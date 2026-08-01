@@ -1,0 +1,8 @@
+.vscode/
+*.elf
+*.sav
+/graphics/
+build/
+notes/
+*.venv*
+lut.c
