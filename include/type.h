@@ -95,7 +95,7 @@ typedef const u16* PaletteSet[16];
 // fixed point number types
 
 typedef union SplitWord {
-    s32 WORD;
+    int WORD;
     u32 WORD_U;
     struct {
         s16 LO, HI;

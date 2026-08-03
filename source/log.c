@@ -36,7 +36,7 @@ void mgbaLog(enum Type type, void* messagePtr) {
             length = sprintf(message, "u8: %d", *(u8*)messagePtr);
             break;
         case S32:
-            length = sprintf(message, "s32: %d", *(s32*)messagePtr);
+            length = sprintf(message, "s32: %ld", *(s32*)messagePtr);
             break;
         case INT:
             length = sprintf(message, "int: %d", *(int*)messagePtr);
@@ -63,7 +63,7 @@ void mgbaLog(enum Type type, void* messagePtr) {
             free(hex);
             break;
         case U32:
-            length = sprintf(message, "u32: %u", *(u32*)messagePtr);
+            length = sprintf(message, "u32: %lu", *(u32*)messagePtr);
             break;
         case U32HEX:
             u32 numHex = *(u32*)messagePtr;
