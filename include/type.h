@@ -212,11 +212,7 @@ typedef struct Quaternion_ {
     SWord x; SWord y; SWord z; SWord w;
 } Quaternion;
 
-typedef struct CollisionCol_ {
-    u32 y0 : 4; u32 y1 : 4; u32 y2 : 4; u32 y3 : 4; u32 y4 : 4; u32 y5 : 4; u32 y6 : 4; u32 y7 : 4;
-} CollisionCol;
-
-typedef CollisionCol CollisionMap[18][18];
+typedef u8 CollisionMap[8][18][18];
 
 #define ILK_ENEMY   0
 #define ILK_ITEM    1

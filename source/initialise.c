@@ -29,7 +29,8 @@ void initialiseGame() {
     //     memcpy32(&pal_obj_bank[i], (*(encounter->paletteSet))[i], 8);
     // }
 
-    spawnPlayer(8 * MT_WIDTH, MT_WIDTH / 2, 0, 8 * MT_WIDTH, PLAYER_HEIGHT / 2, 0);
+    // spawnPlayer(8 * MT_WIDTH, MT_WIDTH / 2, 0, 8 * MT_WIDTH, PLAYER_HEIGHT / 2, 0);
+    spawnPlayer(5, 0, 0, 5, 0, 0);
 
     gGameState.gameStateEnum = INT8_MAX;
     setGameState(NORMAL);

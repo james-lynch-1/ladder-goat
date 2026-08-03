@@ -10,22 +10,21 @@ void handleInputPlayer(int entId) {
     if (!physComp) return;
 
     if (key_is_down(KEY_UP | KEY_DOWN))
-        if (isTaskQueueEmpty(getComponent(gPlayerId, COMP_TASK_QUEUE)))
+        if (!isTaskWithFlagsInQueue(TASK_MVMT_FLAG, gPlayerId, true) && !checkCollisionMove(physComp, -key_tri_vert()))
             addTaskToQueue(gPlayerId, key_is_down(KEY_UP) ? TASK_MOVE_FWD : TASK_MOVE_BWD, 16);
 }
 
-void handleInputLadder(int entId) { // coupled to PhysicsComponent
+void handleInputLadder(int entId) {
     PhysicsComponent* physComp = getComponent(entId, COMP_PHYSICS);
     if (!physComp) return;
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
 
     if (key_hit(KEY_LEFT | KEY_RIGHT)) {
-        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, false)) {
+        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, false) && !checkCollisionTurn(physComp, -key_tri_horz()))
             addTaskToQueue(gPlayerId, key_is_down(KEY_LEFT) ? TASK_TURN_LEFT : TASK_TURN_RIGHT, 16);
-            }
     }
     else if (key_is_down(KEY_LEFT | KEY_RIGHT)) {
-        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, true))
+        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, true) && !checkCollisionTurn(physComp, -key_tri_horz()))
             addTaskToQueue(gPlayerId, key_is_down(KEY_LEFT) ? TASK_TURN_LEFT : TASK_TURN_RIGHT, 16);
     }
 
