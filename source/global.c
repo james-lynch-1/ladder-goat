@@ -7,13 +7,18 @@ int gNumCustomPhysArchetypes = 0;
 int gNumSpritesAllocated = 0;
 int gNumEntsToDelete = 0;
 
-int gNumTasks = 0;
-EWRAM_BSS Task gTasks[MAX_TASKS];
+u16* gCollTileToSpriteMap[8] = {
+    (u16*)spriteLadderTiles,
+    (u16*)spriteLadderTiles,
+    (u16*)spriteCellPurpleTiles
+};
 
 s16 gPlayerId;
 s16 gLadderId;
-OBJ_ATTR gObjBuffer[128];
-OBJ_AFFINE* gObjAffBuffer = (OBJ_AFFINE*)gObjBuffer;
+int gSpriteCellStartingId;
+
+int gObjCompDeepestZIndex = 0;
+ObjAffStruct gObjAffBuffer[32];
 enum ObjSlotEnum gObjAllocArr[1024];
 SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];
 u8 gEntFlags[MAX_ENTS];
@@ -28,7 +33,6 @@ EWRAM_BSS EventListener gEventListeners[NUM_COMP_TYPES][MAX_EVENT_LISTENERS_PER_
 
 // components
 EWRAM_BSS ObjComponent gObjCompsDense[MAX_OBJ_COMPONENTS];
-EWRAM_BSS ObjAffComponent gObjAffCompsDense[MAX_OBJ_AFF_COMPONENTS];
 EWRAM_BSS InputComponent gInputCompsDense[MAX_INPUT_COMPONENTS];
 EWRAM_BSS PhysicsComponent gPhysCompsDense[MAX_PHYSICS_COMPONENTS];
 EWRAM_BSS RotationComponent gRotCompsDense[MAX_ROTATION_COMPONENTS];
@@ -37,10 +41,10 @@ EWRAM_BSS CounterComponent gCounterCompsDense[MAX_COUNTER_COMPONENTS];
 EWRAM_BSS MemberComponent gMemberCompsDense[MAX_MEMBER_COMPONENTS];
 EWRAM_BSS GroupComponent gGroupCompsDense[MAX_GROUP_COMPONENTS];
 EWRAM_BSS TaskQueueComponent gTaskQueueCompsDense[MAX_TASK_QUEUE_COMPONENTS];
+EWRAM_BSS CellComponent gCellCompsDense[MAX_CELL_COMPONENTS];
 
 const uint32_t gCompTable[NUM_COMP_TYPES][4] = {
     {(uint32_t)&gObjCompsDense, sizeof(ObjComponent), MAX_OBJ_COMPONENTS, (uint32_t)removeComponentObj},
-    {(uint32_t)&gObjAffCompsDense, sizeof(ObjAffComponent), MAX_OBJ_AFF_COMPONENTS, (uint32_t)removeComponentObjAff},
     {(uint32_t)&gInputCompsDense, sizeof(InputComponent), MAX_INPUT_COMPONENTS, (uint32_t)removeComponentInput},
     {(uint32_t)&gPhysCompsDense, sizeof(PhysicsComponent), MAX_PHYSICS_COMPONENTS, (uint32_t)removeComponentPhysics},
     {(uint32_t)&gRotCompsDense, sizeof(RotationComponent), MAX_ROTATION_COMPONENTS, (uint32_t)removeComponentRotation},
@@ -49,6 +53,7 @@ const uint32_t gCompTable[NUM_COMP_TYPES][4] = {
     {(uint32_t)&gMemberCompsDense, sizeof(MemberComponent), MAX_MEMBER_COMPONENTS, (uint32_t)removeComponentMember},
     {(uint32_t)&gGroupCompsDense, sizeof(GroupComponent), MAX_GROUP_COMPONENTS, (uint32_t)removeComponentGroup},
     {(uint32_t)&gTaskQueueCompsDense, sizeof(TaskQueueComponent), MAX_TASK_QUEUE_COMPONENTS, (uint32_t)removeComponentTaskQueue},
+    {(uint32_t)&gCellCompsDense, sizeof(CellComponent), MAX_CELL_COMPONENTS, (uint32_t)removeComponentCell}
 };
 int gNumCompsPerType[NUM_COMP_TYPES];
 

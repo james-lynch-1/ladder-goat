@@ -51,6 +51,16 @@ Vector3D scalarMultVec(Vector3D vec, int scalar) {
     return newVec;
 }
 
+PositionMini getTilePos(int entId) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    PositionMini p = {
+        (phys->pos.x.WORD + 0x8000) >> 20,
+        (phys->pos.y.WORD + 0x8000) >> 20,
+        (phys->pos.z.WORD + 0x8000) >> 20
+    };
+    return p;
+}
+
 PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, PhysArchetype* arch, int vecX, int vecY, int vecZ, u16 angle) {
     PhysicsComponent phys = { {entId, flags},
         {(SWord)posX, (SWord)posY, (SWord)posZ},

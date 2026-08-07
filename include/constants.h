@@ -10,9 +10,9 @@
 
 #define MAX_EVENT_LISTENERS_PER_TYPE    32
 
-#define MAX_OBJ_COMPONENTS              126
+#define MAX_OBJ_COMPONENTS              78
 #define MAX_OBJ_AFF_COMPONENTS          32
-#define MAX_INPUT_COMPONENTS            32
+#define MAX_INPUT_COMPONENTS            8
 #define MAX_PHYSICS_COMPONENTS          32
 #define MAX_ROTATION_COMPONENTS         8
 #define MAX_TIMER_COMPONENTS            128
@@ -20,6 +20,7 @@
 #define MAX_MEMBER_COMPONENTS           128
 #define MAX_GROUP_COMPONENTS            8
 #define MAX_TASK_QUEUE_COMPONENTS       32
+#define MAX_CELL_COMPONENTS             82
 
 #define MAX_GROUPS_PER_MEMBER           4
 #define MAX_MEMBERS_PER_GROUP           24

@@ -33,7 +33,7 @@ void updateRotComps() {
         s64 newMatrix[4] = { ((s64)invDet * initMatrix.m11.WORD) >> 16, ((s64)invDet * -initMatrix.m01.WORD) >> 16,
                              ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16 };
 
-        OBJ_AFFINE* oA = getObjAff((ObjAffComponent*)getComponent(rot->header.entId, COMP_OBJ_AFF));
+        ObjAffStruct* oA = &gObjAffBuffer[rot->objAffIndex];
         oA->pa = (newMatrix[0] >> 8) & 0xFFFF;
         oA->pb = (newMatrix[1] >> 8) & 0xFFFF;
         oA->pc = (newMatrix[2] >> 8) & 0xFFFF;
@@ -130,9 +130,9 @@ void cross(Vector3D* result, const Vector3D* a, const Vector3D* b) {
     memcpy32(result, &temp, sizeof(Vector3D) / 4);
 }
 
-void addComponentRotation(int entId, u16 flags) {
+RotationComponent* addComponentRotation(int entId, u16 flags) {
     RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} } };
-    addComponentCustom(&rot, COMP_ROTATION);
+    return (RotationComponent*)addComponentCustom(&rot, COMP_ROTATION);
 }
 
 void removeComponentRotation(int entId) {

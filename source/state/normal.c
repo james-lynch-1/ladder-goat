@@ -9,18 +9,18 @@ void enterNormal() {
 
 void updateNormal() {
     updateInputComps();
-
-    VBlankIntrWait();
     updatePlayerStuff();
     updatePhysics();
-    updateObjs();
     updateRotComps();
+    updateObjs();
     updateTimers();
 
     updateUINormal();
 
     updateTaskQueues();
     deleteMarkedEnts();
+
+    VBlankIntrWait();
 }
 
 void exitNormal(enum GameState state) {

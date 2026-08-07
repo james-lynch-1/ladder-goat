@@ -41,7 +41,6 @@ enum __attribute__ ((__packed__)) EntityKind {
 
 enum __attribute__ ((__packed__)) ComponentType {
     COMP_OBJ,
-    COMP_OBJ_AFF,
     COMP_INPUT,
     COMP_PHYSICS,
     COMP_ROTATION,
@@ -50,6 +49,7 @@ enum __attribute__ ((__packed__)) ComponentType {
     COMP_MEMBER,
     COMP_GROUP,
     COMP_TASK_QUEUE,
+    COMP_CELL,
     NUM_COMP_TYPES
 };
 
@@ -277,20 +277,20 @@ typedef struct LutStruct_ {
 
 typedef struct ALIGN4 ObjComponent_ {
     ComponentHeader header; // 4 bytes
-    u8 objIndex; // 1 byte. Index into gObjBuffer
+    // attrs must be immediately after the header
+    u16 attr0; // 2 bytes
+    u16 attr1; // 2 bytes
+    u16 attr2; // 2 bytes
+    u16 zDepth; // 2 bytes. Farther away from screen = lower zDepth
     u8 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
+    u8 nextIndex; // 1 byte. Next deepest zIndex
     u8 numAnimFrames; // 1 byte
     u8 animSpeed; // 1 byte
 } ObjComponent;
 
-typedef struct ALIGN4 ObjAffComponent_ {
-    ComponentHeader header; // 4 bytes
-    u8 animIndex; // UINT8_MAX means no animation
-    u8 currentStep; // UINT8_MAX means no stages
-    u8 speed;
-    u8 framesElapsed;
-    const LutStruct* lutStruct;
-} ObjAffComponent;
+typedef struct ALIGN4 ObjAffStruct_ {
+    s16 pa; s16 pb; s16 pc; s16 pd;
+} ObjAffStruct;
 
 #define OBJ_AFF_LUT_SML         0b0000000100000000
 #define OBJ_AFF_LUT_LRG         0b0000001000000000
@@ -351,6 +351,7 @@ typedef struct ALIGN4 PhysicsComponent_ {
 typedef struct ALIGN4 RotationComponent_ {
     ComponentHeader header; // 4 bytes
     Matrix3D mtx; // 36 bytes
+    int objAffIndex; // 4 bytes
 } RotationComponent;
 
 #define TIMER_DELETE_ENT            0b1
@@ -387,9 +388,13 @@ typedef struct ALIGN4 GroupComponent_ {
 typedef struct TaskQueueComponent_ {
     ComponentHeader header; // 4 bytes
     Task queue[16]; // 64 bytes
-    // Task currTask; // 4 bytes
     int head; // 4 bytes
     int tail; // 4 bytes
 } TaskQueueComponent;
+
+typedef struct CellComponent_ {
+    ComponentHeader header; // 4 bytes
+    Position pos; // 12 bytes
+} CellComponent;
 
 #endif

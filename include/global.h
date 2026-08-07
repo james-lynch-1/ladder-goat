@@ -14,6 +14,7 @@
 #include "constants.h"
 #include "util.h"
 #include "graphics.h"
+#include "graphicsUtil.h"
 
 extern int gFrameCount;
 extern int gHitstunFrameCount;
@@ -22,14 +23,14 @@ extern int gNumCustomPhysArchetypes;
 extern int gNumSpritesAllocated;
 extern int gNumEntsToDelete;
 
-extern int gNumTasks;
-extern Task gTasks[MAX_TASKS];
+extern u16* gCollTileToSpriteMap[8];
 
 extern s16 gPlayerId;
 extern s16 gLadderId;
+extern int gSpriteCellStartingId;
 
-extern OBJ_ATTR gObjBuffer[128];
-extern OBJ_AFFINE* gObjAffBuffer;
+extern int gObjCompDeepestZIndex;
+extern ObjAffStruct gObjAffBuffer[32];
 extern enum ObjSlotEnum gObjAllocArr[1024];
 extern SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];
 extern u8 gEntFlags[MAX_ENTS];
@@ -44,7 +45,6 @@ extern EventListener gEventListeners[NUM_COMP_TYPES][MAX_EVENT_LISTENERS_PER_TYP
 
 // components
 extern ObjComponent gObjCompsDense[MAX_OBJ_COMPONENTS];
-extern ObjAffComponent gObjAffCompsDense[MAX_OBJ_AFF_COMPONENTS];
 extern InputComponent gInputCompsDense[MAX_INPUT_COMPONENTS];
 extern PhysicsComponent gPhysCompsDense[MAX_PHYSICS_COMPONENTS];
 extern RotationComponent gRotCompsDense[MAX_ROTATION_COMPONENTS];
@@ -53,6 +53,7 @@ extern CounterComponent gCounterCompsDense[MAX_COUNTER_COMPONENTS];
 extern MemberComponent gMemberCompsDense[MAX_MEMBER_COMPONENTS];
 extern GroupComponent gGroupCompsDense [MAX_GROUP_COMPONENTS];
 extern TaskQueueComponent gTaskQueueCompsDense[MAX_TASK_QUEUE_COMPONENTS];
+extern CellComponent gCellCompsDense[MAX_CELL_COMPONENTS];
 
 extern int gNumCompsPerType[NUM_COMP_TYPES];
 
@@ -63,7 +64,7 @@ enum gCompTableIndexes { COMP_DSET_ADDRESSES, COMP_SIZES, COMP_MAX_PER_TYPE, COM
 #define compSize(x)     (int)gCompTable[x][COMP_SIZES]
 #define maxComps(x)     (int)gCompTable[x][COMP_MAX_PER_TYPE]
 #define numComps(x)     gNumCompsPerType[x]
-#define getObj(x)       (&gObjBuffer[x->objIndex]) // x is an ObjComponent pointer
+#define getObj(x)       ((OBJ_ATTR*)&((x)->attr0))
 #define getObjAff(x)    (&gObjAffBuffer[(getObj(((ObjComponent*)getComponent((x)->header.entId, COMP_OBJ)))->attr1 & ATTR1_AFF_ID_MASK) >> ATTR1_AFF_ID_SHIFT]) // x is an ObjAffComponent pointer
 
 extern const uint32_t gCompTable[NUM_COMP_TYPES][4];

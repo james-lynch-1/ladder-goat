@@ -17,25 +17,31 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
 
     // ladder stuff
     addComponentPhysics(ladderId, 0, (16 * ladderX) << 16, (16 * ladderY + MT_WIDTH / 2) << 16, (16 * ladderZ) << 16, NULL, 0, 0, 0, 0);
-    ObjComponent* ladderObj = addComponentObj(ladderId, OBJ_AFF_DBL_FLAG, COMP_PHYSICS);
-    memcpy32(&pal_obj_bank[0], spriteLadderPal, spriteLadderPalLen / sizeof(u32));
-    obj_set_attr(getObj(ladderObj),
+    addComponentObj(
+        ladderId, OBJ_AFF_DBL_FLAG,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
-        ATTR2_ID(fetchSprite(spriteLadderTiles, spriteLadderTilesLen)));
-    addComponentObjAff(ladderId, 0, true);
-    obj_aff_identity(&gObjAffBuffer[0]);
+        ATTR2_ID(fetchSprite(spriteLadderTiles, spriteLadderTilesLen)),
+        255,
+        COMP_PHYSICS
+    );
+    memcpy32(&pal_obj_bank[0], spriteLadderPal, spriteLadderPalLen / sizeof(u32));
+
     addComponentRotation(ladderId, 0);
     addComponentInput(ladderId, 0, handleInputLadder);
     addComponentMember(ladderId, 0, entId);
 
     // player stuff
-    ObjComponent* playerObj = addComponentObj(playerId, 0, COMP_PHYSICS);
-    memcpy32(&pal_obj_bank[1], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
-    obj_set_attr(getObj(playerObj),
+    ObjComponent* playerObj = addComponentObj(
+        playerId, 0,
         ATTR0_REG | ATTR0_TALL,
         ATTR1_SIZE_16x32,
-        ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(1));
+        ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(1),
+        255,
+        COMP_PHYSICS
+    );
+    playerObj->nextIndex = numComps(COMP_OBJ) - 2;
+    memcpy32(&pal_obj_bank[1], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
     addComponentPhysics(playerId, 0, (16 * playerX) << 16, (16 * playerY + PLAYER_HEIGHT / 2) << 16, (16 * playerZ) << 16, NULL, 0, 0, 0, 0);
     addComponentInput(playerId, 0, handleInputPlayer);
     addComponentMember(playerId, 0, entId);
@@ -92,8 +98,32 @@ void turnPlayer(Task* task, int dir) {
 }
 
 void updatePlayerStuff() {
-    // input component update (elsewhere) moves the phys comp
-    // 
+    drawSpriteCells(((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos);
+    PositionMini playerTilePos = getTilePos(gLadderId);
+    int row = (playerTilePos.x - 7 + playerTilePos.z);
+    int zDepth = row / 2 * 10 + (row & 1) + 2;
+    ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
+    ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
+    playerObj->zDepth = zDepth;
+    ladderObj->zDepth = zDepth;
+    int playerIndex = ((int32_t)playerObj - (int32_t)&gObjCompsDense) / 16;
+    int ladderIndex = ((int32_t)ladderObj - (int32_t)&gObjCompsDense) / 16;
+    playerObj->nextIndex = ladderIndex;
+    ObjComponent* o = &gObjCompsDense[gObjCompDeepestZIndex];
+    if (o->zDepth > zDepth) {
+        ladderObj->nextIndex = gObjCompDeepestZIndex;
+        gObjCompDeepestZIndex = playerIndex;
+        return;
+    }
+    for (int i = 0; i < 50; i++) {
+        ObjComponent* nextO = &gObjCompsDense[o->nextIndex];
+        if (nextO->zDepth > zDepth) {
+            o->nextIndex = playerIndex;
+            ladderObj->nextIndex = ((int32_t)nextO - (int32_t)&gObjCompsDense) / 16;
+            break;
+        }
+        o = nextO;
+    }
 }
 
 void handlePlayerDied() {

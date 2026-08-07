@@ -37,7 +37,7 @@ void initialiseComponentArrays();
 // COMPONENTS
 // Obj
 
-ObjComponent* addComponentObj(s16 entId, u16 flags, int posSourceCompType);
+ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 attr2, u16 zDepth, int posSourceCompType);
 
 /** Special component remove function for objs, as each obj component has
  * a pointer into the obj buffer. This means that if we just leave the data
@@ -49,11 +49,11 @@ void updateObjs();
 
 // ObjAff
 
-ObjAffComponent* addComponentObjAff(s16 entId, u16 flags, bool isDblSize);
+// ObjAffComponent* addComponentObjAff(s16 entId, u16 flags, bool isDblSize);
 
-void updateObjAffs();
+// void updateObjAffs();
 
-void removeComponentObjAff(int entId);
+// void removeComponentObjAff(int entId);
 
 // Input
 
@@ -80,6 +80,8 @@ Vector3D divVec(Vector3D vec, u32 divisor);
 Vector3D normaliseVec(Vector3D vec);
 
 Vector3D scalarMultVec(Vector3D vec, int scalar);
+
+PositionMini getTilePos(int entId);
 
 // Physics
 
@@ -109,7 +111,7 @@ SWord dot(const Vector3D* a, const Vector3D* b);
 
 void cross(Vector3D* result, const Vector3D* a, const Vector3D* b);
 
-void addComponentRotation(int entId, u16 flags);
+RotationComponent* addComponentRotation(int entId, u16 flags);
 
 void removeComponentRotation(int entId);
 
@@ -173,5 +175,11 @@ bool isTaskWithFlagsInQueue(int taskFlags, int entId, bool includeRunningTask);
 bool isTaskQueueEmpty(TaskQueueComponent* tQ);
 
 bool isTaskQueueFull(TaskQueueComponent* tQ);
+
+// Cell
+
+CellComponent* addComponentCell(int entId, int flags, int posX, int posY, int posZ);
+
+void removeComponentCell(int entId);
 
 #endif
