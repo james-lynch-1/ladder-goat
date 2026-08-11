@@ -34,6 +34,9 @@
 
 #define PLAYER_HEIGHT       32
 
+#define NUM_SPRITE_CELLS    26
+#define ATTR0_GFX_MASK      0x0C00
+
 // Metatile width, in pixels
 #define MT_WIDTH            16
 #define SBB_WIDTH_MT        16

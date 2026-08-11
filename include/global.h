@@ -23,11 +23,11 @@ extern int gNumCustomPhysArchetypes;
 extern int gNumSpritesAllocated;
 extern int gNumEntsToDelete;
 
-extern u16* gCollTileToSpriteMap[8];
+extern const u16* gCollTileToSpriteMap[256];
 
 extern s16 gPlayerId;
 extern s16 gLadderId;
-extern int gSpriteCellStartingId;
+extern int gSpriteCellStartingObjCompDenseIdx;
 
 extern int gObjCompDeepestZIndex;
 extern ObjAffStruct gObjAffBuffer[32];

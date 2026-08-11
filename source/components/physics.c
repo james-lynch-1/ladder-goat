@@ -5,7 +5,6 @@ void updatePhysics() {
         PhysicsComponent* ent = &gPhysCompsDense[i];
         ent->pos.x.WORD += ent->vec.x.WORD; //       |y
         ent->pos.y.WORD += ent->vec.y.WORD; //       .
-        ent->pos.y.WORD = clamp(ent->pos.y.WORD, 0, 96 << 16);
         ent->pos.z.WORD += ent->vec.z.WORD; //     z/ \x
         memset32(&ent->vec, 0, 3);
     }

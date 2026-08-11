@@ -8,8 +8,8 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
         attr0, attr1, attr2,
         zDepth,
         posSourceCompType,
+        -1,
         255,
-        0,
         0
     };
     ObjComponent* obj = &gObjCompsDense[gObjCompDeepestZIndex];
@@ -23,33 +23,31 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
         if (newObj.zDepth > obj->zDepth) {
             int nextIdx = obj->nextIndex;
             obj->nextIndex = numComps(COMP_OBJ); // where our new obj will be inserted
+            newObj.prevIndex = ((int32_t)obj - (int32_t)&gObjCompsDense) / 16;
             newObj.nextIndex = nextIdx;
+            gObjCompsDense[nextIdx].prevIndex = numComps(COMP_OBJ);
             return (ObjComponent*)addComponentCustom(&newObj, COMP_OBJ);
         }
         obj = &gObjCompsDense[obj->nextIndex];
     }
     // if you reach this point, it means newObj is the deepest
     obj->nextIndex = numComps(COMP_OBJ);
+    newObj.prevIndex = ((int32_t)obj - (int32_t)&gObjCompsDense) / 16;
     return (ObjComponent*)addComponentCustom(&newObj, COMP_OBJ);
 }
 
 void removeComponentObj(int entId) {
     ObjComponent* objComp = getComponent(entId, COMP_OBJ);
     if (!objComp) return;
-    int index = ((int32_t)objComp - (int32_t)&gObjCompsDense) / 16; // assumes ObjComponent is 16 bytes in size
-    if (index == gObjCompDeepestZIndex) {
+    gObjCompsDense[objComp->nextIndex].prevIndex = objComp->prevIndex;
+    if (objComp->prevIndex == -1)
         gObjCompDeepestZIndex = objComp->nextIndex;
-    }
-    else {
-        for (int i = 0; i < numComps(COMP_OBJ); i++) {
-            if (gObjCompsDense[i].nextIndex == index) {
-                gObjCompsDense[i].nextIndex = objComp->nextIndex;
-                break;
-            }
-        }
-    }
+    else
+        gObjCompsDense[objComp->prevIndex].nextIndex = objComp->nextIndex;
     stopUsingSprite(objComp->attr2 & ATTR2_ID_MASK);
     removeComponent(entId, COMP_OBJ);
+    // todo: fix prevIndex and nextIndex being messed up when an obj with an index less than
+    // either of these is removed
 }
 
 // updates the pos based on the pos provided by corresponding comp of type posSourceCompType
@@ -73,10 +71,11 @@ void updateObjs() {
             !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
             objComp->attr0 &= ~ATTR0_MODE_MASK;
             objComp->attr0 |= ATTR0_HIDE;
+            continue;
         }
         else {
-            objComp->attr0 &= ~ATTR0_MODE_MASK;
-            objComp->attr0 |= objComp->header.flags & ATTR0_MODE_MASK;
+            objComp->attr0 &= ~(ATTR0_MODE_MASK | ATTR0_GFX_MASK);
+            objComp->attr0 |= objComp->header.flags & (ATTR0_MODE_MASK | ATTR0_GFX_MASK);
         }
         objComp->attr0 &= ~ATTR0_Y_MASK;
         objComp->attr1 &= ~ATTR1_X_MASK;

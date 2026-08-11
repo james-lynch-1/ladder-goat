@@ -8,6 +8,6 @@ PositionMini getScreenPos(Position pos);
 
 void initSpriteCells();
 
-void drawSpriteCells(Position pos);
+void drawSpriteCells(Position pos, bool isCellsRightToLeft);
 
 #endif

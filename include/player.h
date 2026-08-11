@@ -24,6 +24,8 @@ void taskTurnRight(Task* task);
 /** dir must be 1 or -1 */
 void turnPlayer(Task* task, int dir);
 
+void updatePlayerZDepth();
+
 void updatePlayerStuff();
 
 void handlePlayerDied();

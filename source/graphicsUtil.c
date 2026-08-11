@@ -11,66 +11,172 @@ PositionMini getScreenPos(Position pos) {
 }
 
 void initSpriteCells() { // call after initialising player
-    gSpriteCellStartingId = reserveEntSlot();
-    addComponentCell(gSpriteCellStartingId, 0, 0, 0, 0);
-    addComponentObj(gSpriteCellStartingId, 0, 0, 0, 0, 0, COMP_CELL);
-    for (int i = 1; i < 50; i++) {
+    int id = reserveEntSlot();
+    gSpriteCellStartingObjCompDenseIdx = numComps(COMP_OBJ);
+    gObjCompDeepestZIndex = numComps(COMP_OBJ);
+    addComponentCell(id, 0, 0, 0, 0);
+    addComponentObj(id, 0, 0, ATTR1_SIZE_32, ATTR2_PALBANK(2), 0, COMP_CELL);
+    const int indexesThatShouldBeHalfWidth[NUM_SPRITE_CELLS] = {
+        0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1
+    };
+    for (int i = 1; i < NUM_SPRITE_CELLS; i++) {
         int entId = reserveEntSlot();
         addComponentCell(entId, 0, 0, 0, 0);
-        addComponentObj(entId, 0,
+        ObjComponent* o = addComponentObj(entId, 0,
             ATTR0_SQUARE,
             ATTR1_SIZE_32,
             ATTR2_PALBANK(2),
             0, COMP_CELL);
+        if (indexesThatShouldBeHalfWidth[i]) {
+            o->attr0 |= ATTR0_TALL;
+            o->attr1 |= ATTR1_SIZE_16x32;
+        }
     }
-    Position pos = { {0}, {0}, {0} };
-    if (hasComponent(gLadderId, COMP_PHYSICS))
-        pos = ((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos;
-    drawSpriteCells(pos);
+    for (int i = 0; i < 5; i++) {
+        int entId = reserveEntSlot();
+        addComponentCell(entId, 0, 0, 0, 0);
+        addComponentObj(entId, ATTR0_WINDOW,
+            ATTR0_SQUARE | ATTR0_WINDOW,
+            ATTR1_SIZE_32,
+            fetchSprite(spriteCellPurpleTiles, spriteCellPurpleTilesLen),
+            0, COMP_CELL);
+    }
+    drawSpriteCells(((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos, false);
 }
 
-void drawSpriteCells(Position pos) { // call this when we change tiles and when we init
-    PositionMini tilePos = { pos.x.HALF.HI / 16, pos.y.HALF.HI / 16, pos.z.HALF.HI / 16 };
-    int screenTileX = tilePos.x - tilePos.z + 7;
-    bool isScreenTileXEven = !(screenTileX & 1);
-    PositionMini topTile = { (screenTileX + 1) / 2, tilePos.y, 7 - screenTileX / 2 };
-    topTile.x -= 1;
-    topTile.z += isScreenTileXEven;
-    // if screenTileX is even, do 3 row first. If odd, do 2 row first.
-    for (int row = 0; row < 10; row++) {
-        PositionMini tile = topTile;
-        for (int t = 0; t < 5; t++) {
-            int id = gSpriteCellStartingId + row * 5 + t;
-            CellComponent* c = getComponent(id, COMP_CELL);
-            ObjComponent* o = getComponent(id, COMP_OBJ);
-            o->zDepth = row * 10 + t * 2; // TODO: take into account y
-            // reset every time so it's a solid line of nextIndexes, all spritecells
-            // effectively remove the player for now
-            o->nextIndex = ((int32_t)((ComponentHeader*)getComponent(id + 1, COMP_OBJ)) -
-                (int32_t)&gObjCompsDense) / 16;
-            o->attr0 &= ~ATTR0_MODE_MASK;
-            int colVal = colMap[tile.y][tile.z][tile.x];
-            int sprIndex = o->attr2 & ~ATTR2_ID_MASK;
-            c->pos.x.WORD = (tile.x * 16 - 8) << 16;
-            c->pos.y.WORD = (tile.y * 16) << 16;
-            c->pos.z.WORD = (tile.z * 16 - 8) << 16;
-            o->attr2 = o->attr2 & ~ATTR2_ID_MASK;
-            if (colVal == 0) {
-                if (sprIndex != 0) stopUsingSprite(sprIndex);
-                o->header.flags |= ATTR0_HIDE;
-            }
-            else {
-                o->attr2 |= ATTR2_ID(fetchSprite(gCollTileToSpriteMap[colVal], 512)) & ATTR2_ID_MASK;
-                o->header.flags &= ~ATTR0_MODE_MASK;
-            }
-            tile.x += 1; tile.z -= 1;
-            // t=1 (odd) or t=2 (even): -2x, +3z
-            if (t == (1 + isScreenTileXEven)) {
-                tile.x -= 2;
-                tile.z += 3;
+void drawSpriteCells(Position pos, bool isCellsRightToLeft) {
+    int playerYTile = (pos.y.HALF.HI) / 16;
+    int playerXTile = (pos.x.HALF.HI + 8) / 16; // +8 for rounding to nearest tile
+    int playerZTile = (pos.z.HALF.HI + 8) / 16;
+    const int xZCoords[NUM_SPRITE_CELLS][2] = {
+        // full windows at: [-3, -3] 
+        {-3, -3}, // r0
+        {-3, -2}, // r1
+        {-2, -3},
+        {-3, -1}, // r2
+        {-2, -2},
+        {-1, -3},
+        {-2, -1}, // r3
+        {-1, -2},
+        {-2, 0}, // r4
+        {-1, -1},
+        {0, -2},
+        {-1, 0}, // r5
+        {0, -1},
+        {-1, 1}, // r6
+        {0, 0},
+        {1, -1},
+        {0, 1}, // r7
+        {1, 0},
+        {0, 2}, // r8
+        {1, 1},
+        {2, 0},
+        {1, 2}, // r9
+        {2, 1},
+        {1, 3}, // r10
+        {2, 2},
+        {3, 1}
+    };
+    const int indexesThatShouldBeHalfWidth[NUM_SPRITE_CELLS] = {
+        0, 0, 0, 4, 0, -4, 0, 0, 4, 0, -4, 0, 0, 4, 0, -4, 0, 0, 4, 0, -4, 0, 0, 4, 0, -4
+    };
+
+    ObjComponent* start[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+    ObjComponent* end[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+    for (int cell = 0; cell < NUM_SPRITE_CELLS; cell++) {
+        int x = playerXTile + xZCoords[cell][isCellsRightToLeft];
+        int z = playerZTile + xZCoords[cell][1 - isCellsRightToLeft];
+        bool isCellOccupied = false;
+        int modifier = 0;
+        CellComponent* cellComp = getComponent(gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + cell].header.entId, COMP_CELL);
+        for (int y = 7; y >= playerYTile; y--) {
+            int colVal = (z + y < 17) && (x + y < 17) ? colMap[y][z + y][x + y] : 0;
+            int spriteSize = 512;
+            if (colVal) {
+                if (!start[y]) {
+                    end[y] = start[y] = &gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + cell];
+                    end[y]->nextIndex = INT8_MAX;
+                }
+                else {
+                    int prevIndex = ((int32_t)end[y] - (int32_t)&gObjCompsDense) / 16;
+                    end[y]->nextIndex = gSpriteCellStartingObjCompDenseIdx + cell;
+                    end[y] = &gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + cell];
+                    end[y]->prevIndex = prevIndex;
+                }
+                if (indexesThatShouldBeHalfWidth[cell]) {
+                    modifier = indexesThatShouldBeHalfWidth[cell] * (isCellsRightToLeft ? -1 : 1); // pos on left, neg on right
+                    colVal += 128;
+                    spriteSize = 256;
+                    if ((!isCellsRightToLeft && (indexesThatShouldBeHalfWidth[cell] == 4)) ||
+                        (isCellsRightToLeft && (indexesThatShouldBeHalfWidth[cell] == -4)))
+                        end[y]->attr1 |= ATTR1_HFLIP;
+                    else end[y]->attr1 &= ~ATTR1_FLIP_MASK;
+                }
+                end[y]->zDepth = y * NUM_SPRITE_CELLS + cell;
+                end[y]->header.flags &= ~ATTR0_MODE_MASK;
+                if ((end[y]->attr2 & ATTR2_ID_MASK) != colVal) {
+                    // change the sprite if it's different to before
+                    if ((end[y]->attr2 & ATTR2_ID_MASK))
+                        stopUsingSprite(end[y]->attr2 & ATTR2_ID_MASK);
+                    end[y]->attr2 = end[y]->attr2 & ~ATTR2_ID_MASK;
+                    end[y]->attr2 |= fetchSprite(gCollTileToSpriteMap[colVal], spriteSize) & ATTR2_ID_MASK;
+                }
+                isCellOccupied = true;
+                break;
             }
         }
-        topTile.x += 1;
-        topTile.z += 1;
+        if (!isCellOccupied) {
+            // connect the empty to the y=0 linked list
+            if (!start[playerYTile])
+                end[playerYTile] = start[playerYTile] = &gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + cell];
+            else {
+                end[playerYTile]->nextIndex = gSpriteCellStartingObjCompDenseIdx + cell;
+                end[playerYTile] = &gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + cell];
+            }
+            end[playerYTile]->header.flags |= ATTR0_HIDE;
+            end[playerYTile]->zDepth = cell;
+            if (indexesThatShouldBeHalfWidth[cell]) {
+                modifier = indexesThatShouldBeHalfWidth[cell] * (isCellsRightToLeft ? -1 : 1); // pos on left, neg on right
+                if ((!isCellsRightToLeft && (indexesThatShouldBeHalfWidth[cell] == 4)) ||
+                    (isCellsRightToLeft && (indexesThatShouldBeHalfWidth[cell] == -4)))
+                    end[playerYTile]->attr1 |= ATTR1_HFLIP;
+                else end[playerYTile]->attr1 &= ~ATTR1_FLIP_MASK;
+            }
+        }
+        cellComp->pos.y.HALF.HI = 8;
+        cellComp->pos.x.HALF.HI = x * 16 + modifier;
+        cellComp->pos.z.HALF.HI = z * 16 - modifier;
+    }
+
+    // add the window sprites on top of the top sprite cells (prevent top faces from drawing if
+    // they are meant to be occluded)
+    int spriteMaskCoordOffsets[5][2] = { {-4, -4}, {-4, -3}, {-3, -4}, {-4, -2}, {-2, -4} };
+    for (int i = 0; i < 5; i++) {
+        int prevIndex = ((int32_t)end[playerYTile] - (int32_t)&gObjCompsDense) / 16;
+        end[playerYTile]->nextIndex = gSpriteCellStartingObjCompDenseIdx + NUM_SPRITE_CELLS + i;
+        end[playerYTile] = &gObjCompsDense[gSpriteCellStartingObjCompDenseIdx + NUM_SPRITE_CELLS + i];
+        end[playerYTile]->prevIndex = prevIndex;
+        CellComponent* cellComp = getComponent(end[playerYTile]->header.entId, COMP_CELL);
+        cellComp->pos.y.HALF.HI = 8;
+        cellComp->pos.x.HALF.HI = (playerXTile + spriteMaskCoordOffsets[i][0]) * 16;
+        cellComp->pos.z.HALF.HI = (playerZTile + spriteMaskCoordOffsets[i][1]) * 16;
+    }
+
+    bool foundDeepest = false;
+    for (int i = 0; i < 7; i++) { // join the layers
+        if (end[i]) { // if there are any cells in this layer
+            if (!foundDeepest) {
+                gObjCompDeepestZIndex = ((int32_t)start[i] - (int32_t)&gObjCompsDense) / 16;
+                foundDeepest = true;
+            }
+            for (int j = i + 1; j < 8; j++) {
+                if (start[j]) {
+                    end[i]->nextIndex = ((int32_t)start[j] - (int32_t)&gObjCompsDense) / 16;
+                    start[j]->prevIndex = ((int32_t)end[i] - (int32_t)&gObjCompsDense) / 16;
+                    i = j - 1; // skip empty layers
+                    break;
+                }
+            }
+        }
     }
 }

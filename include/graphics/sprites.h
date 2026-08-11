@@ -10,3 +10,7 @@ extern const unsigned short spritePlayerPal[4];
 extern const unsigned short spriteCellPurpleTiles[256];
 #define spriteCellPurplePalLen 8
 extern const unsigned short spriteCellPurplePal[4];
+#define spriteCellHalfTilesLen 256
+extern const unsigned short spriteCellHalfTiles[128];
+#define spriteCellHalfPalLen 8
+extern const unsigned short spriteCellHalfPal[4];

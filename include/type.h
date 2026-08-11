@@ -275,7 +275,7 @@ typedef struct LutStruct_ {
 #define OBJ_HIDE_FLAG           ATTR0_HIDE
 #define OBJ_AFF_DBL_FLAG        ATTR0_AFF_DBL
 
-typedef struct ALIGN4 ObjComponent_ {
+typedef struct ALIGN4 ObjComponent_ { // if this is anything other than 16 bytes, bad things will happen
     ComponentHeader header; // 4 bytes
     // attrs must be immediately after the header
     u16 attr0; // 2 bytes
@@ -283,9 +283,9 @@ typedef struct ALIGN4 ObjComponent_ {
     u16 attr2; // 2 bytes
     u16 zDepth; // 2 bytes. Farther away from screen = lower zDepth
     u8 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
-    u8 nextIndex; // 1 byte. Next deepest zIndex
+    s8 prevIndex; // 1 byte
+    s8 nextIndex; // 1 byte. Next deepest zIndex
     u8 numAnimFrames; // 1 byte
-    u8 animSpeed; // 1 byte
 } ObjComponent;
 
 typedef struct ALIGN4 ObjAffStruct_ {

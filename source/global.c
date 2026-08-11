@@ -7,15 +7,34 @@ int gNumCustomPhysArchetypes = 0;
 int gNumSpritesAllocated = 0;
 int gNumEntsToDelete = 0;
 
-u16* gCollTileToSpriteMap[8] = {
+const u16* gCollTileToSpriteMap[256] = {
     (u16*)spriteLadderTiles,
     (u16*)spriteLadderTiles,
-    (u16*)spriteCellPurpleTiles
+    (u16*)spriteCellPurpleTiles,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    (u16*)spriteCellHalfTiles,
+    (u16*)spriteCellHalfTiles,
+    (u16*)spriteCellHalfTiles,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 s16 gPlayerId;
 s16 gLadderId;
-int gSpriteCellStartingId;
+int gSpriteCellStartingObjCompDenseIdx;
 
 int gObjCompDeepestZIndex = 0;
 ObjAffStruct gObjAffBuffer[32];

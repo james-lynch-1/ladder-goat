@@ -97,11 +97,9 @@ void turnPlayer(Task* task, int dir) {
     rot->mtx = mtx;
 }
 
-void updatePlayerStuff() {
-    drawSpriteCells(((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos);
+void updatePlayerZDepth() {
     PositionMini playerTilePos = getTilePos(gLadderId);
-    int row = (playerTilePos.x - 7 + playerTilePos.z);
-    int zDepth = row / 2 * 10 + (row & 1) + 2;
+    int zDepth = playerTilePos.y * NUM_SPRITE_CELLS + 14;
     ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
     ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
     playerObj->zDepth = zDepth;
@@ -110,20 +108,38 @@ void updatePlayerStuff() {
     int ladderIndex = ((int32_t)ladderObj - (int32_t)&gObjCompsDense) / 16;
     playerObj->nextIndex = ladderIndex;
     ObjComponent* o = &gObjCompsDense[gObjCompDeepestZIndex];
-    if (o->zDepth > zDepth) {
+    o->header.flags &= ~ATTR0_GFX_MASK;
+    if (zDepth < o->zDepth) {
         ladderObj->nextIndex = gObjCompDeepestZIndex;
         gObjCompDeepestZIndex = playerIndex;
+        o->header.flags |= ATTR0_WINDOW;
         return;
     }
-    for (int i = 0; i < 50; i++) {
-        ObjComponent* nextO = &gObjCompsDense[o->nextIndex];
+    bool isPlayerFound = false;
+    ObjComponent* nextO = NULL;
+    for (int i = 0; i < NUM_SPRITE_CELLS - 1; i++) {
+        nextO = &gObjCompsDense[o->nextIndex];
+        nextO->header.flags &= ~ATTR0_GFX_MASK;
         if (nextO->zDepth > zDepth) {
-            o->nextIndex = playerIndex;
-            ladderObj->nextIndex = ((int32_t)nextO - (int32_t)&gObjCompsDense) / 16;
-            break;
+            if (!isPlayerFound) {
+                o->nextIndex = playerIndex;
+                ladderObj->nextIndex = ((int32_t)nextO - (int32_t)&gObjCompsDense) / 16;
+                isPlayerFound = true;
+            }
+            nextO->header.flags |= ATTR0_WINDOW;
         }
         o = nextO;
     }
+    if (nextO)
+        nextO->header.flags |= ATTR0_WINDOW;
+}
+
+void updatePlayerStuff() {
+    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
+    bool isCellsRightToLeft = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
+        (ladderPhys->angle >= 0x6000 && ladderPhys->angle <= 0x9FFF);
+    drawSpriteCells(((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos, isCellsRightToLeft);
+    updatePlayerZDepth();
 }
 
 void handlePlayerDied() {
