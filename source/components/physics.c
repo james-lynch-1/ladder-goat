@@ -3,9 +3,15 @@
 void updatePhysics() {
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
         PhysicsComponent* ent = &gPhysCompsDense[i];
+        PositionMini oldTilePos = getTilePos(ent->header.entId);
         ent->pos.x.WORD += ent->vec.x.WORD; //       |y
         ent->pos.y.WORD += ent->vec.y.WORD; //       .
         ent->pos.z.WORD += ent->vec.z.WORD; //     z/ \x
+        PositionMini newTilePos = getTilePos(ent->header.entId);
+        if ((oldTilePos.x != newTilePos.x) ||
+            (oldTilePos.y != newTilePos.y) ||
+            (oldTilePos.z != newTilePos.z))
+            updateZDepth(getComponent(ent->header.entId, COMP_OBJ));
         memset32(&ent->vec, 0, 3);
     }
 }
@@ -53,9 +59,9 @@ Vector3D scalarMultVec(Vector3D vec, int scalar) {
 PositionMini getTilePos(int entId) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     PositionMini p = {
-        (phys->pos.x.WORD + 0x8000) >> 20,
-        (phys->pos.y.WORD + 0x8000) >> 20,
-        (phys->pos.z.WORD + 0x8000) >> 20
+        (phys->pos.x.WORD / 16 + 0x8000) >> 16,
+        (phys->pos.y.WORD / 16 + 0x8000) >> 16,
+        (phys->pos.z.WORD / 16 + 0x8000) >> 16,
     };
     return p;
 }

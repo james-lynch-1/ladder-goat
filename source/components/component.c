@@ -32,7 +32,7 @@ bool hasComponent(s16 entId, enum ComponentType componentType) {
 }
 
 void* getComponent(s16 entId, enum ComponentType componentType) {
-    if (hasComponent(entId, componentType))
+    if (entId > -1 && entId < INT16_MAX && hasComponent(entId, componentType))
         return denseSetAddr(componentType) + compSize(componentType) * gCompSetSparse[componentType][entId];
     return NULL;
 }

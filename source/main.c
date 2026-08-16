@@ -1,14 +1,15 @@
 #include "main.h"
 
 void copyObjAttrsToOAM() { // excluding affine stuff
-    int idx = gObjCompDeepestZIndex;
+    int idx = gDeepestObjEntId;
     for (int i = 0; i < numComps(COMP_OBJ); i++) {
-        oam_mem[127 - i].attr0 = gObjCompsDense[idx].attr0;
-        oam_mem[127 - i].attr1 = gObjCompsDense[idx].attr1;
-        oam_mem[127 - i].attr2 = gObjCompsDense[idx].attr2;
-        idx = gObjCompsDense[idx].nextIndex;
+        ObjComponent* o = getComponent(idx, COMP_OBJ);
+        oam_mem[127 - i].attr0 = o->attr0;
+        oam_mem[127 - i].attr1 = o->attr1;
+        oam_mem[127 - i].attr2 = o->attr2;
+        idx = o->nextId;
     }
-    memset32(oam_mem, 0x02000000, 128 - numComps(COMP_OBJ));
+    oam_init(oam_mem, 128 - numComps(COMP_OBJ));
 }
 
 void copyObjAffinesToOAM() {

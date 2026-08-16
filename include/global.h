@@ -17,19 +17,18 @@
 #include "graphicsUtil.h"
 
 extern int gFrameCount;
-extern int gHitstunFrameCount;
 extern int gNumEnts;
 extern int gNumCustomPhysArchetypes;
 extern int gNumSpritesAllocated;
 extern int gNumEntsToDelete;
 
-extern const u16* gCollTileToSpriteMap[256];
+extern const u16* gCollTileToSpriteMap[128];
 
 extern s16 gPlayerId;
 extern s16 gLadderId;
-extern int gSpriteCellStartingObjCompDenseIdx;
 
-extern int gObjCompDeepestZIndex;
+extern int gDeepestObjEntId;
+extern bool gIsZDepthRightToLeft;
 extern ObjAffStruct gObjAffBuffer[32];
 extern enum ObjSlotEnum gObjAllocArr[1024];
 extern SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];

@@ -1,13 +1,12 @@
 #include "global.h"
 
 int gFrameCount = 0;
-int gHitstunFrameCount = 0;
 int gNumEnts = 0;
 int gNumCustomPhysArchetypes = 0;
 int gNumSpritesAllocated = 0;
 int gNumEntsToDelete = 0;
 
-const u16* gCollTileToSpriteMap[256] = {
+const u16* gCollTileToSpriteMap[128] = {
     (u16*)spriteLadderTiles,
     (u16*)spriteLadderTiles,
     (u16*)spriteCellPurpleTiles,
@@ -18,25 +17,14 @@ const u16* gCollTileToSpriteMap[256] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    (u16*)spriteCellHalfTiles,
-    (u16*)spriteCellHalfTiles,
-    (u16*)spriteCellHalfTiles,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 s16 gPlayerId;
 s16 gLadderId;
-int gSpriteCellStartingObjCompDenseIdx;
 
-int gObjCompDeepestZIndex = 0;
+int gDeepestObjEntId;
+bool gIsZDepthRightToLeft = false;
 ObjAffStruct gObjAffBuffer[32];
 enum ObjSlotEnum gObjAllocArr[1024];
 SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];

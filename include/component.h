@@ -37,7 +37,7 @@ void initialiseComponentArrays();
 // COMPONENTS
 // Obj
 
-ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 attr2, u16 zDepth, int posSourceCompType);
+ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 attr2, int yOffset, int posSourceCompType);
 
 /** Special component remove function for objs, as each obj component has
  * a pointer into the obj buffer. This means that if we just leave the data
@@ -46,6 +46,8 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
 void removeComponentObj(int entId);
 
 void updateObjs();
+
+int getObjZDepthPriority(ObjComponent* obj);
 
 // ObjAff
 

@@ -258,11 +258,6 @@ enum Direction {
     STATIONARY = 0x10000
 };
 
-typedef struct ALIGN4 ComponentHeader_ {
-    s16 entId;
-    u16 flags;
-} ComponentHeader;
-
 typedef struct LutStruct_ {
     const s16* lut;
     int length;
@@ -270,22 +265,33 @@ typedef struct LutStruct_ {
     int period;
 } LutStruct;
 
+/* #####  #####  #   #  #####  #####  #   #  #####  #   #  #####  #####
+   #      #   #  ## ##  #   #  #   #  ##  #  #      ##  #    #    #
+   #      #   #  # # #  #####  #   #  # # #  ###    # # #    #    #####
+   #      #   #  #   #  #      #   #  #  ##  #      #  ##    #        #
+   #####  #####  #   #  #      #####  #   #  #####  #   #    #    ##### */
+
+typedef struct ALIGN4 ComponentHeader_ {
+    s16 entId;
+    u16 flags;
+} ComponentHeader;
+
 #define OBJ_REG_FLAG            ATTR0_REG
 #define OBJ_AFF_FLAG            ATTR0_AFF
 #define OBJ_HIDE_FLAG           ATTR0_HIDE
 #define OBJ_AFF_DBL_FLAG        ATTR0_AFF_DBL
+#define OBJ_ZDEPTH_PRIO_MASK    0b11
 
-typedef struct ALIGN4 ObjComponent_ { // if this is anything other than 16 bytes, bad things will happen
+typedef struct ALIGN4 ObjComponent_ {
     ComponentHeader header; // 4 bytes
     // attrs must be immediately after the header
     u16 attr0; // 2 bytes
     u16 attr1; // 2 bytes
     u16 attr2; // 2 bytes
-    u16 zDepth; // 2 bytes. Farther away from screen = lower zDepth
+    s16 prevId; // 2 bytes
+    s16 nextId; // 2 bytes. Next deepest zDepth
+    s8 yOffset;
     u8 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
-    s8 prevIndex; // 1 byte
-    s8 nextIndex; // 1 byte. Next deepest zIndex
-    u8 numAnimFrames; // 1 byte
 } ObjComponent;
 
 typedef struct ALIGN4 ObjAffStruct_ {

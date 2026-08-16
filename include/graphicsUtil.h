@@ -6,8 +6,14 @@
 
 PositionMini getScreenPos(Position pos);
 
-void initSpriteCells();
+int getZDepth(ObjComponent* obj);
 
-void drawSpriteCells(Position pos, bool isCellsRightToLeft);
+/** This function iterates through the obj linked list and finds an appropriate spot for
+ * an obj based on its zDepth.
+ * Assumes the ent has an ObjComponent and a Physics/CellComponent.
+ */
+void updateZDepth(ObjComponent* obj);
+
+void drawSpriteCells();
 
 #endif

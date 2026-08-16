@@ -188,7 +188,7 @@ int checkCollisionMove(PhysicsComponent* phys, int dir) {
     }
     int x = phys->pos.x.HALF.HI / 16;
     int z = phys->pos.z.HALF.HI / 16;
-    int y = (phys->pos.y.HALF.HI - PLAYER_HEIGHT / 2) / 16;
+    int y = phys->pos.y.HALF.HI / 16;
     int row = (x + xTriBool * 2) - 7 + (z + zTriBool * 2);
     if (row < -1 || row > 21)
         return 1;

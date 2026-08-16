@@ -16,13 +16,16 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     addComponentGroup(entId, 0, NULL, NULL, 0, ENT_PLAYER);
 
     // ladder stuff
-    addComponentPhysics(ladderId, 0, (16 * ladderX) << 16, (16 * ladderY + MT_WIDTH / 2) << 16, (16 * ladderZ) << 16, NULL, 0, 0, 0, 0);
+    addComponentPhysics(
+        ladderId, 0, (16 * ladderX) << 16,
+        (16 * ladderY) << 16,
+        (16 * ladderZ) << 16, NULL, 0, 0, 0, 0);
     addComponentObj(
-        ladderId, OBJ_AFF_DBL_FLAG,
+        ladderId, OBJ_AFF_DBL_FLAG | 1,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteLadderTiles, spriteLadderTilesLen)),
-        255,
+        -8,
         COMP_PHYSICS
     );
     memcpy32(&pal_obj_bank[0], spriteLadderPal, spriteLadderPalLen / sizeof(u32));
@@ -32,17 +35,19 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     addComponentMember(ladderId, 0, entId);
 
     // player stuff
-    ObjComponent* playerObj = addComponentObj(
+    addComponentPhysics(
+        playerId, 0, (16 * playerX) << 16,
+        (16 * playerY) << 16,
+        (16 * playerZ) << 16, NULL, 0, 0, 0, 0);
+    addComponentObj(
         playerId, 0,
         ATTR0_REG | ATTR0_TALL,
         ATTR1_SIZE_16x32,
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(1),
-        255,
+        0,
         COMP_PHYSICS
     );
-    playerObj->nextIndex = numComps(COMP_OBJ) - 2;
     memcpy32(&pal_obj_bank[1], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
-    addComponentPhysics(playerId, 0, (16 * playerX) << 16, (16 * playerY + PLAYER_HEIGHT / 2) << 16, (16 * playerZ) << 16, NULL, 0, 0, 0, 0);
     addComponentInput(playerId, 0, handleInputPlayer);
     addComponentMember(playerId, 0, entId);
     addComponentTaskQueue(playerId, 0);
@@ -81,6 +86,7 @@ void taskTurnRight(Task* task) {
 
 void turnPlayer(Task* task, int dir) {
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
+    updatePlayerStuff();
     if (task->timeRemaining == 16) { // check collision at start of task
         if (checkCollisionTurn(ladderPhys, dir)) {
             task->timeRemaining = 1;
@@ -97,49 +103,14 @@ void turnPlayer(Task* task, int dir) {
     rot->mtx = mtx;
 }
 
-void updatePlayerZDepth() {
-    PositionMini playerTilePos = getTilePos(gLadderId);
-    int zDepth = playerTilePos.y * NUM_SPRITE_CELLS + 14;
-    ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
-    ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
-    playerObj->zDepth = zDepth;
-    ladderObj->zDepth = zDepth;
-    int playerIndex = ((int32_t)playerObj - (int32_t)&gObjCompsDense) / 16;
-    int ladderIndex = ((int32_t)ladderObj - (int32_t)&gObjCompsDense) / 16;
-    playerObj->nextIndex = ladderIndex;
-    ObjComponent* o = &gObjCompsDense[gObjCompDeepestZIndex];
-    o->header.flags &= ~ATTR0_GFX_MASK;
-    if (zDepth < o->zDepth) {
-        ladderObj->nextIndex = gObjCompDeepestZIndex;
-        gObjCompDeepestZIndex = playerIndex;
-        o->header.flags |= ATTR0_WINDOW;
-        return;
-    }
-    bool isPlayerFound = false;
-    ObjComponent* nextO = NULL;
-    for (int i = 0; i < NUM_SPRITE_CELLS - 1; i++) {
-        nextO = &gObjCompsDense[o->nextIndex];
-        nextO->header.flags &= ~ATTR0_GFX_MASK;
-        if (nextO->zDepth > zDepth) {
-            if (!isPlayerFound) {
-                o->nextIndex = playerIndex;
-                ladderObj->nextIndex = ((int32_t)nextO - (int32_t)&gObjCompsDense) / 16;
-                isPlayerFound = true;
-            }
-            nextO->header.flags |= ATTR0_WINDOW;
-        }
-        o = nextO;
-    }
-    if (nextO)
-        nextO->header.flags |= ATTR0_WINDOW;
-}
-
 void updatePlayerStuff() {
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    bool isCellsRightToLeft = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
+    ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
+    ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
+    gIsZDepthRightToLeft = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
         (ladderPhys->angle >= 0x6000 && ladderPhys->angle <= 0x9FFF);
-    drawSpriteCells(((PhysicsComponent*)getComponent(gLadderId, COMP_PHYSICS))->pos, isCellsRightToLeft);
-    updatePlayerZDepth();
+    updateZDepth(ladderObj);
+    updateZDepth(playerObj);
 }
 
 void handlePlayerDied() {
