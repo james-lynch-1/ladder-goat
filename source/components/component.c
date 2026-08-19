@@ -52,8 +52,6 @@ void initialiseComponentArrays() {
     memset32(&gNumCompsPerType, 0, sizeof(gNumCompsPerType) / 4);
     for (int i = 0; i < NUM_COMP_TYPES; i++) {
         if (!denseSetAddr(i)) break;
-        // memset32((void*)denseSetAddr[i], 0, compSize[i] / 4);
-        // make the index from the dense set comp to the 
         for (int j = 0; j < maxComps(i); j++) {
             ComponentHeader* compHeader = denseSetAddr(i) + compSize(i) * j;
             compHeader->entId = -1;

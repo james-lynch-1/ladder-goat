@@ -6,48 +6,46 @@ void addComponentInput(int entId, int flags, void (*inputHandler)(int entId)) {
 }
 
 void handleInputPlayer(int entId) {
-    PhysicsComponent* physComp = getComponent(entId, COMP_PHYSICS);
-    if (!physComp) return;
-    physComp->pos.y.HALF.HI += key_tri_fire();
-    physComp->pos.y.HALF.HI = clamp(physComp->pos.y.HALF.HI, 0, 64);
+    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
+    playerPhys->pos.y.HALF.HI += key_tri_fire();
+    playerPhys->pos.y.HALF.HI = clamp(playerPhys->pos.y.HALF.HI, 0, 64);
 
-    if (key_is_down(KEY_UP | KEY_DOWN))
-        if (!isTaskWithFlagsInQueue(TASK_MVMT_FLAG, gPlayerId, true) && !checkCollisionMove(physComp, -key_tri_vert()))
-            addTaskToQueue(gPlayerId, key_is_down(KEY_UP) ? TASK_MOVE_FWD : TASK_MOVE_BWD, 16);
+    if (key_is_down(KEY_UP | KEY_DOWN)) {
+        if (!isTaskWithFlagsInQueue(TASK_MVMT_FLAG, entId, true))
+            addTaskToQueue(entId, TASK_MOVE, key_is_down(KEY_UP) ? 1 : 0);
+    }
 }
-bool switchedMap = false;
+
 void handleInputLadder(int entId) {
-    PhysicsComponent* physComp = getComponent(entId, COMP_PHYSICS);
-    if (!physComp) return;
+    PhysicsComponent* ladderPhys = getComponent(entId, COMP_PHYSICS);
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
 
     if (key_hit(KEY_LEFT | KEY_RIGHT)) {
-        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, false) && !checkCollisionTurn(physComp, -key_tri_horz()))
-            addTaskToQueue(gPlayerId, key_is_down(KEY_LEFT) ? TASK_TURN_LEFT : TASK_TURN_RIGHT, 16);
+        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, false))
+            addTaskToQueue(gPlayerId, TASK_TURN, key_is_down(KEY_LEFT) ? 1 : 0);
     }
     else if (key_is_down(KEY_LEFT | KEY_RIGHT)) {
-        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, true) && !checkCollisionTurn(physComp, -key_tri_horz()))
-            addTaskToQueue(gPlayerId, key_is_down(KEY_LEFT) ? TASK_TURN_LEFT : TASK_TURN_RIGHT, 16);
+        if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, true))
+            addTaskToQueue(gPlayerId, TASK_TURN, key_is_down(KEY_LEFT) ? 1 : 0);
     }
 
-    physComp->pos.y.HALF.HI += key_tri_fire();
-    physComp->pos.y.HALF.HI = clamp(physComp->pos.y.HALF.HI, 0, 64);
+    ladderPhys->pos.y.HALF.HI += key_tri_fire();
+    ladderPhys->pos.y.HALF.HI = clamp(ladderPhys->pos.y.HALF.HI, 0, 64);
 
-    if (rot) {
-        SWord vecs[5] = { {0}, {0}, {0x10000}, {0}, {0} }; // vecs[0, 1, 2] are z, y, x vecs
-        switch (key_is_down(KEY_ANY)) {
-            case KEY_A:
-            case KEY_B:
-                makeRotation(&rot->mtx, 512 * key_tri_fire(), (Vector3D*)&vecs[2]);
-                break;
-            case KEY_L:
-            case KEY_R:
-                makeRotation(&rot->mtx, 512 * key_tri_shoulder(), (Vector3D*)&vecs[0]);
-                break;
-            default:
-                break;
-        }
+    SWord vecs[5] = { {0}, {0}, {0x10000}, {0}, {0} }; // vecs[0, 1, 2] are z, y, x vecs
+    switch (key_is_down(KEY_ANY)) {
+        case KEY_A:
+        case KEY_B:
+            makeRotation(&rot->mtx, 512 * key_tri_fire(), (Vector3D*)&vecs[2]);
+            break;
+        case KEY_L:
+        case KEY_R:
+            makeRotation(&rot->mtx, 512 * key_tri_shoulder(), (Vector3D*)&vecs[0]);
+            break;
+        default:
+            break;
     }
+
 
     if (key_hit(KEY_START)) { // reset
         reset();

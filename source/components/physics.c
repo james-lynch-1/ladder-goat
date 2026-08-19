@@ -66,10 +66,10 @@ PositionMini getTilePos(int entId) {
     return p;
 }
 
-PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, PhysArchetype* arch, int vecX, int vecY, int vecZ, u16 angle) {
+PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, u16 angle) {
     PhysicsComponent phys = { {entId, flags},
         {(SWord)posX, (SWord)posY, (SWord)posZ},
-        arch,
+        {0, 0, 0, 0, 0, 0},
         {(SWord)vecX, (SWord)vecY, (SWord)vecZ},
         angle
     };

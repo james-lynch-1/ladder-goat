@@ -19,13 +19,13 @@ CollisionMap colMap = { { // y, z, x
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,2,2,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,2,2,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,0,2,2,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,2,0,2,2,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -38,13 +38,13 @@ CollisionMap colMap = { { // y, z, x
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -170,6 +170,7 @@ CollisionMap colMap = { { // y, z, x
 #define BWD -1
 int checkCollisionMove(PhysicsComponent* phys, int dir) {
     int zTriBool = 0, xTriBool = 0;
+    int colOffset = dir == 1 ? phys->hitbox.fwd : phys->hitbox.bwd;
     switch (phys->angle) {
         case 0:
             xTriBool = dir;
@@ -186,13 +187,11 @@ int checkCollisionMove(PhysicsComponent* phys, int dir) {
         default:
             return 0;
     }
-    int x = phys->pos.x.HALF.HI / 16;
-    int z = phys->pos.z.HALF.HI / 16;
-    int y = phys->pos.y.HALF.HI / 16;
-    int row = (x + xTriBool * 2) - 7 + (z + zTriBool * 2);
+    PositionMini tilePos = getTilePos(phys->header.entId);
+    int row = (tilePos.x + xTriBool * 2) + (tilePos.z + zTriBool * 2) - 7;
     if (row < -1 || row > 21)
         return 1;
-    return colMap[y][z + zTriBool * 2][x + xTriBool * 2];
+    return colMap[tilePos.y][tilePos.z + zTriBool + colOffset * zTriBool][tilePos.x + xTriBool + colOffset * xTriBool];
 }
 #undef FWD
 #undef BWD
@@ -200,15 +199,16 @@ int checkCollisionMove(PhysicsComponent* phys, int dir) {
 #define CW  -1
 #define CCW 1
 int checkCollisionTurn(PhysicsComponent* phys, int dir) {
-    int x = phys->pos.x.HALF.HI / 16;
-    int z = phys->pos.z.HALF.HI / 16;
-    int y = phys->pos.y.HALF.HI / 16;
+    PositionMini tilePos = getTilePos(phys->header.entId);
     bool isZFacing = (phys->angle / 0x4000) & 1;
-    int topLeft = colMap[y][z - 1][x - 1];
-    int topRight = colMap[y][z - 1][x + 1];
-    int btmLeft = colMap[y][z + 1][x - 1];
-    int btmRight = colMap[y][z + 1][x + 1];
-    int cardinalColl = colMap[y][z - 1][x] | colMap[y][z + 1][x] | colMap[y][z][x - 1] | colMap[y][z][x + 1];
+    int topLeft = colMap[tilePos.y][tilePos.z - 1][tilePos.x - 1];
+    int topRight = colMap[tilePos.y][tilePos.z - 1][tilePos.x + 1];
+    int btmLeft = colMap[tilePos.y][tilePos.z + 1][tilePos.x - 1];
+    int btmRight = colMap[tilePos.y][tilePos.z + 1][tilePos.x + 1];
+    int cardinalColl = colMap[tilePos.y][tilePos.z - 1][tilePos.x] |
+        colMap[tilePos.y][tilePos.z + 1][tilePos.x] |
+        colMap[tilePos.y][tilePos.z][tilePos.x - 1] |
+        colMap[tilePos.y][tilePos.z][tilePos.x + 1];
     if ((isZFacing && dir == CCW) || (!isZFacing && dir == CW))
         return topLeft | btmRight | cardinalColl;
     if ((isZFacing && dir == CW) || (!isZFacing && dir == CCW))

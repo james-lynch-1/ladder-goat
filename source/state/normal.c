@@ -15,7 +15,7 @@ void updateNormal() {
     updateObjs();
     updateTimers();
 
-    updateUINormal();
+    // updateUINormal();
 
     updateTaskQueues();
     deleteMarkedEnts();

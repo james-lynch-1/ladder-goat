@@ -1,10 +1,11 @@
 #include "component.h"
 
 const TaskData gTaskTable[NUM_TASK_TYPES] = {
-    {taskMoveForward, 16, TASK_MVMT_FLAG},
-    {taskMoveBackward, 16, TASK_MVMT_FLAG},
-    {taskTurnLeft, 16, TASK_TURN_FLAG},
-    {taskTurnRight, 16, TASK_TURN_FLAG},
+    {taskMove, 1, TASK_MVMT_FLAG},
+    {taskMovePlayer, 16, TASK_MVMT_FLAG},
+    {taskMoveLadder, 16, TASK_MVMT_FLAG},
+    {taskMovePlayerAndLadder, 16, TASK_MVMT_FLAG},
+    {taskTurn, 16, TASK_TURN_FLAG}
 };
 
 TaskQueueComponent* addComponentTaskQueue(int entId, int flags) {
@@ -21,7 +22,7 @@ void updateTaskQueues() {
         TaskQueueComponent* tQ = &gTaskQueueCompsDense[i];
         if (isTaskQueueEmpty(tQ)) continue;
         Task* currTask = &tQ->queue[tQ->head];
-        gTaskTable[currTask->taskIndex].fn(currTask);
+        gTaskTable[currTask->taskIndex].fn(tQ->header.entId, currTask);
         if (--currTask->timeRemaining <= 0) {
             if (tQ->head != tQ->tail)
                 tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
@@ -29,10 +30,10 @@ void updateTaskQueues() {
     }
 }
 
-bool addTaskToQueue(int entId, int taskIndex, int length) {
+bool addTaskToQueue(int entId, int taskIndex, int data) {
     TaskQueueComponent* tQ = getComponent(entId, COMP_TASK_QUEUE);
     if (!tQ || isTaskQueueFull(tQ)) return false;
-    Task t = { taskIndex, length > 0 ? length : gTaskTable[taskIndex].length };
+    Task t = { taskIndex, gTaskTable[taskIndex].length, data };
     tQ->queue[tQ->tail] = t;
     tQ->tail = (tQ->tail + 1) % (sizeof(tQ->queue) / sizeof(Task));
     return true;

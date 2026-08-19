@@ -21,12 +21,7 @@ enum __attribute__ ((__packed__)) ObjSlotEnum {
 
 enum __attribute__ ((__packed__)) PhysArchetypeEnum {
     ARCHETYPE_PLAYER,
-    ARCHETYPE_ENEMY_WEAK,
-    ARCHETYPE_ENEMY,
-    ARCHETYPE_ENEMY_DEAD,
     ARCHETYPE_ITEM,
-    ARCHETYPE_NON_INTERACTABLE,
-    ARCHETYPE_PARTICLE,
     NUM_PHYS_ARCHETYPES
 };
 
@@ -75,12 +70,11 @@ enum __attribute__ ((__packed__)) Type {
 #define TASK_QUEUE_TURN_FLAG    0b100
 
 enum __attribute__ ((__packed__)) TaskType {
-    TASK_MOVE_FWD,
-    TASK_MOVE_BWD,
-    TASK_TURN_LEFT,
-    TASK_TURN_RIGHT,
-    TASK_QUEUE_TURN_LEFT,
-    TASK_QUEUE_TURN_RIGHT,
+    TASK_MOVE,
+    TASK_MOVE_PLAYER,
+    TASK_MOVE_LADDER,
+    TASK_MOVE_PLAYER_AND_LADDER,
+    TASK_TURN,
     NUM_TASK_TYPES
 };
 enum __attribute__ ((__packed__)) PaletteEnum {
@@ -145,12 +139,13 @@ typedef struct gGameState { // for game states (FSM)
 // Tasks
 
 typedef struct ALIGN4 Task_ {
-    s16 taskIndex;
-    s16 timeRemaining;
+    int taskIndex : 12;
+    int timeRemaining : 12;
+    int data : 4;
 } Task;
 
 typedef struct ALIGN4 TaskData_ {
-    void (*fn)(Task* task);
+    void (*fn)(int entId, Task* task);
     s16 length;
     u32 flags;
 } TaskData;
@@ -190,10 +185,12 @@ typedef struct PositionMini_ {
 } PositionMini;
 
 typedef struct Hitbox_ {
-    u8 width;
-    u8 height;
-    s8 xOffset; // whole hitbox offset on x axis
-    s8 yOffset; // whole hitbox offset on y axis
+    int fwd : 4;
+    int bwd : 4;
+    int l : 4;
+    int r : 4;
+    int u : 4;
+    int d : 4;
 } Hitbox;
 
 typedef struct Vector3D_ {
@@ -335,22 +332,14 @@ typedef struct ALIGN4 InputComponent_ {
 } InputComponent;
 
 #define PHYS_GRAVITY_FLAG        0b10000000
-#define CUSTOM_ARCHETYPE_FLAG    0b00000001
-
-typedef struct ALIGN4 PhysArchetype_ {
-    Hitbox hitbox; // 4 bytes
-    int radius; // 4 bytes
-    SWord accel; // 4 bytes
-    u16 decay; // 2 bytes
-    u16 inUse; // 2 bytes
-} PhysArchetype;
 
 typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
     Position pos; // 8 bytes. should always be after header for updateObjs()
-    PhysArchetype* archetype; // 4 bytes. should always be after header and pos for updateObjs()
+    Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
     Vector3D vec; // 8 bytes
     u16 angle; // 2 bytes
+
 } PhysicsComponent;
 
 // for 3d objects

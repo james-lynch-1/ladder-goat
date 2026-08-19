@@ -30,8 +30,10 @@ void updateRotComps() {
             (multSWord(initMatrix.m00, initMatrix.m11).WORD) -
             (multSWord(initMatrix.m01, initMatrix.m10).WORD)
             );
-        s64 newMatrix[4] = { ((s64)invDet * initMatrix.m11.WORD) >> 16, ((s64)invDet * -initMatrix.m01.WORD) >> 16,
-                             ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16 };
+        s64 newMatrix[4] = {
+            ((s64)invDet * initMatrix.m11.WORD) >> 16, ((s64)invDet * -initMatrix.m01.WORD) >> 16,
+            ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16
+        };
 
         ObjAffStruct* oA = &gObjAffBuffer[rot->objAffIndex];
         oA->pa = (newMatrix[0] >> 8) & 0xFFFF;

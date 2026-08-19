@@ -8,6 +8,8 @@
 #include "enemy.h"
 #include "eventListener.h"
 
+extern const TaskData gTaskTable[NUM_TASK_TYPES];
+
 ComponentHeader* addComponentCustom(void* data, enum ComponentType componentType);
 
 /** Moves last component in list to the slot of the one being removed.
@@ -89,7 +91,7 @@ PositionMini getTilePos(int entId);
 
 void updatePhysics();
 
-PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, PhysArchetype* arch, int vecX, int vecY, int vecZ, u16 angle);
+PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, u16 angle);
 
 void removeComponentPhysics(int entId);
 
@@ -168,7 +170,7 @@ void removeComponentTaskQueue(int entId);
 
 void updateTaskQueues();
 
-bool addTaskToQueue(int entId, int taskIndex, int length);
+bool addTaskToQueue(int entId, int taskIndex, int data);
 
 bool isTaskWithFlagsRunning(int taskFlags, int entId);
 

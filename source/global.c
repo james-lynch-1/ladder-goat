@@ -7,8 +7,8 @@ int gNumSpritesAllocated = 0;
 int gNumEntsToDelete = 0;
 
 const u16* gCollTileToSpriteMap[128] = {
-    (u16*)spriteLadderTiles,
-    (u16*)spriteLadderTiles,
+    (u16*)spriteHoriTiles,
+    (u16*)spriteHoriTiles,
     (u16*)spriteCellPurpleTiles,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

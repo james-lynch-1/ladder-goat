@@ -9,7 +9,7 @@ void copyObjAttrsToOAM() { // excluding affine stuff
         oam_mem[127 - i].attr2 = o->attr2;
         idx = o->nextId;
     }
-    oam_init(oam_mem, 128 - numComps(COMP_OBJ));
+    memset32(oam_mem, ATTR0_HIDE, 128 - numComps(COMP_OBJ));
 }
 
 void copyObjAffinesToOAM() {
