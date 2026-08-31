@@ -3,8 +3,8 @@
 //                                                      y
 //                                                      ↑
 //                                                      o
-// each row is a row of 18 on the x axis               ↙ ↘
-// each col is a col of 18 on the z axis              z    x
+// each row is a row of 19 on the x axis               ↙ ↘
+// each col is a col of 19 on the z axis              z    x
 
 // collTiles:
 // 0: nothing

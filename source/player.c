@@ -26,7 +26,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)),
-        -8,
+        -16,
         COMP_PHYSICS
     );
     memcpy32(&pal_obj_bank[0], spriteHoriPal, spriteHoriPalLen / sizeof(u32));
@@ -62,9 +62,13 @@ void taskMove(int entId, Task* task) {
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
     bool canMovePlayer = checkCollisionMove(playerPhys, dir) == 0;
     bool canMoveLadder = checkCollisionMove(ladderPhys, dir) == 0;
-    const int taskIndexes[4] = { 0, TASK_MOVE_PLAYER, TASK_MOVE_LADDER, TASK_MOVE_PLAYER_AND_LADDER };
+    const int taskIndexes[4] = { 0, TASK_MOVE_PLAYER, 0, TASK_MOVE_PLAYER_AND_LADDER };
     int taskIndexesIndex = (canMoveLadder << 1) | canMovePlayer;
     if (taskIndexesIndex == 0) return;
+    if (taskIndexes[taskIndexesIndex] == 0) {
+        task->timeRemaining = 0;
+        return;
+    }
 
     task->taskIndex = taskIndexes[taskIndexesIndex];
     task->timeRemaining = gTaskTable[task->taskIndex].length;
@@ -73,8 +77,8 @@ void taskMove(int entId, Task* task) {
 
 void taskMovePlayerAndLadder(int entId, Task* task) {
     int dir = task->data == 1 ? 1 : -1;
-    moveEnt(gPlayerId, task, dir);
     moveEnt(gLadderId, task, dir);
+    moveEnt(gPlayerId, task, dir);
 }
 
 void taskMovePlayer(int entId, Task* task) {

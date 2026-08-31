@@ -209,7 +209,7 @@ typedef struct Quaternion_ {
     SWord x; SWord y; SWord z; SWord w;
 } Quaternion;
 
-typedef u8 CollisionMap[8][18][18];
+typedef u8 CollisionMap[8][MAP_WIDTH_Z][MAP_WIDTH_X];
 
 #define ILK_ENEMY   0
 #define ILK_ITEM    1
@@ -263,7 +263,7 @@ typedef struct LutStruct_ {
 } LutStruct;
 
 typedef struct CollLayer_ {
-    u8 cell[18][18];
+    u8 cell[MAP_WIDTH_Z][MAP_WIDTH_X];
 } CollLayer;
 
 typedef struct LevelData_ {
@@ -352,7 +352,6 @@ typedef struct ALIGN4 PhysicsComponent_ {
     Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
     Vector3D vec; // 8 bytes
     u16 angle; // 2 bytes
-
 } PhysicsComponent;
 
 // for 3d objects

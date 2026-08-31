@@ -37,8 +37,8 @@
 #define NUM_SPRITE_CELLS    26
 #define ATTR0_GFX_MASK      0x0C00
 
-#define MAP_WIDTH_X         18
-#define MAP_WIDTH_Z         18
+#define MAP_WIDTH_X         19
+#define MAP_WIDTH_Z         19
 #define NUM_ROWS            21
 #define NUM_COLS            16
 
