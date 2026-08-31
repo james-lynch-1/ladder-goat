@@ -6,7 +6,7 @@
 
 PositionMini getScreenPos(Position pos);
 
-int getZDepth(ObjComponent* obj);
+int getZDepth(ObjComponent* obj, bool isNW);
 
 /** This function iterates through the obj linked list and finds an appropriate spot for
  * an obj based on its zDepth.
@@ -14,6 +14,10 @@ int getZDepth(ObjComponent* obj);
  */
 void updateZDepth(ObjComponent* obj);
 
+void resetObjZDepth(ObjComponent* toBeReset);
+
 void drawSpriteCells();
+
+void deallocateSpriteCells();
 
 #endif

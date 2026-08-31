@@ -125,16 +125,6 @@ void turnPlayer(int entId, Task* task, int dir) {
 
 void updatePlayerStuff() {
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
-    ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
-    gIsZDepthRightToLeft = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
+    gIsLadderNWFacing = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
         (ladderPhys->angle >= 0x6000 && ladderPhys->angle <= 0x9FFF);
-    updateZDepth(ladderObj);
-    updateZDepth(playerObj);
-    int zDepth = getZDepth(playerObj);
-    logVal("zDepth: ", zDepth);
-}
-
-void handlePlayerDied() {
-
 }

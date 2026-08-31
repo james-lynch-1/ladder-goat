@@ -37,6 +37,11 @@
 #define NUM_SPRITE_CELLS    26
 #define ATTR0_GFX_MASK      0x0C00
 
+#define MAP_WIDTH_X         18
+#define MAP_WIDTH_Z         18
+#define NUM_ROWS            21
+#define NUM_COLS            16
+
 // Metatile width, in pixels
 #define MT_WIDTH            16
 #define SBB_WIDTH_MT        16

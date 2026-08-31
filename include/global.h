@@ -15,6 +15,7 @@
 #include "util.h"
 #include "graphics.h"
 #include "graphicsUtil.h"
+#include "levels.h"
 
 extern int gFrameCount;
 extern int gNumEnts;
@@ -27,8 +28,13 @@ extern const u16* gCollTileToSpriteMap[128];
 extern s16 gPlayerId;
 extern s16 gLadderId;
 
-extern int gDeepestObjEntId;
-extern bool gIsZDepthRightToLeft;
+extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
+extern bool gIsLadderNWFacing;
+extern const LevelData* gLevelData;
+extern CollLayer gColl[8];
+
+extern const LevelData* gLevels[];
+
 extern ObjAffStruct gObjAffBuffer[32];
 extern enum ObjSlotEnum gObjAllocArr[1024];
 extern SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];

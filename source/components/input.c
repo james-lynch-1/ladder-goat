@@ -51,6 +51,10 @@ void handleInputLadder(int entId) {
         reset();
         return;
     }
+
+    if (key_hit(KEY_SELECT)) {
+        changeLevel(!gLevelData->levelId);
+    }
 }
 
 void handleInputGameover(int entId) {

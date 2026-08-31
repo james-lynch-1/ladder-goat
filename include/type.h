@@ -262,11 +262,24 @@ typedef struct LutStruct_ {
     int period;
 } LutStruct;
 
-/* #####  #####  #   #  #####  #####  #   #  #####  #   #  #####  #####
-   #      #   #  ## ##  #   #  #   #  ##  #  #      ##  #    #    #
-   #      #   #  # # #  #####  #   #  # # #  ###    # # #    #    #####
-   #      #   #  #   #  #      #   #  #  ##  #      #  ##    #        #
-   #####  #####  #   #  #      #####  #   #  #####  #   #    #    ##### */
+typedef struct CollLayer_ {
+    u8 cell[18][18];
+} CollLayer;
+
+typedef struct LevelData_ {
+    int levelId;
+    int bgIndex;
+    int yHeight;
+    PositionMini playerPos;
+    PositionMini ladderPos;
+    CollLayer clsn[];
+} LevelData;
+
+/* #######  #######  ##   ##  #######  #######  ##    #  #######  ##    #  #######  #######
+   #        #     #  # # # #  #     #  #     #  # #   #  #        # #   #     #     #
+   #        #     #  #  #  #  #######  #     #  #  #  #  #####    #  #  #     #     #######
+   #        #     #  #     #  #        #     #  #   # #  #        #   # #     #           #
+   #######  #######  #     #  #        #######  #    ##  #######  #    ##     #     ####### */
 
 typedef struct ALIGN4 ComponentHeader_ {
     s16 entId;
@@ -285,10 +298,10 @@ typedef struct ALIGN4 ObjComponent_ {
     u16 attr0; // 2 bytes
     u16 attr1; // 2 bytes
     u16 attr2; // 2 bytes
-    s16 prevId; // 2 bytes
-    s16 nextId; // 2 bytes. Next deepest zDepth
     s8 yOffset;
     u8 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
+    s16 prevId[2]; // 4 bytes. [0]: NE, [1]: NW
+    s16 nextId[2]; // 4 bytes. [0]: NE, [1]: NW
 } ObjComponent;
 
 typedef struct ALIGN4 ObjAffStruct_ {
@@ -368,7 +381,7 @@ typedef struct ALIGN4 CounterComponent_ {
 // member uses the header flags to determine what ent kind it is
 typedef struct ALIGN4 MemberComponent_ {
     ComponentHeader header; // 4 bytes
-    s8 groupIds[MAX_GROUPS_PER_MEMBER]; // 4 bytes. Can be in up to 4 groups. Each id defaults to -1
+    s8 groupIds[MAX_GROUPS_PER_MEMBER]; // 4 bytes. Can be in up to 4 groups
 } MemberComponent;
 
 typedef struct ALIGN4 GroupComponent_ {

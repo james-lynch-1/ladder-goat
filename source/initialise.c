@@ -20,14 +20,12 @@ void initialiseGame() {
     memset16(gCompSetSparse, -1, NUM_COMP_TYPES * MAX_ENTS);
     memset32(gEntsToDelete, 0, sizeof(gEntsToDelete) / 4);
 
+    changeLevel(1);
     loadBG(MAP_SBB, isometricPal, isometricPalLen, isometricTiles, isometricTilesLen, isometricMap, isometricMapLen);
 
     // for (int i = 0; i < 16; i++) {
     //     memcpy32(&pal_obj_bank[i], (*(encounter->paletteSet))[i], 8);
     // }
-
-    drawSpriteCells();
-    spawnPlayer(7, 0, 7, 7, 0, 7);
 
     memcpy32(&pal_obj_bank[2], spriteCellPurplePal, spriteCellPurplePalLen / sizeof(u32));
 

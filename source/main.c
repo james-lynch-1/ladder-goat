@@ -1,13 +1,13 @@
 #include "main.h"
 
 void copyObjAttrsToOAM() { // excluding affine stuff
-    int idx = gDeepestObjEntId;
+    int idx = gDeepestObjEntId[gIsLadderNWFacing];
     for (int i = 0; i < numComps(COMP_OBJ); i++) {
         ObjComponent* o = getComponent(idx, COMP_OBJ);
         oam_mem[127 - i].attr0 = o->attr0;
         oam_mem[127 - i].attr1 = o->attr1;
         oam_mem[127 - i].attr2 = o->attr2;
-        idx = o->nextId;
+        idx = o->nextId[gIsLadderNWFacing];
     }
     memset32(oam_mem, ATTR0_HIDE, 128 - numComps(COMP_OBJ));
 }

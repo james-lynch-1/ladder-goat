@@ -20,11 +20,14 @@ const u16* gCollTileToSpriteMap[128] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-s16 gPlayerId;
-s16 gLadderId;
+s16 gPlayerId = -1;
+s16 gLadderId = -1;
 
-int gDeepestObjEntId;
-bool gIsZDepthRightToLeft = false;
+int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
+bool gIsLadderNWFacing = false;
+const LevelData* gLevelData; // ptr to the level in rom
+CollLayer gColl[8]; // collision map we copy to ram and can edit
+
 ObjAffStruct gObjAffBuffer[32];
 enum ObjSlotEnum gObjAllocArr[1024];
 SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];

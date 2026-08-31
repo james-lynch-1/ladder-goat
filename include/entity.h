@@ -9,9 +9,9 @@ int spawnEntity(int entityKind, int x, int y);
 int reserveEntSlot();
 
 /** Marks an ent to be deleted at the end of the frame. */
-void markEntToBeDeleted(int index);
+void markEntToBeDeleted(int entId);
 
-int deleteEnt(int index);
+int deleteEnt(int entId);
 
 void deleteMarkedEnts();
 

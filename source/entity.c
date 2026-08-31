@@ -13,20 +13,20 @@ int reserveEntSlot() {
     return i;
 }
 
-void markEntToBeDeleted(int index) {
-    if (index == -1) return;
-    gEntsToDelete[gNumEntsToDelete++] = index;
+void markEntToBeDeleted(int entId) {
+    if (entId == -1) return;
+    gEntsToDelete[gNumEntsToDelete++] = entId;
 }
 
-int deleteEnt(int index) {
-    if (gEntFlags[index] == 0) return 0;
+int deleteEnt(int entId) {
+    if (entId == -1 || (gEntFlags[entId] == 0)) return 0;
     for (int i = 0; i < NUM_COMP_TYPES; i++) {
         void(*delFn)(int);
         delFn = (void(*)(int))gCompTable[i][COMP_REMOVERS];
-        delFn(index);
+        delFn(entId);
     }
     gNumEnts--;
-    gEntFlags[index] = 0;
+    gEntFlags[entId] = 0;
     return 1;
 }
 

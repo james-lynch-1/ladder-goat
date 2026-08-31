@@ -7,6 +7,7 @@
 #include "component.h"
 #include "encounter.h"
 #include "mem.h"
+#include "levels.h"
 
 void initialiseGame();
 

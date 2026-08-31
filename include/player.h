@@ -29,6 +29,4 @@ void turnPlayer(int entId, Task* task, int dir);
 
 void updatePlayerStuff();
 
-void handlePlayerDied();
-
 #endif

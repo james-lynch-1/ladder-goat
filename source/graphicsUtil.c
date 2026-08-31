@@ -10,91 +10,132 @@ PositionMini getScreenPos(Position pos) {
     return screenPos;
 }
 
-int getZDepth(ObjComponent* obj) {
+int getZDepth(ObjComponent* obj, bool isNW) {
     Position pos = ((PhysicsComponent*)getComponent(obj->header.entId, obj->posSourceCompType))->pos;
     PositionMini tilePos = {
         (pos.x.WORD / 16 + 0x8000) >> 16,
         (pos.y.WORD / 16 + 0x8000) >> 16,
         (pos.z.WORD / 16 + 0x8000) >> 16,
     };
-    int row = tilePos.x + tilePos.z - 7;
-    int col = tilePos.x - tilePos.z + 7;
-    // multiply the whole thing by 4 so we can control zDepths of things on the same tile
-    return 4 * (tilePos.y * 8 * 11 + 8 * row + col / 2 - (gIsZDepthRightToLeft * col)) + getObjZDepthPriority(obj);
+    // ne: [0], nw: [1]
+    return 4 * (
+        gLevelData->yHeight *
+        (*(&(tilePos.x) + 2 * isNW) * MAP_WIDTH_X + *(&(tilePos.z) - 2 * isNW)) + tilePos.y
+        );
 }
 
 void updateZDepth(ObjComponent* obj) {
-    int zDepth = getZDepth(obj);
-    ObjComponent* next = getComponent(obj->nextId, COMP_OBJ);
-    ObjComponent* prev = getComponent(obj->prevId, COMP_OBJ);
-    ObjComponent* ptr;
-    int nextZDepth = next ? getZDepth(next) : INT16_MAX;
-    int prevZDepth = prev ? getZDepth(prev) : -1;
+    for (int i = 0; i < 2; i++) { // NE then NW
+        int zDepth = getZDepth(obj, i);
+        ObjComponent* next = getComponent(obj->nextId[i], COMP_OBJ);
+        ObjComponent* prev = getComponent(obj->prevId[i], COMP_OBJ);
+        ObjComponent* ptr;
+        int nextZDepth = next ? getZDepth(next, i) : INT16_MAX;
+        int prevZDepth = prev ? getZDepth(prev, i) : -1;
 
-    if (next && (zDepth > nextZDepth)) {
-        ptr = next;
-        while ((ptr->nextId != INT16_MAX) && zDepth > nextZDepth) {
-            ptr = getComponent(ptr->nextId, COMP_OBJ);
-            nextZDepth = getZDepth(ptr);
+        if (next && (zDepth > nextZDepth)) {
+            ptr = next;
+            while ((ptr->nextId[i] != INT16_MAX) && zDepth > nextZDepth) {
+                ptr = getComponent(ptr->nextId[i], COMP_OBJ);
+                nextZDepth = getZDepth(ptr, i);
+            }
+            if (prev) prev->nextId[i] = obj->nextId[i];
+            else gDeepestObjEntId[i] = obj->nextId[i];
+            next->prevId[i] = obj->prevId[i];
+            if (zDepth > nextZDepth) { // we reached the back, so insert after ptr
+                obj->prevId[i] = ptr->header.entId;
+                obj->nextId[i] = INT16_MAX;
+                ptr->nextId[i] = obj->header.entId;
+                continue;
+            }
+            // insert before ptr
+            ObjComponent* newPrev = getComponent(ptr->prevId[i], COMP_OBJ);
+            newPrev->nextId[i] = obj->header.entId;
+            obj->prevId[i] = newPrev->header.entId;
+            obj->nextId[i] = ptr->header.entId;
+            ptr->prevId[i] = obj->header.entId;
         }
-        if (prev) prev->nextId = obj->nextId;
-        else gDeepestObjEntId = obj->nextId;
-        next->prevId = obj->prevId;
-        if (zDepth > nextZDepth) { // we reached the back, so insert after ptr
-            obj->prevId = ptr->header.entId;
-            obj->nextId = INT16_MAX;
-            ptr->nextId = obj->header.entId;
-            return;
+        else if (prev && (zDepth < prevZDepth)) {
+            ptr = prev;
+            while ((ptr->prevId[i] != -1) && zDepth < prevZDepth) {
+                ptr = getComponent(ptr->prevId[i], COMP_OBJ);
+                prevZDepth = getZDepth(ptr, i);
+            }
+            if (next) next->prevId[i] = obj->prevId[i];
+            prev->nextId[i] = obj->nextId[i];
+            if (zDepth < prevZDepth) { // we reached the front, so insert before ptr
+                gDeepestObjEntId[i] = obj->header.entId;
+                obj->nextId[i] = ptr->header.entId;
+                obj->prevId[i] = -1;
+                ptr->prevId[i] = obj->header.entId;
+                continue;
+            }
+            obj->prevId[i] = ptr->header.entId;
+            ObjComponent* newNext = getComponent(ptr->nextId[i], COMP_OBJ);
+            newNext->prevId[i] = obj->header.entId;
+            obj->nextId[i] = newNext->header.entId;
+            ptr->nextId[i] = obj->header.entId;
         }
-        // insert before ptr
-        ObjComponent* newPrev = getComponent(ptr->prevId, COMP_OBJ);
-        newPrev->nextId = obj->header.entId;
-        obj->prevId = newPrev->header.entId;
-        obj->nextId = ptr->header.entId;
-        ptr->prevId = obj->header.entId;
     }
-    else if (prev && (zDepth < prevZDepth)) {
-        ptr = prev;
-        while ((ptr->prevId != -1) && zDepth < prevZDepth) {
-            ptr = getComponent(ptr->prevId, COMP_OBJ);
-            prevZDepth = getZDepth(ptr);
+}
+
+// this is for when the next/prev ptrs are broken
+void resetObjZDepth(ObjComponent* toBeReset) {
+    for (int i = 0; i < 2; i++) {
+        int zDepth = getZDepth(toBeReset, i);
+        toBeReset->prevId[i] = -1;
+        toBeReset->nextId[i] = INT16_MAX;
+        ObjComponent* currObj = getComponent(gDeepestObjEntId[i], COMP_OBJ);
+        if (!currObj) {
+            gDeepestObjEntId[i] = toBeReset->header.entId;
+            continue;
         }
-        if (next) next->prevId = obj->prevId;
-        prev->nextId = obj->nextId;
-        if (zDepth < prevZDepth) { // we reached the front, so insert before ptr
-            gDeepestObjEntId = obj->header.entId;
-            obj->nextId = ptr->header.entId;
-            obj->prevId = -1;
-            ptr->prevId = obj->header.entId;
-            return;
+        ObjComponent* nextObj = getComponent(currObj->nextId[i], COMP_OBJ);
+        int currObjZDepth = getZDepth(currObj, i);
+        while (nextObj && zDepth < currObjZDepth) {
+            currObj = nextObj;
+            nextObj = getComponent(nextObj->nextId[i], COMP_OBJ);
+            currObjZDepth = getZDepth(currObj, i);
         }
-        obj->prevId = ptr->header.entId;
-        ObjComponent* newNext = getComponent(ptr->nextId, COMP_OBJ);
-        newNext->prevId = obj->header.entId;
-        obj->nextId = newNext->header.entId;
-        ptr->nextId = obj->header.entId;
+        currObjZDepth = getZDepth(currObj, i);
+        if (zDepth > currObjZDepth) {
+            toBeReset->nextId[i] = currObj->nextId[i];
+            toBeReset->prevId[i] = currObj->header.entId;
+            if (nextObj) nextObj->prevId[i] = toBeReset->header.entId;
+            currObj->nextId[i] = toBeReset->header.entId;
+        }
+        else if (zDepth <= currObjZDepth) {
+            toBeReset->nextId[i] = currObj->header.entId;
+            toBeReset->prevId[i] = currObj->prevId[i];
+            ObjComponent* prevObj = getComponent(currObj->prevId[i], COMP_OBJ);
+            if (prevObj) prevObj->nextId[i] = toBeReset->header.entId;
+            else gDeepestObjEntId[i] = toBeReset->header.entId;
+            currObj->prevId[i] = toBeReset->header.entId;
+        }
     }
 }
 
 void drawSpriteCells() {
     int entId = -1;
-    ObjComponent* o = NULL;
-    for (int y = 0; y < 8; y++) {
-        for (int row = 0; row < 21; row++) {
-            for (int col = row & 1; col < 16; col += 2) {
-                int z = 7 - col / 2 + row / 2;
-                int x = col / 2 + (row + 1) / 2;
-                if (colMap[y][z][x]) {
+    for (int y = 0; y < gLevelData->yHeight; y++) {
+        for (int z = 0; z < MAP_WIDTH_Z; z++) {
+            for (int x = 0; x < MAP_WIDTH_X; x++) {
+                if (gLevelData->clsn[y].cell[z][x]) {
+                    int clsnVal = gLevelData->clsn[y].cell[z][x];
                     entId = reserveEntSlot();
                     addComponentCell(entId, 0, x, y, z);
-                    o = addComponentObj(entId, 0, ATTR0_SQUARE, ATTR1_SIZE_32x32,
-                        ATTR2_ID(fetchSprite(gCollTileToSpriteMap[colMap[y][z][x]], 512) |
-                            ATTR2_PALBANK(2)),
+                    addComponentObj(entId, 0, ATTR0_SQUARE, ATTR1_SIZE_32x32,
+                        ATTR2_ID(fetchSprite(gCollTileToSpriteMap[clsnVal], 512) | ATTR2_PALBANK(2)),
                         8,
                         COMP_CELL);
                 }
             }
         }
     }
-    if (!o) return;
+}
+
+void deallocateSpriteCells() {
+    for (int i = 0; i < numComps(COMP_CELL); i++)
+        markEntToBeDeleted(gCellCompsDense[i].header.entId);
+    deleteMarkedEnts();
 }
