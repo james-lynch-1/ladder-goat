@@ -78,10 +78,12 @@ enum __attribute__ ((__packed__)) TaskType {
     NUM_TASK_TYPES
 };
 enum __attribute__ ((__packed__)) PaletteEnum {
-    PLAYER_PAL,
-    ENEMY_WEAK_PAL,
-    ENEMY_STRONG_PAL,
-    ITEM_PAL
+    PAL_PLAYER,
+    PAL_LADDER,
+    PAL_PURPLE,
+    PAL_PURPLE_REVERSED,
+    PAL_ORANGE,
+    NUM_PALS
 };
 
 typedef const u16* PaletteSet[16];
@@ -265,6 +267,12 @@ typedef struct LutStruct_ {
 typedef struct CollLayer_ {
     u8 cell[MAP_WIDTH_Z][MAP_WIDTH_X];
 } CollLayer;
+
+typedef struct CollTileToSpriteMapEntry_ {
+    u16* tiles;
+    u16 flipFlags;
+    u16 palIndex;
+} CollTileToSpriteMapEntry;
 
 typedef struct LevelData_ {
     int levelId;

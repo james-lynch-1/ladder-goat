@@ -127,11 +127,15 @@ void drawSpriteCells() {
                     Position pos = *(Position*)(cell + 1);
                     PositionMini screenPos = getScreenPos(pos);
                     if (in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) &&
-                        in_range(screenPos.y, 0 - 16, SCREEN_HEIGHT + 16))
-                        addComponentObj(entId, 0, ATTR0_SQUARE, ATTR1_SIZE_32x32,
-                            ATTR2_ID(fetchSprite(gCollTileToSpriteMap[clsnVal], 512) | ATTR2_PALBANK(2)),
+                        in_range(screenPos.y, 0 - 16, SCREEN_HEIGHT + 16)) {
+                        addComponentObj(entId, 0, ATTR0_SQUARE,
+                            ATTR1_SIZE_32x32 | gCollTileToSpriteMap[clsnVal].flipFlags,
+                            ATTR2_ID(fetchSprite(gCollTileToSpriteMap[clsnVal].tiles, 512)) |
+                            ATTR2_PALBANK(gCollTileToSpriteMap[clsnVal].palIndex),
                             8,
                             COMP_CELL);
+                        updateObj(entId);
+                    }
                 }
             }
         }

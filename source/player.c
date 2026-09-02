@@ -25,13 +25,14 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         ladderId, OBJ_AFF_DBL_FLAG | 1,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
-        ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)),
+        ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
         -16,
         COMP_PHYSICS
     );
-    memcpy32(&pal_obj_bank[0], spriteHoriPal, spriteHoriPalLen / sizeof(u32));
+    updateObj(ladderId);
 
     addComponentRotation(ladderId, 0);
+    applyRotations(ladderId);
     addComponentInput(ladderId, 0, handleInputLadder);
     addComponentMember(ladderId, 0, entId);
 
@@ -41,14 +42,17 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         (16 * playerY) << 16,
         (16 * playerZ) << 16, 0, 0, 0, 0);
     addComponentObj(
-        playerId, 0,
-        ATTR0_REG | ATTR0_TALL,
-        ATTR1_SIZE_16x32,
-        ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(1),
-        0,
+        playerId, OBJ_AFF_DBL_FLAG,
+        ATTR0_AFF_DBL | ATTR0_TALL,
+        ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
+        ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_PLAYER),
+        -28,
         COMP_PHYSICS
     );
-    memcpy32(&pal_obj_bank[1], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
+    updateObj(playerId);
+    
+    addComponentRotation(playerId, 0);
+    applyRotations(playerId);
     addComponentInput(playerId, 0, handleInputPlayer);
     addComponentMember(playerId, 0, entId);
     addComponentTaskQueue(playerId, 0);
@@ -105,26 +109,22 @@ void taskTurn(int entId, Task* task) {
         task->timeRemaining = 1;
         return;
     }
-    turnLadder(entId, task, dir);
-    turnPlayer(entId, task, dir);
+    turnEnt(gLadderId, task, dir);
+    turnEnt(gPlayerId, task, dir);
 }
 
-void turnLadder(int entId, Task* task, int dir) {
-    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    RotationComponent* rot = getComponent(gLadderId, COMP_ROTATION);
-    ladderPhys->angle += dir * 0x4000 / 16;
-    int visAngle = ladderPhys->angle;
+void turnEnt(int entId, Task* task, int dir) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
+    phys->angle += dir * 0x4000 / 16;
+    int visAngle = phys->angle;
     if ((visAngle & (UINT16_MAX / 2)) == 0x6000) // avoid having the affine matrix be 0
         visAngle += 128 * dir;
     Matrix3D mtx = { {lu_cos(visAngle) << 4}, {0}, {-lu_sin(visAngle) << 4},
                      {0},{0x10000}, {0},
                      {lu_sin(visAngle) << 4}, {0}, {lu_cos(visAngle) << 4} };
     rot->mtx = mtx;
-}
-
-void turnPlayer(int entId, Task* task, int dir) {
-    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
-    playerPhys->angle += dir * 0x4000 / 16;
+    applyRotations(entId);
 }
 
 void updatePlayerStuff() {

@@ -23,9 +23,7 @@ void moveEnt(int entId, Task* task, int dir);
 
 void taskTurn(int entId, Task* task);
 
-void turnLadder(int entId, Task * task, int dir);
-
-void turnPlayer(int entId, Task* task, int dir);
+void turnEnt(int entId, Task* task, int dir);
 
 void updatePlayerStuff();
 

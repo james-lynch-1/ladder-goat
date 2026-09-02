@@ -9,6 +9,8 @@
 #include "mem.h"
 #include "levels.h"
 
+void initialiseObjPalettes();
+
 void initialiseGame();
 
 #endif

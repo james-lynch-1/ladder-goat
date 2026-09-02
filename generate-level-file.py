@@ -43,8 +43,9 @@ def main():
                 csvStr = csv.read()
                 for z in range(mapWidth):
                     f.write("            {")
-                    for x in range(mapWidth):
-                        f.write(csvStr[z * mapWidth * 2 + x * 2] + ",")
+                    rowArr = csvStr.split("\n")[z].split(",")
+                    for x in rowArr:
+                        f.write(x + ",")
                     f.seek(f.seek(0, os.SEEK_END) - 1)
                     f.truncate()
                     f.write("},\n")

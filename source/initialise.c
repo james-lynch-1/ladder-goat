@@ -1,5 +1,16 @@
 #include "initialise.h"
 
+void initialiseObjPalettes() {
+    memcpy32(&pal_obj_bank[PAL_PLAYER], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
+    memcpy32(&pal_obj_bank[PAL_LADDER], spriteHoriPal, spriteHoriPalLen / sizeof(u32));
+    memcpy32(&pal_obj_bank[PAL_PURPLE], spriteCellPurplePal, spriteCellPurplePalLen / sizeof(u32));
+    pal_obj_bank[PAL_PURPLE_REVERSED][0] = spriteCellPurplePal[0];
+    pal_obj_bank[PAL_PURPLE_REVERSED][1] = spriteCellPurplePal[1];
+    for (int i = 2; i < 16; i++)
+        pal_obj_bank[PAL_PURPLE_REVERSED][i] = spriteCellPurplePal[15 - i + 2];
+    memcpy32(&pal_obj_bank[PAL_ORANGE], spriteCellFenceNEPal, spriteCellFenceNEPalLen / sizeof(u32));
+}
+
 void initialiseGame() {
     oam_init(oam_mem, 128);
     irq_init(NULL);
@@ -20,14 +31,15 @@ void initialiseGame() {
     memset16(gCompSetSparse, -1, NUM_COMP_TYPES * MAX_ENTS);
     memset32(gEntsToDelete, 0, sizeof(gEntsToDelete) / 4);
 
+    initialiseObjPalettes();
+
     changeLevel(1);
-    loadBG(MAP_SBB, isometricPal, isometricPalLen, isometricTiles, isometricTilesLen, isometricMap, isometricMapLen);
-
-    // for (int i = 0; i < 16; i++) {
-    //     memcpy32(&pal_obj_bank[i], (*(encounter->paletteSet))[i], 8);
-    // }
-
-    memcpy32(&pal_obj_bank[2], spriteCellPurplePal, spriteCellPurplePalLen / sizeof(u32));
+    loadBG(
+        MAP_SBB,
+        isometricPal, isometricPalLen,
+        isometricTiles, isometricTilesLen,
+        isometricMap, isometricMapLen
+    );
 
     gGameState.gameStateEnum = INT8_MAX;
     setGameState(NORMAL);

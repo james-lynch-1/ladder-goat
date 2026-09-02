@@ -47,17 +47,10 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
  */
 void removeComponentObj(int entId);
 
-void updateObjs();
+/** Updates the pos based on the pos provided by corresponding comp of type posSourceCompType */
+void updateObj(int entId);
 
 int getObjZDepthPriority(ObjComponent* obj);
-
-// ObjAff
-
-// ObjAffComponent* addComponentObjAff(s16 entId, u16 flags, bool isDblSize);
-
-// void updateObjAffs();
-
-// void removeComponentObjAff(int entId);
 
 // Input
 
@@ -96,6 +89,8 @@ PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, 
 void removeComponentPhysics(int entId);
 
 // Rotation
+
+void applyRotations(int entId);
 
 void updateRotComps();
 

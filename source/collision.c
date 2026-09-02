@@ -35,7 +35,7 @@ int checkCollisionMove(PhysicsComponent* phys, int dir) {
     PositionMini tilePos = getTilePos(phys->header.entId);
     int row = (tilePos.x + xTriBool) + (tilePos.z + zTriBool) - 7;
     int col = (tilePos.x + xTriBool) - (tilePos.z + zTriBool) + 7;
-    if (row <= 0 || row > NUM_ROWS || col < 0 || col >= NUM_COLS)
+    if (row <= 0 || row >= NUM_ROWS || col < 0 || col >= NUM_COLS)
         return 1;
     return gColl[tilePos.y].cell[tilePos.z + zTriBool + colOffset * zTriBool][tilePos.x + xTriBool + colOffset * xTriBool];
 }

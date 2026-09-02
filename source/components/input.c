@@ -18,7 +18,6 @@ void handleInputPlayer(int entId) {
 
 void handleInputLadder(int entId) {
     PhysicsComponent* ladderPhys = getComponent(entId, COMP_PHYSICS);
-    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
 
     if (key_hit(KEY_LEFT | KEY_RIGHT)) {
         if (!isTaskWithFlagsInQueue(TASK_TURN_FLAG, gPlayerId, false))
@@ -31,21 +30,6 @@ void handleInputLadder(int entId) {
 
     ladderPhys->pos.y.HALF.HI += key_tri_fire();
     ladderPhys->pos.y.HALF.HI = clamp(ladderPhys->pos.y.HALF.HI, 0, 64);
-
-    SWord vecs[5] = { {0}, {0}, {0x10000}, {0}, {0} }; // vecs[0, 1, 2] are z, y, x vecs
-    switch (key_is_down(KEY_ANY)) {
-        case KEY_A:
-        case KEY_B:
-            makeRotation(&rot->mtx, 512 * key_tri_fire(), (Vector3D*)&vecs[2]);
-            break;
-        case KEY_L:
-        case KEY_R:
-            makeRotation(&rot->mtx, 512 * key_tri_shoulder(), (Vector3D*)&vecs[0]);
-            break;
-        default:
-            break;
-    }
-
 
     if (key_hit(KEY_START)) { // reset
         reset();

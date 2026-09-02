@@ -6,18 +6,23 @@ int gNumCustomPhysArchetypes = 0;
 int gNumSpritesAllocated = 0;
 int gNumEntsToDelete = 0;
 
-const u16* gCollTileToSpriteMap[128] = {
-    (u16*)spriteHoriTiles,
-    (u16*)spriteHoriTiles,
-    (u16*)spriteCellPurpleTiles,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+const CollTileToSpriteMapEntry gCollTileToSpriteMap[128] = {
+    {0},
+    {(u16*)spriteCellPurpleTiles, 0, PAL_PURPLE},
+    {(u16*)spriteCellPurpleTiles, 0, PAL_PURPLE},
+    {(u16*)spriteCellFenceNETiles, 0, PAL_ORANGE},
+    {(u16*)spriteCellFenceNETiles, ATTR1_HFLIP, PAL_ORANGE},
+    {(u16*)spriteCellPurpleHalfNETiles, 0, PAL_PURPLE},
+    {(u16*)spriteCellPurpleHalfNETiles, ATTR1_HFLIP, PAL_PURPLE_REVERSED},
+    {(u16*)spriteCellPurpleCrossTiles, 0, PAL_PURPLE},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}
 };
 
 s16 gPlayerId = -1;

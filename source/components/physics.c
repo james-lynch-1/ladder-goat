@@ -7,6 +7,9 @@ void updatePhysics() {
         ent->pos.x.WORD += ent->vec.x.WORD; //       |y
         ent->pos.y.WORD += ent->vec.y.WORD; //       .
         ent->pos.z.WORD += ent->vec.z.WORD; //     z/ \x
+        if (ent->vec.x.WORD || ent->vec.y.WORD || ent->vec.z.WORD)
+            updateObj(ent->header.entId);
+
         PositionMini newTilePos = getTilePos(ent->header.entId);
         if ((oldTilePos.x != newTilePos.x) ||
             (oldTilePos.y != newTilePos.y) ||

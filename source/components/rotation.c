@@ -1,46 +1,45 @@
 #include "component.h"
 
-void updateRotComps() {
-    for (int i = 0; i < numComps(COMP_ROTATION); i++) {
-        RotationComponent* rot = &gRotCompsDense[i];
+void applyRotations(int entId) {
+    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
+    if (!rot) return;
 
-        Matrix3D initMatrix = rot->mtx;
+    Matrix3D initMatrix = rot->mtx;
 
-        /* Camera. dimetric 2:1 pixel ratio projection */
-        // Matrix3D rotAboutX = {
-        //     {0x10000},{0}, {0},
-        //     {0}, {lu_cos(0x1555) << 4}, {-lu_sin(0x1555) << 4},
-        //     {0}, {lu_sin(0x1555) << 4}, {lu_cos(0x1555)}
-        // };
-        // Matrix3D rotAboutY = {
-        //     {0xB505}, {0}, {0xB505},
-        //     {0}, {0x10000}, {0},
-        //     {-0xB505}, {0}, {0xB505}
-        // };
-        // above matrices multiplied to produce the matrix below
-        Matrix3D worldMatrix = {
-            {0xB505}, {0}, {0xB505},
-            {0x592F}, {0XDEB0}, {-0X5930},
-            {-0x9D8}, {0x7E20}, {0X9D7}
-        };
-        multMatrix3D(&initMatrix, &worldMatrix, &initMatrix);
+    /* Camera. dimetric 2:1 pixel ratio projection */
+    // Matrix3D rotAboutX = {
+    //     {0x10000},{0}, {0},
+    //     {0}, {lu_cos(0x1555) << 4}, {-lu_sin(0x1555) << 4},
+    //     {0}, {lu_sin(0x1555) << 4}, {lu_cos(0x1555)}
+    // };
+    // Matrix3D rotAboutY = {
+    //     {0xB505}, {0}, {0xB505},
+    //     {0}, {0x10000}, {0},
+    //     {-0xB505}, {0}, {0xB505}
+    // };
+    // above matrices multiplied to produce the matrix below
+    const Matrix3D worldMatrix = {
+        {0xB505}, {0}, {0xB505},
+        {0x592F}, {0XDEB0}, {-0X5930},
+        {-0x9D8}, {0x7E20}, {0X9D7}
+    };
+    multMatrix3D(&initMatrix, (Matrix3D*)&worldMatrix, &initMatrix);
 
-        // Invert matrix for GBA screen-to-texture mapping
-        int invDet = ((s64)0x10000 * (1 << 16)) / (
-            (multSWord(initMatrix.m00, initMatrix.m11).WORD) -
-            (multSWord(initMatrix.m01, initMatrix.m10).WORD)
-            );
-        s64 newMatrix[4] = {
-            ((s64)invDet * initMatrix.m11.WORD) >> 16, ((s64)invDet * -initMatrix.m01.WORD) >> 16,
-            ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16
-        };
+    // Invert matrix for GBA screen-to-texture mapping
+    int invDet = ((s64)0x10000 * (1 << 16)) / (
+        (multSWord(initMatrix.m00, initMatrix.m11).WORD) -
+        (multSWord(initMatrix.m01, initMatrix.m10).WORD)
+        );
+    s64 newMatrix[4] = {
+        ((s64)invDet * initMatrix.m11.WORD) >> 16, ((s64)invDet * -initMatrix.m01.WORD) >> 16,
+        ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16
+    };
 
-        ObjAffStruct* oA = &gObjAffBuffer[rot->objAffIndex];
-        oA->pa = (newMatrix[0] >> 8) & 0xFFFF;
-        oA->pb = (newMatrix[1] >> 8) & 0xFFFF;
-        oA->pc = (newMatrix[2] >> 8) & 0xFFFF;
-        oA->pd = (newMatrix[3] >> 8) & 0xFFFF;
-    }
+    ObjAffStruct* oA = &gObjAffBuffer[rot->objAffIndex];
+    oA->pa = (newMatrix[0] >> 8) & 0xFFFF;
+    oA->pb = (newMatrix[1] >> 8) & 0xFFFF;
+    oA->pc = (newMatrix[2] >> 8) & 0xFFFF;
+    oA->pd = (newMatrix[3] >> 8) & 0xFFFF;
 }
 
 void makeRotation(Matrix3D* initMatrix, int angle, Vector3D* a) {
@@ -133,7 +132,7 @@ void cross(Vector3D* result, const Vector3D* a, const Vector3D* b) {
 }
 
 RotationComponent* addComponentRotation(int entId, u16 flags) {
-    RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} } };
+    RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} }, numComps(COMP_ROTATION) };
     return (RotationComponent*)addComponentCustom(&rot, COMP_ROTATION);
 }
 

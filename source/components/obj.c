@@ -62,14 +62,12 @@ void removeComponentObj(int entId) {
     removeComponent(entId, COMP_OBJ);
 }
 
-// updates the pos based on the pos provided by corresponding comp of type posSourceCompType
-void updateObjs() {
-    for (int i = 0; i < numComps(COMP_OBJ); i++) {
-        ObjComponent* objComp = &gObjCompsDense[i];
-        if (objComp->posSourceCompType >= NUM_COMP_TYPES) continue;
+void updateObj(int entId) {
+        ObjComponent* objComp = getComponent(entId, COMP_OBJ);
+        if (objComp->posSourceCompType >= NUM_COMP_TYPES) return;
         PhysicsComponent* physComp = getComponent(objComp->header.entId, objComp->posSourceCompType);
         Position pos = *(Position*)((uint32_t)physComp + sizeof(ComponentHeader));
-        const u8* sizes = obj_get_size(getObj(objComp)); // sizes[0,1]: width, height
+        const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)objComp + sizeof(ComponentHeader))); // sizes[0,1]: width, height
         bool isDbl = (objComp->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
 
         PositionMini screenPos = getScreenPos(pos);
@@ -83,7 +81,7 @@ void updateObjs() {
             !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
             objComp->attr0 &= ~ATTR0_MODE_MASK;
             objComp->attr0 |= ATTR0_HIDE;
-            continue;
+            return;
         }
         else {
             objComp->attr0 &= ~(ATTR0_MODE_MASK | ATTR0_GFX_MASK);
@@ -93,7 +91,6 @@ void updateObjs() {
         objComp->attr1 &= ~ATTR1_X_MASK;
         objComp->attr0 |= ATTR0_Y(screenY) & ATTR0_Y_MASK;
         objComp->attr1 |= ATTR1_X(screenX) & ATTR1_X_MASK;
-    }
 }
 
 int getObjZDepthPriority(ObjComponent* obj) {

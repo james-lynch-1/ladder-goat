@@ -23,7 +23,7 @@ extern int gNumCustomPhysArchetypes;
 extern int gNumSpritesAllocated;
 extern int gNumEntsToDelete;
 
-extern const u16* gCollTileToSpriteMap[128];
+extern const CollTileToSpriteMapEntry gCollTileToSpriteMap[128];
 
 extern s16 gPlayerId;
 extern s16 gLadderId;
@@ -69,8 +69,6 @@ enum gCompTableIndexes { COMP_DSET_ADDRESSES, COMP_SIZES, COMP_MAX_PER_TYPE, COM
 #define compSize(x)     (int)gCompTable[x][COMP_SIZES]
 #define maxComps(x)     (int)gCompTable[x][COMP_MAX_PER_TYPE]
 #define numComps(x)     gNumCompsPerType[x]
-#define getObj(x)       ((OBJ_ATTR*)&((x)->attr0))
-#define getObjAff(x)    (&gObjAffBuffer[(getObj(((ObjComponent*)getComponent((x)->header.entId, COMP_OBJ)))->attr1 & ATTR1_AFF_ID_MASK) >> ATTR1_AFF_ID_SHIFT]) // x is an ObjAffComponent pointer
 
 extern const uint32_t gCompTable[NUM_COMP_TYPES][4];
 

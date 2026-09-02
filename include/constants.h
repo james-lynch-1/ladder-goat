@@ -12,7 +12,7 @@
 
 #define MAX_OBJ_COMPONENTS              78
 #define MAX_OBJ_AFF_COMPONENTS          32
-#define MAX_INPUT_COMPONENTS            8
+#define MAX_INPUT_COMPONENTS            4
 #define MAX_PHYSICS_COMPONENTS          32
 #define MAX_ROTATION_COMPONENTS         8
 #define MAX_TIMER_COMPONENTS            128
@@ -28,11 +28,6 @@
 #define MAX_PHYS_ARCHETYPES_STATIC      32
 
 #define MAX_ALLOC_SPRITES               128
-
-// enemy-related constants
-#define WEAK_TURN_FREQ      20
-
-#define PLAYER_HEIGHT       32
 
 #define NUM_SPRITE_CELLS    26
 #define ATTR0_GFX_MASK      0x0C00

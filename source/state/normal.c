@@ -11,8 +11,6 @@ void updateNormal() {
     updateInputComps();
     updatePlayerStuff();
     updatePhysics();
-    updateRotComps();
-    updateObjs();
     updateTimers();
 
     // updateUINormal();
