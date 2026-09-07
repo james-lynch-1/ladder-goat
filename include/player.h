@@ -3,7 +3,6 @@
 
 #include "component.h"
 #include "eventListener.h"
-#include "enemy.h"
 #include "collision.h"
 
 /** Spawns player with ladder */
@@ -22,6 +21,8 @@ void taskMoveLadder(int entId, Task* task);
 void moveEnt(int entId, Task* task, int dir);
 
 void taskTurn(int entId, Task* task);
+
+void taskChangeLevel(int entId, Task * task);
 
 void turnEnt(int entId, Task* task, int dir);
 

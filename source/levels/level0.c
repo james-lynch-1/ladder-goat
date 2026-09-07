@@ -1,7 +1,16 @@
 #include "levels.h"
 
+const LevelEntData level0EntArr[] = {
+    {
+        {3, 0, 7}, ENT_WALKSWITCH, 0, doNothing
+    },
+    {
+        {6, 0, 4}, ENT_SLAPSWITCH, 0, slapSwitchCBChangeLevel
+    }
+};
+
 const LevelData level0 = {
-    0, 0, 3, {7, 0 ,7}, {7, 0, 7},
+    0, 0, level0EntArr, sizeof(level0EntArr) / sizeof(LevelEntData), {7, 0, 7}, {7, 0, 7}, 3,
     {
         {{ // y, z, x
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},

@@ -1,8 +1,8 @@
 #include "eventListener.h"
 
-bool addEventListener(enum ComponentType eventType, u32 flags, void (*callback)(int entId), bool removeAfterCallback) {
+bool addEventListener(enum ComponentType eventType, u32 eventFlags, void (*callback)(int entId), bool removeAfterCallback) {
     if (gNumListenersPerType[eventType] == MAX_EVENT_LISTENERS_PER_TYPE) return false;
-    EventListener eL = { flags, callback, removeAfterCallback };
+    EventListener eL = { eventFlags, callback, removeAfterCallback };
     gEventListeners[eventType][gNumListenersPerType[eventType]++] = eL;
     return true;
 }

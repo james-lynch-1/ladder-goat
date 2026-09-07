@@ -5,7 +5,6 @@
 #include "mem.h"
 
 #include "player.h"
-#include "enemy.h"
 #include "eventListener.h"
 
 extern const TaskData gTaskTable[NUM_TASK_TYPES];
@@ -47,6 +46,12 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
  */
 void removeComponentObj(int entId);
 
+void hideObj(ObjComponent * obj);
+
+void unhideObj(ObjComponent* obj);
+
+void changePalette(ObjComponent* obj, enum PaletteEnum pal);
+
 /** Updates the pos based on the pos provided by corresponding comp of type posSourceCompType */
 void updateObj(int entId);
 
@@ -82,9 +87,13 @@ PositionMini getTilePos(int entId);
 
 // Physics
 
+enum Direction getDirFromAngle(int angle);
+
 void updatePhysics();
 
-PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, u16 angle);
+void setPhysPos(int entId, int x, int y, int z);
+
+PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle);
 
 void removeComponentPhysics(int entId);
 
@@ -177,8 +186,22 @@ bool isTaskQueueFull(TaskQueueComponent* tQ);
 
 // Cell
 
-CellComponent* addComponentCell(int entId, int flags, int posX, int posY, int posZ);
+CellComponent* addComponentCell(int entId, int flags, int posX, int posY, int posZ, int clsnVal);
 
 void removeComponentCell(int entId);
+
+// Walkable
+
+void walkableAddWeight(WalkableComponent* walk, int weight);
+
+WalkableComponent* addComponentWalkable(int entId, int flags, void(*callback));
+
+void removeComponentWalkable(int entId);
+
+// Slappable
+
+SlappableComponent* addComponentSlappable(int entId, int flags, void(*callback));
+
+void removeComponentSlappable(int entId);
 
 #endif

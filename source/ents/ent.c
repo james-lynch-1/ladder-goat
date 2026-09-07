@@ -1,7 +1,11 @@
-#include "entity.h"
+#include "ent.h"
 
-int spawnEntity(int entityKind, int x, int y) {
-    return 0;
+int (*gEntSpawners[NUM_ENT_KINDS])(int tileX, int tileY, int tileZ, int entFlags, void(*callback)) = {
+    0, spawnEntWalkSwitch, spawnEntSlapSwitch
+};
+
+int spawnEnt(int entKind, int x, int y, int z, int entFlags, void* data) {
+    return gEntSpawners[entKind](x, y, z, entFlags, data);
 }
 
 int reserveEntSlot() {
@@ -11,6 +15,22 @@ int reserveEntSlot() {
     gEntFlags[i] = 1;
     gNumEnts++;
     return i;
+}
+
+void makeEntInactive(int entId) {
+    gEntFlags[entId] |= ENT_INACTIVE;
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    if (obj) hideObj(obj);
+}
+
+void makeEntActive(int entId) {
+    gEntFlags[entId] = gEntFlags[entId] & ~ENT_INACTIVE;
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    if (obj) unhideObj(obj);
+}
+
+bool isEntInactive(int entId) {
+    return (gEntFlags[entId] & ENT_INACTIVE) != 0;
 }
 
 void markEntToBeDeleted(int entId) {

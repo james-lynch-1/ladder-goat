@@ -8,13 +8,13 @@ int gNumEntsToDelete = 0;
 
 const CollTileToSpriteMapEntry gCollTileToSpriteMap[128] = {
     {0},
-    {(u16*)spriteCellPurpleTiles, 0, PAL_PURPLE},
-    {(u16*)spriteCellPurpleTiles, 0, PAL_PURPLE},
-    {(u16*)spriteCellFenceNETiles, 0, PAL_ORANGE},
-    {(u16*)spriteCellFenceNETiles, ATTR1_HFLIP, PAL_ORANGE},
-    {(u16*)spriteCellPurpleHalfNETiles, 0, PAL_PURPLE},
-    {(u16*)spriteCellPurpleHalfNETiles, ATTR1_HFLIP, PAL_PURPLE_REVERSED},
-    {(u16*)spriteCellPurpleCrossTiles, 0, PAL_PURPLE},
+    {spriteCellPurpleTiles, 0, PAL_PURPLE},
+    {spriteCellPurpleTiles, 0, PAL_PURPLE},
+    {spriteCellFenceNETiles, 0, PAL_ORANGE},
+    {spriteCellFenceNETiles, ATTR1_HFLIP, PAL_ORANGE},
+    {spriteCellPurpleHalfNETiles, 0, PAL_PURPLE},
+    {spriteCellPurpleHalfNETiles, ATTR1_HFLIP, PAL_PURPLE_REVERSED},
+    {spriteCellPurpleCrossTiles, 0, PAL_PURPLE},
     {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
     {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
     {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0},
@@ -31,7 +31,7 @@ s16 gLadderId = -1;
 int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
 bool gIsLadderNWFacing = false;
 const LevelData* gLevelData; // ptr to the level in rom
-CollLayer gColl[8]; // collision map we copy to ram and can edit
+CellComponent* gColl[8][18][18]; // collision map we copy to ram and can edit
 
 ObjAffStruct gObjAffBuffer[32];
 enum ObjSlotEnum gObjAllocArr[1024];
@@ -57,6 +57,8 @@ EWRAM_BSS MemberComponent gMemberCompsDense[MAX_MEMBER_COMPONENTS];
 EWRAM_BSS GroupComponent gGroupCompsDense[MAX_GROUP_COMPONENTS];
 EWRAM_BSS TaskQueueComponent gTaskQueueCompsDense[MAX_TASK_QUEUE_COMPONENTS];
 EWRAM_BSS CellComponent gCellCompsDense[MAX_CELL_COMPONENTS];
+EWRAM_BSS WalkableComponent gWalkableCompsDense[MAX_WALKABLE_COMPONENTS];
+EWRAM_BSS SlappableComponent gSlappableCompsDense[MAX_SLAPPABLE_COMPONENTS];
 
 const uint32_t gCompTable[NUM_COMP_TYPES][4] = {
     {(uint32_t)&gObjCompsDense, sizeof(ObjComponent), MAX_OBJ_COMPONENTS, (uint32_t)removeComponentObj},
@@ -68,7 +70,9 @@ const uint32_t gCompTable[NUM_COMP_TYPES][4] = {
     {(uint32_t)&gMemberCompsDense, sizeof(MemberComponent), MAX_MEMBER_COMPONENTS, (uint32_t)removeComponentMember},
     {(uint32_t)&gGroupCompsDense, sizeof(GroupComponent), MAX_GROUP_COMPONENTS, (uint32_t)removeComponentGroup},
     {(uint32_t)&gTaskQueueCompsDense, sizeof(TaskQueueComponent), MAX_TASK_QUEUE_COMPONENTS, (uint32_t)removeComponentTaskQueue},
-    {(uint32_t)&gCellCompsDense, sizeof(CellComponent), MAX_CELL_COMPONENTS, (uint32_t)removeComponentCell}
+    {(uint32_t)&gCellCompsDense, sizeof(CellComponent), MAX_CELL_COMPONENTS, (uint32_t)removeComponentCell},
+    {(uint32_t)&gWalkableCompsDense, sizeof(WalkableComponent), MAX_WALKABLE_COMPONENTS, (uint32_t)removeComponentWalkable},
+    {(uint32_t)&gSlappableCompsDense, sizeof(SlappableComponent), MAX_SLAPPABLE_COMPONENTS, (uint32_t)removeComponentSlappable}
 };
 int gNumCompsPerType[NUM_COMP_TYPES];
 

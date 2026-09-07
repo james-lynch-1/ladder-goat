@@ -30,4 +30,8 @@ void multMatrix2D(s16* result, s16* m1, s16* m2);
 
 Matrix3D* multMatrix3D(Matrix3D* result, Matrix3D* m1, Matrix3D* m2);
 
+bool isEqualPos(Position pos1, Position pos2);
+
+bool isEqualPosMini(PositionMini pos1, PositionMini pos2);
+
 #endif

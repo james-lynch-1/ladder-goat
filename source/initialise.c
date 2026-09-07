@@ -33,7 +33,13 @@ void initialiseGame() {
 
     initialiseObjPalettes();
 
+    spawnPlayer(0, 0, 0, 0, 0, 0);
     changeLevel(1);
+    // loadBG(
+    //     MAP_SBB,
+    //     checkerboardPal, checkerboardPalLen,
+    //     checkerboardTiles, checkerboardTilesLen,
+    //     checkerboardMap, checkerboardMapLen);
     loadBG(
         MAP_SBB,
         isometricPal, isometricPalLen,

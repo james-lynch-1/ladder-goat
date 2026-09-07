@@ -5,9 +5,7 @@
 #include "constants.h"
 
 // ent flags
-#define ENT_ACTIVE      0b1000000000000000 // active
-#define ENT_PERSIST     0b0100000000000000 // persists when off screen
-#define ENT_AFFINE      0b0010000000000000 // uses affine object
+#define ENT_INACTIVE              0b10000000
 
 // obj allocation defines
 
@@ -27,10 +25,8 @@ enum __attribute__ ((__packed__)) PhysArchetypeEnum {
 
 enum __attribute__ ((__packed__)) EntityKind {
     ENT_PLAYER,
-    ENT_ENEMY_WEAK,
-    ENT_ENEMY,
-    ENT_ITEM,
-    ENT_CUSTOM,
+    ENT_WALKSWITCH,
+    ENT_SLAPSWITCH,
     NUM_ENT_KINDS
 };
 
@@ -45,6 +41,8 @@ enum __attribute__ ((__packed__)) ComponentType {
     COMP_GROUP,
     COMP_TASK_QUEUE,
     COMP_CELL,
+    COMP_WALKABLE,
+    COMP_SLAPPABLE,
     NUM_COMP_TYPES
 };
 
@@ -75,6 +73,7 @@ enum __attribute__ ((__packed__)) TaskType {
     TASK_MOVE_LADDER,
     TASK_MOVE_PLAYER_AND_LADDER,
     TASK_TURN,
+    TASK_CHANGE_LEVEL,
     NUM_TASK_TYPES
 };
 enum __attribute__ ((__packed__)) PaletteEnum {
@@ -143,7 +142,7 @@ typedef struct gGameState { // for game states (FSM)
 typedef struct ALIGN4 Task_ {
     int taskIndex : 12;
     int timeRemaining : 12;
-    int data : 4;
+    int data : 8;
 } Task;
 
 typedef struct ALIGN4 TaskData_ {
@@ -246,15 +245,10 @@ typedef struct EncounterSet_ {
 } EncounterSet;
 
 enum Direction {
-    EAST = 0,
-    NORTHEAST = 0x2000,
-    NORTH = 0x4000,
-    NORTHWEST = 0x6000,
-    WEST = 0x8000,
-    SOUTHWEST = 0xA000,
-    SOUTH = 0xC000,
-    SOUTHEAST = 0xE000,
-    STATIONARY = 0x10000
+    SOUTHEAST,
+    NORTHEAST,
+    NORTHWEST,
+    SOUTHWEST
 };
 
 typedef struct LutStruct_ {
@@ -269,19 +263,33 @@ typedef struct CollLayer_ {
 } CollLayer;
 
 typedef struct CollTileToSpriteMapEntry_ {
-    u16* tiles;
+    const u16* tiles;
     u16 flipFlags;
     u16 palIndex;
 } CollTileToSpriteMapEntry;
 
+typedef struct LevelEntData_ {
+    PositionMini tilePos;
+    enum EntityKind entKind; // walkable or slappable
+    int entFlags;
+    void (*callback)(int entId);
+} LevelEntData;
+
 typedef struct LevelData_ {
     int levelId;
     int bgIndex;
-    int yHeight;
+    const LevelEntData* entArr;
+    int entArrLength;
     PositionMini playerPos;
     PositionMini ladderPos;
+    int yHeight;
     CollLayer clsn[];
 } LevelData;
+
+// typedef struct LevelEntArr_ {
+//     int numEnts;
+//     LevelEntData levelEntData[];
+// } LevelEntArr;
 
 /* #######  #######  ##   ##  #######  #######  ##    #  #######  ##    #  #######  #######
    #        #     #  # # # #  #     #  #     #  # #   #  #        # #   #     #     #
@@ -294,11 +302,18 @@ typedef struct ALIGN4 ComponentHeader_ {
     u16 flags;
 } ComponentHeader;
 
+#define COMP_INACTIVE           1
+
 #define OBJ_REG_FLAG            ATTR0_REG
 #define OBJ_AFF_FLAG            ATTR0_AFF
 #define OBJ_HIDE_FLAG           ATTR0_HIDE
 #define OBJ_AFF_DBL_FLAG        ATTR0_AFF_DBL
-#define OBJ_ZDEPTH_PRIO_MASK    0b11
+#define OBJ_ZDEPTH_PRIO_MASK    0b110
+#define OBJ_ZDEPTH_PRIO_SHIFT   1
+#define OBJ_ZDEPTH_PRIO_0       0b000
+#define OBJ_ZDEPTH_PRIO_1       0b010
+#define OBJ_ZDEPTH_PRIO_2       0b100
+#define OBJ_ZDEPTH_PRIO_3       0b110
 
 typedef struct ALIGN4 ObjComponent_ {
     ComponentHeader header; // 4 bytes
@@ -352,13 +367,12 @@ typedef struct ALIGN4 InputComponent_ {
     void (*inputHandler)(int entId);
 } InputComponent;
 
-#define PHYS_GRAVITY_FLAG        0b10000000
-
 typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
     Position pos; // 8 bytes. should always be after header for updateObjs()
     Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
     Vector3D vec; // 8 bytes
+    int weight; // 4 bytes
     u16 angle; // 2 bytes
 } PhysicsComponent;
 
@@ -410,6 +424,21 @@ typedef struct TaskQueueComponent_ {
 typedef struct CellComponent_ {
     ComponentHeader header; // 4 bytes
     Position pos; // 12 bytes
+    int clsnVal; // 4 bytes
 } CellComponent;
+
+// stepping into this ent's position runs the callback
+typedef struct WalkableComponent_ {
+    ComponentHeader header; // 4 bytes
+    int currentWeight; // 4 bytes
+    int weightToAdd; // 4 bytes
+    void (*callback)(int entId); // 4 bytes
+} WalkableComponent;
+
+// rotating the arrow next to this ent's position ("slapping" it with the arrow) runs the callback
+typedef struct SlappableComponent_ {
+    ComponentHeader header; // 4 bytes
+    void (*callback)(int entId); // 4 bytes
+} SlappableComponent;
 
 #endif

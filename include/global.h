@@ -16,6 +16,7 @@
 #include "graphics.h"
 #include "graphicsUtil.h"
 #include "levels.h"
+#include "ent.h"
 
 extern int gFrameCount;
 extern int gNumEnts;
@@ -31,7 +32,7 @@ extern s16 gLadderId;
 extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
 extern bool gIsLadderNWFacing;
 extern const LevelData* gLevelData;
-extern CollLayer gColl[8];
+extern CellComponent* gColl[8][18][18];
 
 extern const LevelData* gLevels[];
 
@@ -59,6 +60,8 @@ extern MemberComponent gMemberCompsDense[MAX_MEMBER_COMPONENTS];
 extern GroupComponent gGroupCompsDense [MAX_GROUP_COMPONENTS];
 extern TaskQueueComponent gTaskQueueCompsDense[MAX_TASK_QUEUE_COMPONENTS];
 extern CellComponent gCellCompsDense[MAX_CELL_COMPONENTS];
+extern WalkableComponent gWalkableCompsDense[MAX_WALKABLE_COMPONENTS];
+extern SlappableComponent gSlappableCompsDense[MAX_SLAPPABLE_COMPONENTS];
 
 extern int gNumCompsPerType[NUM_COMP_TYPES];
 

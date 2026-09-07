@@ -5,7 +5,8 @@ const TaskData gTaskTable[NUM_TASK_TYPES] = {
     {taskMovePlayer, 16, TASK_MVMT_FLAG},
     {taskMoveLadder, 16, TASK_MVMT_FLAG},
     {taskMovePlayerAndLadder, 16, TASK_MVMT_FLAG},
-    {taskTurn, 16, TASK_TURN_FLAG}
+    {taskTurn, 16, TASK_TURN_FLAG},
+    {taskChangeLevel, 1, 0}
 };
 
 TaskQueueComponent* addComponentTaskQueue(int entId, int flags) {
@@ -24,7 +25,7 @@ void updateTaskQueues() {
         Task* currTask = &tQ->queue[tQ->head];
         gTaskTable[currTask->taskIndex].fn(tQ->header.entId, currTask);
         if (--currTask->timeRemaining <= 0) {
-            if (tQ->head != tQ->tail)
+            if (!isTaskQueueEmpty(tQ))
                 tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
         }
     }

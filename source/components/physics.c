@@ -1,5 +1,9 @@
 #include "component.h"
 
+enum Direction getDirFromAngle(int angle) {
+    return angle / 0x4000;
+}
+
 void updatePhysics() {
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
         PhysicsComponent* ent = &gPhysCompsDense[i];
@@ -11,12 +15,18 @@ void updatePhysics() {
             updateObj(ent->header.entId);
 
         PositionMini newTilePos = getTilePos(ent->header.entId);
-        if ((oldTilePos.x != newTilePos.x) ||
-            (oldTilePos.y != newTilePos.y) ||
-            (oldTilePos.z != newTilePos.z))
+        if (!isEqualPosMini(oldTilePos, newTilePos))
             updateZDepth(getComponent(ent->header.entId, COMP_OBJ));
         memset32(&ent->vec, 0, 3);
     }
+}
+
+void setPhysPos(int entId, int x, int y, int z) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    if (!phys) return;
+    phys->pos.x.WORD = x;
+    phys->pos.y.WORD = y;
+    phys->pos.z.WORD = z;
 }
 
 // utils
@@ -69,12 +79,13 @@ PositionMini getTilePos(int entId) {
     return p;
 }
 
-PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, u16 angle) {
+PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle) {
     PhysicsComponent phys = {
         {entId, flags},
         {(SWord)posX, (SWord)posY, (SWord)posZ},
         {0, 0, 0, 0, 0, 0},
         {(SWord)vecX, (SWord)vecY, (SWord)vecZ},
+        weight,
         angle
     };
     return (PhysicsComponent*)addComponentCustom(&phys, COMP_PHYSICS);

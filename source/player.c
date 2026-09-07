@@ -1,4 +1,5 @@
 #include "player.h"
+#include <assert.h>
 
 int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ) {
     int entId = reserveEntSlot();
@@ -19,10 +20,10 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     PhysicsComponent* ladderPhys = addComponentPhysics(
         ladderId, 0, (16 * ladderX) << 16,
         (16 * ladderY) << 16,
-        (16 * ladderZ) << 16, 0, 0, 0, 0);
+        (16 * ladderZ) << 16, 0, 0, 0, 1, 0);
     ladderPhys->hitbox.fwd = ladderPhys->hitbox.bwd = 1;
     addComponentObj(
-        ladderId, OBJ_AFF_DBL_FLAG | 1,
+        ladderId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_1,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
@@ -40,7 +41,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     addComponentPhysics(
         playerId, 0, (16 * playerX) << 16,
         (16 * playerY) << 16,
-        (16 * playerZ) << 16, 0, 0, 0, 0);
+        (16 * playerZ) << 16, 0, 0, 0, 2, 0);
     addComponentObj(
         playerId, OBJ_AFF_DBL_FLAG,
         ATTR0_AFF_DBL | ATTR0_TALL,
@@ -50,7 +51,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         COMP_PHYSICS
     );
     updateObj(playerId);
-    
+
     addComponentRotation(playerId, 0);
     applyRotations(playerId);
     addComponentInput(playerId, 0, handleInputPlayer);
@@ -111,6 +112,16 @@ void taskTurn(int entId, Task* task) {
     }
     turnEnt(gLadderId, task, dir);
     turnEnt(gPlayerId, task, dir);
+}
+
+void taskChangeLevel(int entId, Task* task) {
+    TaskQueueComponent* tQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
+    while (!isTaskQueueEmpty(tQ)) {
+        tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
+    }
+    static_assert(sizeof(Task) == 4); // don't want to divide by a non-power of 2
+
+    changeLevel(task->data);
 }
 
 void turnEnt(int entId, Task* task, int dir) {

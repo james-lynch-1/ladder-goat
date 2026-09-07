@@ -48,51 +48,65 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
 }
 
 void removeComponentObj(int entId) {
-    ObjComponent* objComp = getComponent(entId, COMP_OBJ);
-    if (!objComp) return;
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    if (!obj) return;
     for (int i = 0; i < 2; i++) {
-        ObjComponent* nextObj = getComponent(objComp->nextId[i], COMP_OBJ);
-        if (nextObj) nextObj->prevId[i] = objComp->prevId[i];
-        if (objComp->prevId[i] == -1)
-            gDeepestObjEntId[i] = objComp->nextId[i];
+        ObjComponent* nextObj = getComponent(obj->nextId[i], COMP_OBJ);
+        if (nextObj) nextObj->prevId[i] = obj->prevId[i];
+        if (obj->prevId[i] == -1)
+            gDeepestObjEntId[i] = obj->nextId[i];
         else
-            ((ObjComponent*)getComponent(objComp->prevId[i], COMP_OBJ))->nextId[i] = objComp->nextId[i];
+            ((ObjComponent*)getComponent(obj->prevId[i], COMP_OBJ))->nextId[i] = obj->nextId[i];
     }
-    stopUsingSprite(objComp->attr2 & ATTR2_ID_MASK);
+    stopUsingSprite(obj->attr2 & ATTR2_ID_MASK);
     removeComponent(entId, COMP_OBJ);
 }
 
+void hideObj(ObjComponent* obj) {
+    obj->attr0 &= ~ATTR0_MODE_MASK;
+    obj->attr0 |= ATTR0_HIDE;
+}
+
+void unhideObj(ObjComponent* obj) {
+    obj->attr0 &= ~(ATTR0_MODE_MASK | ATTR0_GFX_MASK);
+    obj->attr0 |= obj->header.flags & (ATTR0_MODE_MASK | ATTR0_GFX_MASK);
+}
+
+void changePalette(ObjComponent* obj, enum PaletteEnum pal) {
+    if (obj) {
+        obj->attr2 &= ~ATTR2_PALBANK_MASK;
+        obj->attr2 |= ATTR2_PALBANK(pal);
+    }
+}
+
 void updateObj(int entId) {
-        ObjComponent* objComp = getComponent(entId, COMP_OBJ);
-        if (objComp->posSourceCompType >= NUM_COMP_TYPES) return;
-        PhysicsComponent* physComp = getComponent(objComp->header.entId, objComp->posSourceCompType);
-        Position pos = *(Position*)((uint32_t)physComp + sizeof(ComponentHeader));
-        const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)objComp + sizeof(ComponentHeader))); // sizes[0,1]: width, height
-        bool isDbl = (objComp->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    if (obj->posSourceCompType >= NUM_COMP_TYPES) return;
+    PhysicsComponent* physComp = getComponent(obj->header.entId, obj->posSourceCompType);
+    Position pos = *(Position*)((uint32_t)physComp + sizeof(ComponentHeader));
+    const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)obj + sizeof(ComponentHeader))); // sizes[0,1]: width, height
+    bool isDbl = (obj->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
 
-        PositionMini screenPos = getScreenPos(pos);
-        // left of the sprite
-        int screenX = screenPos.x - (sizes[0] >> (1 - isDbl));
+    PositionMini screenPos = getScreenPos(pos);
 
-        // top of the sprite
-        int screenY = screenPos.y - sizes[1] + objComp->yOffset;
+    // left of the sprite
+    int screenX = screenPos.x - (sizes[0] >> (1 - isDbl));
+    // top of the sprite
+    int screenY = screenPos.y - sizes[1] + obj->yOffset;
 
-        if (!in_range(screenX, 0 - sizes[0] - isDbl * sizes[0], SCREEN_WIDTH + isDbl * sizes[0] / 2) ||
-            !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
-            objComp->attr0 &= ~ATTR0_MODE_MASK;
-            objComp->attr0 |= ATTR0_HIDE;
-            return;
-        }
-        else {
-            objComp->attr0 &= ~(ATTR0_MODE_MASK | ATTR0_GFX_MASK);
-            objComp->attr0 |= objComp->header.flags & (ATTR0_MODE_MASK | ATTR0_GFX_MASK);
-        }
-        objComp->attr0 &= ~ATTR0_Y_MASK;
-        objComp->attr1 &= ~ATTR1_X_MASK;
-        objComp->attr0 |= ATTR0_Y(screenY) & ATTR0_Y_MASK;
-        objComp->attr1 |= ATTR1_X(screenX) & ATTR1_X_MASK;
+    if (isEntInactive(entId) ||
+        !in_range(screenX, 0 - sizes[0] - isDbl * sizes[0], SCREEN_WIDTH + isDbl * sizes[0] / 2) ||
+        !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
+        hideObj(obj);
+    }
+    else
+        unhideObj(obj);
+    obj->attr0 &= ~ATTR0_Y_MASK;
+    obj->attr1 &= ~ATTR1_X_MASK;
+    obj->attr0 |= ATTR0_Y(screenY) & ATTR0_Y_MASK;
+    obj->attr1 |= ATTR1_X(screenX) & ATTR1_X_MASK;
 }
 
 int getObjZDepthPriority(ObjComponent* obj) {
-    return obj->header.flags & OBJ_ZDEPTH_PRIO_MASK;
+    return (obj->header.flags & OBJ_ZDEPTH_PRIO_MASK) >> OBJ_ZDEPTH_PRIO_SHIFT;
 }

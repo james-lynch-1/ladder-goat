@@ -55,7 +55,7 @@ int nextPow2(int num) {
 }
 
 SWord setSWord(s16 hi, u16 lo) {
-    SWord sWord = {.HALF.HI = hi, .HALF.LO = lo};
+    SWord sWord = { .HALF.HI = hi, .HALF.LO = lo };
     return sWord;
 }
 
@@ -90,4 +90,12 @@ Matrix3D* multMatrix3D(Matrix3D* result, Matrix3D* m1, Matrix3D* m2) {
     };
     memcpy32(result, &temp, sizeof(Matrix3D) / 4);
     return result;
+}
+
+bool isEqualPos(Position pos1, Position pos2) {
+    return pos1.x.WORD == pos2.x.WORD && pos1.y.WORD == pos2.y.WORD && pos1.z.WORD == pos2.z.WORD;
+}
+
+bool isEqualPosMini(PositionMini pos1, PositionMini pos2) {
+    return pos1.x == pos2.x && pos1.y == pos2.y && pos1.z == pos2.z;
 }

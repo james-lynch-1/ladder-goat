@@ -21,6 +21,8 @@
 #define MAX_GROUP_COMPONENTS            8
 #define MAX_TASK_QUEUE_COMPONENTS       32
 #define MAX_CELL_COMPONENTS             82
+#define MAX_WALKABLE_COMPONENTS         32
+#define MAX_SLAPPABLE_COMPONENTS        32
 
 #define MAX_GROUPS_PER_MEMBER           4
 #define MAX_MEMBERS_PER_GROUP           24

@@ -21,7 +21,7 @@ int getZDepth(ObjComponent* obj, bool isNW) {
     return 4 * (
         gLevelData->yHeight *
         (*(&(tilePos.x) + 2 * isNW) * MAP_WIDTH_X + *(&(tilePos.z) - 2 * isNW)) + tilePos.y
-        );
+        ) + getObjZDepthPriority(obj);
 }
 
 void updateZDepth(ObjComponent* obj) {
@@ -123,8 +123,9 @@ void drawSpriteCells() {
                 if (gLevelData->clsn[y].cell[z][x]) {
                     int clsnVal = gLevelData->clsn[y].cell[z][x];
                     entId = reserveEntSlot();
-                    ComponentHeader* cell = (ComponentHeader*)addComponentCell(entId, 0, x, y, z);
-                    Position pos = *(Position*)(cell + 1);
+                    CellComponent* cell = addComponentCell(entId, 0, x, y, z, clsnVal);
+                    gColl[y][z][x] = cell;
+                    Position pos = *(Position*)((u8*)cell + sizeof(ComponentHeader));
                     PositionMini screenPos = getScreenPos(pos);
                     if (in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) &&
                         in_range(screenPos.y, 0 - 16, SCREEN_HEIGHT + 16)) {

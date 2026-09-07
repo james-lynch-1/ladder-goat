@@ -2,9 +2,8 @@
 #define MAIN
 
 #include "global.h"
-#include "entity.h"
+#include "ent.h"
 #include "encounter.h"
-#include "enemy.h"
 #include "initialise.h" 
 #include "mem.h"
 #include "player.h"
