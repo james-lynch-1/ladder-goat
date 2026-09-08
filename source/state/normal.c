@@ -12,9 +12,6 @@ void updateNormal() {
     updatePlayerStuff();
     updatePhysics();
     updateTimers();
-
-    // updateUINormal();
-
     updateTaskQueues();
     deleteMarkedEnts();
 

@@ -21,12 +21,13 @@ void updatePhysics() {
     }
 }
 
-void setPhysPos(int entId, int x, int y, int z) {
+void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     if (!phys) return;
     phys->pos.x.WORD = x;
     phys->pos.y.WORD = y;
     phys->pos.z.WORD = z;
+    phys->angle = dir * 0x4000;
 }
 
 // utils

@@ -3,12 +3,9 @@
 
 #include "global.h"
 
-#define E_NO_EVENT              0
+bool doesEventListenerExist(enum ComponentType eventType, u32 eventFlags, int listenerEntId, void(*callback)(EventListener* eL, int entId), bool isRemovedAfterCallback);
 
-#define E_WALKABLE_WALK_ON      0b1
-#define E_WALKABLE_WALK_OFF     0b10
-
-bool addEventListener(enum ComponentType eventType, u32 eventFlags, void(*callback)(int entId), bool removeAfterCallback);
+bool addEventListener(enum ComponentType eventType, u32 eventFlags, int listenerEntId, void(*callback)(EventListener* eL, int entId), bool isRemovedAfterCallback);
 
 void removeEventListener(enum ComponentType compType, int listenerIndex);
 

@@ -27,13 +27,17 @@ def main():
             numLayers = numLayers + 1
         else:
             break
-    numLayers = numLayers - 1
-    beginStr = "#include \"levels.h\"\n\nconst LevelData " + levelName + " = {\n    " + levelNum + ", 0, " + str(numLayers) + ", {7, 0, 7}, {7, 0, 7},\n    {\n"
+    numLayers -= 1
+    beginStr = "const LevelData " + levelName + " = {\n    " + levelNum + ", 0, " +\
+         levelName + "EntArr, sizeof(" + levelName + \
+         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6}, {6, 0, 6}, SOUTHEAST, " +\
+         str(numLayers) + ",\n    {\n"
     mapWidth = 19
-    
+
+    with open("source/levels/" + levelName + ".c", "r") as f:
+        stuffToNotOverwrite = f.read().split("const LevelData")[0]
     with open("source/levels/" + levelName + ".c", "w") as f:
-        f.write("")
-    with open("source/levels/" + levelName + ".c", "a") as f:
+        f.write(stuffToNotOverwrite)
         f.write(beginStr)
         y = 1
         while y <= numLayers:

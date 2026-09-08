@@ -55,27 +55,29 @@ int checkCollisionTurn(PhysicsComponent* phys, int turnDir) {
     PositionMini topRightTilePos = { tilePos.x + 1, tilePos.y, tilePos.z - 1 };
     PositionMini btmLeftTilePos = { tilePos.x - 1, tilePos.y, tilePos.z + 1 };
     PositionMini btmRightTilePos = { tilePos.x + 1, tilePos.y, tilePos.z + 1 };
+    PositionMini xPosPos = { tilePos.x + 1, tilePos.y, tilePos.z };
+    PositionMini xNegPos = { tilePos.x - 1, tilePos.y, tilePos.z };
+    PositionMini zPosPos = { tilePos.x, tilePos.y, tilePos.z + 1 };
+    PositionMini zNegPos = { tilePos.x, tilePos.y, tilePos.z - 1 };
     int topLeft = getClsnValAtTilePos(topLeftTilePos);
     int topRight = getClsnValAtTilePos(topRightTilePos);
     int btmLeft = getClsnValAtTilePos(btmLeftTilePos);
     int btmRight = getClsnValAtTilePos(btmRightTilePos);
-    int cardinalColl = getClsnVal(gColl[tilePos.y][tilePos.z - 1][tilePos.x]) |
-        getClsnVal(gColl[tilePos.y][tilePos.z + 1][tilePos.x]) |
-        getClsnVal(gColl[tilePos.y][tilePos.z][tilePos.x - 1]) |
-        getClsnVal(gColl[tilePos.y][tilePos.z][tilePos.x + 1]);
+    int cardinalColl = getClsnValAtTilePos(xPosPos) | getClsnValAtTilePos(xNegPos) |
+        getClsnValAtTilePos(zPosPos) | getClsnValAtTilePos(zNegPos);
 
-    PositionMini slappablePositions[2];
+    PositionMini slappablePositions[6] = { xPosPos, xNegPos, zPosPos, zNegPos };
     if ((isZFacing && turnDir == CCW) || (!isZFacing && turnDir == CW)) {
         int clsn = topLeft | btmRight | cardinalColl;
         if (clsn) return clsn;
-        slappablePositions[0] = topLeftTilePos;
-        slappablePositions[1] = btmRightTilePos;
+        slappablePositions[4] = topLeftTilePos;
+        slappablePositions[5] = btmRightTilePos;
     }
     else if ((isZFacing && turnDir == CW) || (!isZFacing && turnDir == CCW)) {
         int clsn = topRight | btmLeft | cardinalColl;
         if (clsn) return clsn;
-        slappablePositions[0] = topRightTilePos;
-        slappablePositions[1] = btmLeftTilePos;
+        slappablePositions[4] = topRightTilePos;
+        slappablePositions[5] = btmLeftTilePos;
     }
 
     // check slappables
@@ -84,7 +86,11 @@ int checkCollisionTurn(PhysicsComponent* phys, int turnDir) {
         SlappableComponent* slap = &gSlappableCompsDense[i];
         PositionMini slapTilePos = getTilePos(slap->header.entId);
         if (isEqualPosMini(slapTilePos, slappablePositions[0]) ||
-            isEqualPosMini(slapTilePos, slappablePositions[1])) {
+            isEqualPosMini(slapTilePos, slappablePositions[1]) ||
+            isEqualPosMini(slapTilePos, slappablePositions[2]) ||
+            isEqualPosMini(slapTilePos, slappablePositions[3]) ||
+            isEqualPosMini(slapTilePos, slappablePositions[4]) ||
+            isEqualPosMini(slapTilePos, slappablePositions[5])) {
             slap->callback(slap->header.entId);
             numSlapped++;
         }
@@ -143,12 +149,6 @@ void checkWalkables(int weight, PositionMini tilePos, PositionMini nextTilePos, 
 void checkWalkableSteppingOn(WalkableComponent* walk, int weight) {
     walk->weightToAdd = weight;
     walk->callback(walk->header.entId);
-    ObjComponent* switchObj = getComponent(walk->header.entId, COMP_OBJ);
-    if (walk->currentWeight == 0)
-        changePalette(
-            switchObj,
-            ((switchObj->attr2 & ATTR2_PALBANK_MASK) >> ATTR2_PALBANK_SHIFT) == PAL_ORANGE ?
-            PAL_PURPLE : PAL_ORANGE);
     walk->currentWeight += walk->weightToAdd;
     walk->weightToAdd = 0;
 }

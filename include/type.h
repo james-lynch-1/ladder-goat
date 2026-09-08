@@ -27,6 +27,7 @@ enum __attribute__ ((__packed__)) EntityKind {
     ENT_PLAYER,
     ENT_WALKSWITCH,
     ENT_SLAPSWITCH,
+    ENT_GOAL,
     NUM_ENT_KINDS
 };
 
@@ -74,14 +75,27 @@ enum __attribute__ ((__packed__)) TaskType {
     TASK_MOVE_PLAYER_AND_LADDER,
     TASK_TURN,
     TASK_CHANGE_LEVEL,
+    TASK_SPIN_ENDLESSLY,
+    TASK_SPIN,
     NUM_TASK_TYPES
 };
-enum __attribute__ ((__packed__)) PaletteEnum {
+
+enum EventType {
+    E_NO_EVENT,
+    E_WALKABLE_WALK_ON = 0b1,
+    E_WALKABLE_WALK_OFF = 0b10,
+    E_MOVETASK_QUEUED = 0b100,
+    E_SLAPPABLE_STOPPED = 0b1000
+};
+
+enum __attribute__ ((__packed__)) Palette {
     PAL_PLAYER,
     PAL_LADDER,
     PAL_PURPLE,
     PAL_PURPLE_REVERSED,
     PAL_ORANGE,
+    PAL_BLUE,
+    PAL_GOAL,
     NUM_PALS
 };
 
@@ -140,14 +154,14 @@ typedef struct gGameState { // for game states (FSM)
 // Tasks
 
 typedef struct ALIGN4 Task_ {
-    int taskIndex : 12;
-    int timeRemaining : 12;
-    int data : 8;
+    int taskIndex;
+    int timeRemaining;
+    int data;
 } Task;
 
 typedef struct ALIGN4 TaskData_ {
     void (*fn)(int entId, Task* task);
-    s16 length;
+    int length;
     u32 flags;
 } TaskData;
 
@@ -159,9 +173,9 @@ typedef struct Event_ {
 
 typedef struct EventListener_ {
     u32 flags;
-    void (*callback)(int entId);
+    int listenerEntId;
+    void (*callback)(struct EventListener_* eL, int entId);
     bool isRemovedAfterCallback;
-    bool isCalledOncePerFrame;
 } EventListener;
 
 // stuff with only one instance
@@ -272,6 +286,7 @@ typedef struct LevelEntData_ {
     PositionMini tilePos;
     enum EntityKind entKind; // walkable or slappable
     int entFlags;
+    int moveTimerLength;
     void (*callback)(int entId);
 } LevelEntData;
 
@@ -282,14 +297,10 @@ typedef struct LevelData_ {
     int entArrLength;
     PositionMini playerPos;
     PositionMini ladderPos;
+    enum Direction playerDir;
     int yHeight;
     CollLayer clsn[];
 } LevelData;
-
-// typedef struct LevelEntArr_ {
-//     int numEnts;
-//     LevelEntData levelEntData[];
-// } LevelEntArr;
 
 /* #######  #######  ##   ##  #######  #######  ##    #  #######  ##    #  #######  #######
    #        #     #  # # # #  #     #  #     #  # #   #  #        # #   #     #     #
@@ -380,7 +391,7 @@ typedef struct ALIGN4 PhysicsComponent_ {
 typedef struct ALIGN4 RotationComponent_ {
     ComponentHeader header; // 4 bytes
     Matrix3D mtx; // 36 bytes
-    int objAffIndex; // 4 bytes
+    // int objAffIndex; // 4 bytes
 } RotationComponent;
 
 #define TIMER_DELETE_ENT            0b1
@@ -432,12 +443,14 @@ typedef struct WalkableComponent_ {
     ComponentHeader header; // 4 bytes
     int currentWeight; // 4 bytes
     int weightToAdd; // 4 bytes
+    int moveTimerLength; // 4 bytes
     void (*callback)(int entId); // 4 bytes
 } WalkableComponent;
 
 // rotating the arrow next to this ent's position ("slapping" it with the arrow) runs the callback
 typedef struct SlappableComponent_ {
     ComponentHeader header; // 4 bytes
+    int moveTimerLength; // 4 bytes
     void (*callback)(int entId); // 4 bytes
 } SlappableComponent;
 

@@ -5,8 +5,8 @@ void walkableAddWeight(WalkableComponent* walk, int weight) {
     walk->currentWeight += weight;
 }
 
-WalkableComponent* addComponentWalkable(int entId, int flags, void(*callback)) {
-    WalkableComponent walk = { {entId, flags}, 0, 0, callback };
+WalkableComponent* addComponentWalkable(int entId, int flags, int moveTimerLength, void(*callback)) {
+    WalkableComponent walk = { {entId, flags}, 0, 0, moveTimerLength, callback };
     return (WalkableComponent*)addComponentCustom(&walk, COMP_WALKABLE);
 }
 

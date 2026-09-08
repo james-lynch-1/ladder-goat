@@ -1,4 +1,5 @@
 #include "component.h"
+#include <assert.h>
 
 const TaskData gTaskTable[NUM_TASK_TYPES] = {
     {taskMove, 1, TASK_MVMT_FLAG},
@@ -6,7 +7,9 @@ const TaskData gTaskTable[NUM_TASK_TYPES] = {
     {taskMoveLadder, 16, TASK_MVMT_FLAG},
     {taskMovePlayerAndLadder, 16, TASK_MVMT_FLAG},
     {taskTurn, 16, TASK_TURN_FLAG},
-    {taskChangeLevel, 1, 0}
+    {taskChangeLevel, 1, 0},
+    {taskSpinEndlessly, INT32_MAX, 0},
+    {taskSpinEndlessly, INT32_MAX, 0},
 };
 
 TaskQueueComponent* addComponentTaskQueue(int entId, int flags) {
@@ -24,9 +27,12 @@ void updateTaskQueues() {
         if (isTaskQueueEmpty(tQ)) continue;
         Task* currTask = &tQ->queue[tQ->head];
         gTaskTable[currTask->taskIndex].fn(tQ->header.entId, currTask);
-        if (--currTask->timeRemaining <= 0) {
+        if (currTask->timeRemaining != INT32_MAX)
+            currTask->timeRemaining--;
+        if (currTask->timeRemaining <= 0) {
             if (!isTaskQueueEmpty(tQ))
                 tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
+            static_assert(sizeof(tQ->queue) == 192);
         }
     }
 }

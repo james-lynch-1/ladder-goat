@@ -1,11 +1,11 @@
 #include "ent.h"
 
-int (*gEntSpawners[NUM_ENT_KINDS])(int tileX, int tileY, int tileZ, int entFlags, void(*callback)) = {
-    0, spawnEntWalkSwitch, spawnEntSlapSwitch
+int (*gEntSpawners[NUM_ENT_KINDS])(int tileX, int tileY, int tileZ, int entFlags, int moveTimerLength, void(*callback)) = {
+    0, spawnEntWalkSwitch, spawnEntSlapSwitch, spawnEntGoal
 };
 
-int spawnEnt(int entKind, int x, int y, int z, int entFlags, void* data) {
-    return gEntSpawners[entKind](x, y, z, entFlags, data);
+int spawnEnt(int entKind, int x, int y, int z, int entFlags, int moveTimerLength, void* data) {
+    return gEntSpawners[entKind](x, y, z, entFlags, moveTimerLength, data);
 }
 
 int reserveEntSlot() {

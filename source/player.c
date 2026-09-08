@@ -23,7 +23,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         (16 * ladderZ) << 16, 0, 0, 0, 1, 0);
     ladderPhys->hitbox.fwd = ladderPhys->hitbox.bwd = 1;
     addComponentObj(
-        ladderId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_1,
+        ladderId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_2,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
@@ -43,7 +43,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         (16 * playerY) << 16,
         (16 * playerZ) << 16, 0, 0, 0, 2, 0);
     addComponentObj(
-        playerId, OBJ_AFF_DBL_FLAG,
+        playerId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_1,
         ATTR0_AFF_DBL | ATTR0_TALL,
         ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_PLAYER),
@@ -62,11 +62,10 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
 }
 
 void taskMove(int entId, Task* task) {
-    int dir = task->data == 1 ? 1 : -1;
     PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    bool canMovePlayer = checkCollisionMove(playerPhys, dir) == 0;
-    bool canMoveLadder = checkCollisionMove(ladderPhys, dir) == 0;
+    bool canMovePlayer = checkCollisionMove(playerPhys, task->data) == 0;
+    bool canMoveLadder = checkCollisionMove(ladderPhys, task->data) == 0;
     const int taskIndexes[4] = { 0, TASK_MOVE_PLAYER, 0, TASK_MOVE_PLAYER_AND_LADDER };
     int taskIndexesIndex = (canMoveLadder << 1) | canMovePlayer;
     if (taskIndexesIndex == 0) return;
@@ -81,19 +80,16 @@ void taskMove(int entId, Task* task) {
 }
 
 void taskMovePlayerAndLadder(int entId, Task* task) {
-    int dir = task->data == 1 ? 1 : -1;
-    moveEnt(gLadderId, task, dir);
-    moveEnt(gPlayerId, task, dir);
+    moveEnt(gLadderId, task, task->data);
+    moveEnt(gPlayerId, task, task->data);
 }
 
 void taskMovePlayer(int entId, Task* task) {
-    int dir = task->data == 1 ? 1 : -1;
-    moveEnt(gPlayerId, task, dir);
+    moveEnt(gPlayerId, task, task->data);
 }
 
 void taskMoveLadder(int entId, Task* task) {
-    int dir = task->data == 1 ? 1 : -1;
-    moveEnt(gLadderId, task, dir);
+    moveEnt(gLadderId, task, task->data);
 }
 
 void moveEnt(int entId, Task* task, int dir) {
@@ -103,15 +99,14 @@ void moveEnt(int entId, Task* task, int dir) {
 }
 
 void taskTurn(int entId, Task* task) {
-    int dir = task->data == 1 ? 1 : -1;
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
     if (task->timeRemaining == gTaskTable[task->taskIndex].length &&
-        checkCollisionTurn(ladderPhys, dir)) {
+        checkCollisionTurn(ladderPhys, task->data)) {
         task->timeRemaining = 1;
         return;
     }
-    turnEnt(gLadderId, task, dir);
-    turnEnt(gPlayerId, task, dir);
+    turnEnt(gLadderId, task, task->data * 0x4000 / 16);
+    turnEnt(gPlayerId, task, task->data * 0x4000 / 16);
 }
 
 void taskChangeLevel(int entId, Task* task) {
@@ -119,22 +114,24 @@ void taskChangeLevel(int entId, Task* task) {
     while (!isTaskQueueEmpty(tQ)) {
         tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
     }
-    static_assert(sizeof(Task) == 4); // don't want to divide by a non-power of 2
+    static_assert(sizeof(Task) == 12); // don't want to divide by a non-power of 2
 
     changeLevel(task->data);
 }
 
-void turnEnt(int entId, Task* task, int dir) {
+void turnEnt(int entId, Task* task, int amount) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
-    phys->angle += dir * 0x4000 / 16;
+    phys->angle += amount;
     int visAngle = phys->angle;
     if ((visAngle & (UINT16_MAX / 2)) == 0x6000) // avoid having the affine matrix be 0
-        visAngle += 128 * dir;
-    Matrix3D mtx = { {lu_cos(visAngle) << 4}, {0}, {-lu_sin(visAngle) << 4},
-                     {0},{0x10000}, {0},
-                     {lu_sin(visAngle) << 4}, {0}, {lu_cos(visAngle) << 4} };
-    rot->mtx = mtx;
+        visAngle += 128;
+    if (rot) {
+        Matrix3D mtx = { {lu_cos(visAngle) << 4}, {0}, {-lu_sin(visAngle) << 4},
+                         {0},{0x10000}, {0},
+                         {lu_sin(visAngle) << 4}, {0}, {lu_cos(visAngle) << 4} };
+        rot->mtx = mtx;
+    }
     applyRotations(entId);
 }
 

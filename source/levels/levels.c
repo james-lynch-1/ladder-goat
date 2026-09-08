@@ -21,19 +21,25 @@ void changeLevel(int levelId) {
         j++;
     }
     deleteMarkedEnts();
+    gNumListenersPerType[COMP_SLAPPABLE] = 0;
 
-    setPhysPos(gPlayerId,
+    setPhysPosAndDir(gPlayerId,
         (gLevelData->playerPos.x * 16) << 16,
         (gLevelData->playerPos.y * 16) << 16,
-        (gLevelData->playerPos.z * 16) << 16);
-
-    setPhysPos(gLadderId,
+        (gLevelData->playerPos.z * 16) << 16,
+        gLevelData->playerDir);
+    setPhysPosAndDir(gLadderId,
         (gLevelData->ladderPos.x * 16) << 16,
         (gLevelData->ladderPos.y * 16) << 16,
-        (gLevelData->ladderPos.z * 16) << 16);
+        (gLevelData->ladderPos.z * 16) << 16,
+        gLevelData->playerDir);
+    turnEnt(gPlayerId, 0, 0);
+    turnEnt(gLadderId, 0, 0);
     updateObj(gPlayerId);
     updateObj(gLadderId);
+
     drawSpriteCells();
+
     for (int i = 0; i < gLevelData->entArrLength; i++)
         spawnEnt(
             gLevelData->entArr[i].entKind,
@@ -41,6 +47,7 @@ void changeLevel(int levelId) {
             gLevelData->entArr[i].tilePos.y,
             gLevelData->entArr[i].tilePos.z,
             gLevelData->entArr[i].entFlags,
+            gLevelData->entArr[i].moveTimerLength,
             gLevelData->entArr[i].callback
         );
 

@@ -9,6 +9,8 @@ void initialiseObjPalettes() {
     for (int i = 2; i < 16; i++)
         pal_obj_bank[PAL_PURPLE_REVERSED][i] = spriteCellPurplePal[15 - i + 2];
     memcpy32(&pal_obj_bank[PAL_ORANGE], spriteCellFenceNEPal, spriteCellFenceNEPalLen / sizeof(u32));
+    memcpy32(&pal_obj_bank[PAL_BLUE], slapSwitchPal, slapSwitchPalLen / sizeof(u32));
+    memcpy32(&pal_obj_bank[PAL_GOAL], goalPal, goalPalLen / sizeof(u32));
 }
 
 void initialiseGame() {
@@ -34,7 +36,7 @@ void initialiseGame() {
     initialiseObjPalettes();
 
     spawnPlayer(0, 0, 0, 0, 0, 0);
-    changeLevel(1);
+    changeLevel(0);
     // loadBG(
     //     MAP_SBB,
     //     checkerboardPal, checkerboardPalLen,

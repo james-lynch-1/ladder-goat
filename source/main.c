@@ -15,11 +15,11 @@ void copyObjAttrsToOAM() { // excluding affine stuff
 void copyObjAffinesToOAM() {
     for (int i = 0; i < numComps(COMP_ROTATION); i++) {
         RotationComponent* rot = &gRotCompsDense[i];
-        OBJ_AFFINE* oamAffPtr = &obj_aff_mem[rot->objAffIndex];
-        oamAffPtr->pa = gObjAffBuffer[rot->objAffIndex].pa;
-        oamAffPtr->pb = gObjAffBuffer[rot->objAffIndex].pb;
-        oamAffPtr->pc = gObjAffBuffer[rot->objAffIndex].pc;
-        oamAffPtr->pd = gObjAffBuffer[rot->objAffIndex].pd;
+        OBJ_AFFINE* oamAffPtr = &obj_aff_mem[gCompSetSparse[COMP_ROTATION][rot->header.entId]];
+        oamAffPtr->pa = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pa;
+        oamAffPtr->pb = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pb;
+        oamAffPtr->pc = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pc;
+        oamAffPtr->pd = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pd;
     }
 }
 

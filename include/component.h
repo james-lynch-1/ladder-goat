@@ -50,7 +50,7 @@ void hideObj(ObjComponent * obj);
 
 void unhideObj(ObjComponent* obj);
 
-void changePalette(ObjComponent* obj, enum PaletteEnum pal);
+void changePalette(ObjComponent* obj, enum Palette pal);
 
 /** Updates the pos based on the pos provided by corresponding comp of type posSourceCompType */
 void updateObj(int entId);
@@ -91,7 +91,7 @@ enum Direction getDirFromAngle(int angle);
 
 void updatePhysics();
 
-void setPhysPos(int entId, int x, int y, int z);
+void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir);
 
 PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle);
 
@@ -100,8 +100,6 @@ void removeComponentPhysics(int entId);
 // Rotation
 
 void applyRotations(int entId);
-
-void updateRotComps();
 
 void makeRotation(Matrix3D* result, int angle, Vector3D* v);
 
@@ -194,13 +192,13 @@ void removeComponentCell(int entId);
 
 void walkableAddWeight(WalkableComponent* walk, int weight);
 
-WalkableComponent* addComponentWalkable(int entId, int flags, void(*callback));
+WalkableComponent* addComponentWalkable(int entId, int flags, int moveTimerLength, void(*callback));
 
 void removeComponentWalkable(int entId);
 
 // Slappable
 
-SlappableComponent* addComponentSlappable(int entId, int flags, void(*callback));
+SlappableComponent* addComponentSlappable(int entId, int flags, int moveTimerLength, void(*callback));
 
 void removeComponentSlappable(int entId);
 

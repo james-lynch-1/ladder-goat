@@ -35,7 +35,7 @@ void applyRotations(int entId) {
         ((s64)invDet * -initMatrix.m10.WORD) >> 16, ((s64)invDet * initMatrix.m00.WORD) >> 16
     };
 
-    ObjAffStruct* oA = &gObjAffBuffer[rot->objAffIndex];
+    ObjAffStruct* oA = &gObjAffBuffer[gCompSetSparse[COMP_ROTATION][entId]];
     oA->pa = (newMatrix[0] >> 8) & 0xFFFF;
     oA->pb = (newMatrix[1] >> 8) & 0xFFFF;
     oA->pc = (newMatrix[2] >> 8) & 0xFFFF;
@@ -132,10 +132,34 @@ void cross(Vector3D* result, const Vector3D* a, const Vector3D* b) {
 }
 
 RotationComponent* addComponentRotation(int entId, u16 flags) {
-    RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} }, numComps(COMP_ROTATION) };
+    RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} } };
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    if (obj) {
+        obj->header.flags |= ATTR0_AFF;
+        obj->attr0 |= ATTR0_AFF;
+        obj->attr1 &= ~ATTR1_AFF_ID_MASK;
+        obj->attr1 |= ATTR1_AFF_ID(numComps(COMP_ROTATION));
+    }
     return (RotationComponent*)addComponentCustom(&rot, COMP_ROTATION);
 }
 
 void removeComponentRotation(int entId) {
+    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    int objAffId = 0;
+    if (!rot) return;
+    if (obj) {
+        objAffId = obj->attr1 & ATTR1_AFF_ID_MASK;
+        obj->attr1 &= ~ATTR1_AFF_ID_MASK;
+        obj->attr0 &= ~ATTR0_AFF_DBL;
+        obj->header.flags &= ~ATTR0_AFF_DBL;
+        updateObj(entId);
+    }
+    RotationComponent lastRot = gRotCompsDense[numComps(COMP_ROTATION) - 1];
+    ObjComponent* lastRotObj = getComponent(lastRot.header.entId, COMP_OBJ);
+    if (lastRotObj) {
+        lastRotObj->attr1 &= ~ATTR1_AFF_ID_MASK;
+        lastRotObj->attr1 |= ATTR1_AFF_ID(objAffId);
+    }
     removeComponent(entId, COMP_ROTATION);
 }

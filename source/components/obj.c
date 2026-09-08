@@ -72,7 +72,7 @@ void unhideObj(ObjComponent* obj) {
     obj->attr0 |= obj->header.flags & (ATTR0_MODE_MASK | ATTR0_GFX_MASK);
 }
 
-void changePalette(ObjComponent* obj, enum PaletteEnum pal) {
+void changePalette(ObjComponent* obj, enum Palette pal) {
     if (obj) {
         obj->attr2 &= ~ATTR2_PALBANK_MASK;
         obj->attr2 |= ATTR2_PALBANK(pal);

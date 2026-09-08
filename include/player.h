@@ -24,7 +24,7 @@ void taskTurn(int entId, Task* task);
 
 void taskChangeLevel(int entId, Task * task);
 
-void turnEnt(int entId, Task* task, int dir);
+void turnEnt(int entId, Task* task, int amount);
 
 void updatePlayerStuff();
 

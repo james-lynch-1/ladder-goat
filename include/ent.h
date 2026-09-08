@@ -3,17 +3,27 @@
 
 #include "global.h"
 
-int spawnEnt(int entityKind, int x, int y, int z, int entFlags, void* data);
+int spawnEnt(int entityKind, int x, int y, int z, int entFlags, int moveTimerLength, void* data);
 
-int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, void(*callback));
+int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int moveTimerLength, void(*callback));
 
 void walkSwitchCBEnableGoal(int entId);
 
 void walkSwitchCBChangeLevel(int entId);
 
-int spawnEntSlapSwitch(int tileX, int tileY, int tileZ, int entFlags, void(*callback));
+int spawnEntSlapSwitch(int tileX, int tileY, int tileZ, int entFlags, int moveTimerLength, void(*callback));
 
-void slapSwitchCBChangeLevel(int entId);
+void slapSwitchStartSpinning(int entId);
+
+void slapSwitchCBEnableGoal(int entId);
+
+void eLMakeGoalInactive(EventListener* eL, int entId);
+
+void eLDecrementSpinTaskSpeed(EventListener* eL, int entId);
+
+void taskSpinEndlessly(int entId, Task* task);
+
+int spawnEntGoal(int tileX, int tileY, int tileZ, int entFlags, int moveTimerLength, void(*callback));
 
 /** Returns -1 if no slot available */
 int reserveEntSlot();
