@@ -26,3 +26,6 @@ Game Programming Patterns by Robert Nystrom, specifically the Component chapter:
 
 Usenti GBA graphics editor: https://www.coranac.com/projects/usenti
 
+Tiled - level editor: https://www.mapeditor.org
+
+LibreSprite: https://libresprite.github.io
