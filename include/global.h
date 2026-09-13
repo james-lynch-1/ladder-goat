@@ -33,6 +33,7 @@ extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
 extern bool gIsLadderNWFacing;
 extern const LevelData* gLevelData;
 extern CellComponent* gColl[8][18][18];
+extern int gNextLevel;
 
 extern const LevelData* gLevels[];
 

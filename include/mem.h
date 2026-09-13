@@ -18,7 +18,7 @@ int allocateObj(const u16* tiles, int tilesLen);
 
 void deallocateObj(int index);
 
-void loadBG(int sbbIndex, const u16* pal, int palLen, const u16* tiles, int tilesLen, const u16* map, int mapLen);
+void loadBG(int sbbIndex, int bg, int palIdx, const u16* pal, int palLen, const u16* tiles, int tilesLen, const u16* map, int mapLen);
 
 void lightenBgPalette(int amount);
 

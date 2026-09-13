@@ -34,8 +34,11 @@ def main():
          str(numLayers) + ",\n    {\n"
     mapWidth = 19
 
-    with open("source/levels/" + levelName + ".c", "r") as f:
-        stuffToNotOverwrite = f.read().split("const LevelData")[0]
+    stuffToNotOverwrite = "#include \"levels.h\"\n\n" +\
+    "const LevelEntData level" + levelNum + "EntArr[] = {\n};\n\n"
+    if (os.path.isfile("source/levels/" + levelName + ".c")):
+        with open("source/levels/" + levelName + ".c", "r") as f:
+            stuffToNotOverwrite = f.read().split("const LevelData")[0]
     with open("source/levels/" + levelName + ".c", "w") as f:
         f.write(stuffToNotOverwrite)
         f.write(beginStr)

@@ -1,5 +1,10 @@
 #include "levels.h"
 
+int getNextLevelIndex() {
+    int numLevels = sizeof(gLevels) / sizeof(LevelData*);
+    return gLevelData->levelId == numLevels - 1 ? 0 : gLevelData->levelId + 1;
+}
+
 void changeLevel(int levelId) {
     gLevelData = gLevels[levelId];
     memset32(&gColl, 0, sizeof(gColl) / 4);
@@ -35,8 +40,8 @@ void changeLevel(int levelId) {
         gLevelData->playerDir);
     turnEnt(gPlayerId, 0, 0);
     turnEnt(gLadderId, 0, 0);
-    updateObj(gPlayerId);
-    updateObj(gLadderId);
+
+    updateZDepth(getComponent(gPlayerId, COMP_OBJ));
 
     drawSpriteCells();
 
@@ -47,14 +52,20 @@ void changeLevel(int levelId) {
             gLevelData->entArr[i].tilePos.y,
             gLevelData->entArr[i].tilePos.z,
             gLevelData->entArr[i].entFlags,
-            gLevelData->entArr[i].moveTimerLength,
+            gLevelData->entArr[i].data[0],
+            gLevelData->entArr[i].data[1],
+            gLevelData->entArr[i].data[2],
+            gLevelData->entArr[i].data[3],
             gLevelData->entArr[i].callback
         );
 
+    updateObj(gPlayerId);
+    updateObj(gLadderId);
     // TODO: change bg layer, when we have those
 }
 
-const LevelData* gLevels[2] = {
+const LevelData* gLevels[3] = {
     &level0,
-    &level1
+    &level1,
+    &level2
 };

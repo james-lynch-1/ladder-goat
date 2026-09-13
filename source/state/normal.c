@@ -3,20 +3,39 @@
 // normal state functions
 
 void enterNormal() {
-    REG_DISPCNT |= DCNT_BG0 | DCNT_BG1 | DCNT_OBJ;
-    REG_BG1CNT = BG_PRIO(PRIO_UI) | BG_CBB(CBB_UI) | BG_SBB(UI_SBB) | BG_4BPP | BG_REG_32x32; // ui
+    loadBG(
+        MAP_SBB,
+        BG_MAP,
+        MAP_PAL,
+        checkerboardPal, checkerboardPalLen,
+        checkerboardTiles, checkerboardTilesLen,
+        checkerboardMap, checkerboardMapLen);
+    // loadBG(
+    //     MAP_SBB,
+    //     BG_MAP,
+    //     MAP_PAL,
+    //     isometricPal, isometricPalLen,
+    //     isometricTiles, isometricTilesLen,
+    //     isometricMap, isometricMapLen
+    // );
+    REG_DISPCNT &= ~(DCNT_BG1);
+    REG_DISPCNT |= DCNT_BG0 | DCNT_OBJ;
+    tte_set_pos(SCREEN_WIDTH - TILE_WIDTH * 12 - 8, SCREEN_HEIGHT - 16);
+    tte_write("START: RESET");
 }
 
 void updateNormal() {
     updateInputComps();
     updatePlayerStuff();
-    updatePhysics();
     updateTimers();
+    // updateUINormal();
     updateTaskQueues();
+    updatePhysics();
     deleteMarkedEnts();
 
     VBlankIntrWait();
 }
 
 void exitNormal(enum GameState state) {
+    tte_erase_line();
 }

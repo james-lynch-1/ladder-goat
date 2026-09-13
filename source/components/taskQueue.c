@@ -3,13 +3,14 @@
 
 const TaskData gTaskTable[NUM_TASK_TYPES] = {
     {taskMove, 1, TASK_MVMT_FLAG},
+    {taskMoveNESW, 16, TASK_MVMT_FLAG},
     {taskMovePlayer, 16, TASK_MVMT_FLAG},
     {taskMoveLadder, 16, TASK_MVMT_FLAG},
     {taskMovePlayerAndLadder, 16, TASK_MVMT_FLAG},
     {taskTurn, 16, TASK_TURN_FLAG},
     {taskChangeLevel, 1, 0},
     {taskSpinEndlessly, INT32_MAX, 0},
-    {taskSpinEndlessly, INT32_MAX, 0},
+    {taskSpinFinite, 16, 0},
 };
 
 TaskQueueComponent* addComponentTaskQueue(int entId, int flags) {

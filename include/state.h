@@ -13,13 +13,13 @@ void updateNormal();
 
 void exitNormal(enum GameState state);
 
-// pause state functions
+// transition state functions
 
-void enterPause();
+void enterTransition();
 
-void updatePause();
+void updateTransition();
 
-void exitPause(enum GameState state);
+void exitTransition(enum GameState state);
 
 // title state functions
 
@@ -29,12 +29,20 @@ void updateTitle();
 
 void exitTitle(enum GameState state);
 
-// game over state functions
+// pause state functions
 
-void enterGameOver();
+void enterPause();
 
-void updateGameOver();
+void updatePause();
 
-void exitGameOver(enum GameState state);
+void exitPause(enum GameState state);
+
+// win state functions
+
+void enterWin();
+
+void updateWin();
+
+void exitWin(enum GameState state);
 
 #endif

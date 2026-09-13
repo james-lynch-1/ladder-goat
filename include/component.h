@@ -63,10 +63,6 @@ void addComponentInput(int entId, int flags, void (*inputHandler)(int entId));
 
 void handleInputPlayer(int entId);
 
-void handleInputLadder(int entId);
-
-void handleInputGameover(int entId);
-
 void updateInputComps();
 
 void removeComponentInput(int entId);
@@ -92,6 +88,8 @@ enum Direction getDirFromAngle(int angle);
 void updatePhysics();
 
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir);
+
+void taskMoveNESW(int entId, Task * task);
 
 PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle);
 
@@ -192,13 +190,13 @@ void removeComponentCell(int entId);
 
 void walkableAddWeight(WalkableComponent* walk, int weight);
 
-WalkableComponent* addComponentWalkable(int entId, int flags, int moveTimerLength, void(*callback));
+WalkableComponent* addComponentWalkable(int entId, int flags, int data0, int data1, int data2, int data3, void(*callback));
 
 void removeComponentWalkable(int entId);
 
 // Slappable
 
-SlappableComponent* addComponentSlappable(int entId, int flags, int moveTimerLength, void(*callback));
+SlappableComponent* addComponentSlappable(int entId, int flags, int data0, int data1, int data2, int data3, void(*callback));
 
 void removeComponentSlappable(int entId);
 

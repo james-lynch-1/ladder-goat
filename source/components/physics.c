@@ -30,6 +30,22 @@ void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {
     phys->angle = dir * 0x4000;
 }
 
+void taskMoveNESW(int entId, Task* task) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    if (!phys) return;
+    enum Direction dir = task->data;
+    int angle = dir * 0x4000;
+    phys->angle = angle;
+    if (task->timeRemaining == 16) {
+        bool canMove = checkCollisionMove(phys, 1) == 0;
+        if (!canMove) {
+            task->timeRemaining = 1;
+            return;
+        }
+    }
+    moveEnt(entId, task, 1);
+}
+
 // utils
 
 Vector3D decaySpeed(Vector3D vec, u32 rate) {
@@ -46,7 +62,7 @@ u32 fastMagnitude(int x, int y) {
 }
 
 Vector3D addVec(Vector3D vec1, Vector3D vec2) {
-    Vector3D vec = { {vec1.x.WORD + vec2.x.WORD}, {vec1.y.WORD + vec2.y.WORD} };
+    Vector3D vec = { { vec1.x.WORD + vec2.x.WORD },{ vec1.y.WORD + vec2.y.WORD } };
     return vec;
 }
 
@@ -61,12 +77,12 @@ Vector3D divVec(Vector3D vec, u32 divisor) {
 
 Vector3D normaliseVec(Vector3D vec) {
     u32 angle = ArcTan2(vec.x.WORD >> 12, -vec.y.WORD >> 12);
-    Vector3D normVec = { {(lu_cos(angle)) << 4}, {(-lu_sin(angle)) << 4} };
+    Vector3D normVec = { { (lu_cos(angle)) << 4 },{ (-lu_sin(angle)) << 4 } };
     return normVec;
 }
 
 Vector3D scalarMultVec(Vector3D vec, int scalar) {
-    Vector3D newVec = { {vec.x.WORD * scalar}, {vec.y.WORD * scalar} };
+    Vector3D newVec = { { vec.x.WORD * scalar },{ vec.y.WORD * scalar } };
     return newVec;
 }
 
@@ -82,10 +98,10 @@ PositionMini getTilePos(int entId) {
 
 PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle) {
     PhysicsComponent phys = {
-        {entId, flags},
-        {(SWord)posX, (SWord)posY, (SWord)posZ},
-        {0, 0, 0, 0, 0, 0},
-        {(SWord)vecX, (SWord)vecY, (SWord)vecZ},
+        { entId, flags },
+        { (SWord)posX, (SWord)posY, (SWord)posZ },
+        { 0, 0, 0, 0, 0, 0 },
+        { (SWord)vecX, (SWord)vecY, (SWord)vecZ },
         weight,
         angle
     };

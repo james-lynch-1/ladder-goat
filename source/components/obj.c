@@ -11,6 +11,7 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
         {-1, -1},
         {INT16_MAX, INT16_MAX}
     };
+    newObj.attr2 |= ATTR2_PRIO(3);
     for (int i = 0; i < 2; i++) {
         int zDepth = getZDepth(&newObj, i);
         ObjComponent* objIter = getComponent(gDeepestObjEntId[i], COMP_OBJ);

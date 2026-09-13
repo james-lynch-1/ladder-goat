@@ -13,7 +13,7 @@ void initialiseUi() {
         BG_TEXT,
         BG_CBB(CBB_TEXT) | BG_SBB(TEXT_SBB) | BG_PRIO(PRIO_TEXT),
         0,
-        CLR_WHITE,
+        CLR_ORANGE,
         14,
         NULL,
         se_drawg_w8h8

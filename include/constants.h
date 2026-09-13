@@ -34,6 +34,9 @@
 #define NUM_SPRITE_CELLS    26
 #define ATTR0_GFX_MASK      0x0C00
 
+#define PLAYER_WEIGHT       2
+#define ARROW_WEIGHT        1
+
 #define MAP_WIDTH_X         19
 #define MAP_WIDTH_Z         19
 #define NUM_ROWS            21

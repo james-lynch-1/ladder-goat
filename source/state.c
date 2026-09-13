@@ -10,6 +10,11 @@ void setGameState(enum GameState state) {
             gGameState.updateFunction = updateNormal;
             gGameState.exitFunction = exitNormal;
             break;
+        case TRANSITION:
+            gGameState.enterFunction = enterTransition;
+            gGameState.updateFunction = updateTransition;
+            gGameState.exitFunction = exitTransition;
+            break;
         case PAUSE:
             gGameState.enterFunction = enterPause;
             gGameState.updateFunction = updatePause;
@@ -20,10 +25,10 @@ void setGameState(enum GameState state) {
             gGameState.updateFunction = updateTitle;
             gGameState.exitFunction = exitTitle;
             break;
-        case GAMEOVER:
-            gGameState.enterFunction = enterGameOver;
-            gGameState.updateFunction = updateGameOver;
-            gGameState.exitFunction = exitGameOver;
+        case WIN:
+            gGameState.enterFunction = enterWin;
+            gGameState.updateFunction = updateWin;
+            gGameState.exitFunction = exitWin;
             break;
         default:
             break;

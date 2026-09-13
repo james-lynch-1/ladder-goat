@@ -28,6 +28,9 @@ enum __attribute__ ((__packed__)) EntityKind {
     ENT_WALKSWITCH,
     ENT_SLAPSWITCH,
     ENT_GOAL,
+    ENT_MOVER,
+    ENT_X_AXIS_DECAL,
+    ENT_Z_AXIS_DECAL,
     NUM_ENT_KINDS
 };
 
@@ -70,6 +73,7 @@ enum __attribute__ ((__packed__)) Type {
 
 enum __attribute__ ((__packed__)) TaskType {
     TASK_MOVE,
+    TASK_MOVE_NESW,
     TASK_MOVE_PLAYER,
     TASK_MOVE_LADDER,
     TASK_MOVE_PLAYER_AND_LADDER,
@@ -137,9 +141,10 @@ typedef union SplitHWord {
 
 enum __attribute__ ((__packed__)) GameState {
     NORMAL,
+    TRANSITION,
     TITLE,
     PAUSE,
-    GAMEOVER,
+    WIN,
     NUM_GAME_STATES
 };
 
@@ -286,7 +291,7 @@ typedef struct LevelEntData_ {
     PositionMini tilePos;
     enum EntityKind entKind; // walkable or slappable
     int entFlags;
-    int moveTimerLength;
+    int data[4];
     void (*callback)(int entId);
 } LevelEntData;
 
@@ -332,8 +337,8 @@ typedef struct ALIGN4 ObjComponent_ {
     u16 attr0; // 2 bytes
     u16 attr1; // 2 bytes
     u16 attr2; // 2 bytes
-    s8 yOffset;
-    u8 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
+    s16 yOffset;
+    u16 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
     s16 prevId[2]; // 4 bytes. [0]: NE, [1]: NW
     s16 nextId[2]; // 4 bytes. [0]: NE, [1]: NW
 } ObjComponent;
@@ -377,6 +382,9 @@ typedef struct ALIGN4 InputComponent_ {
     ComponentHeader header;
     void (*inputHandler)(int entId);
 } InputComponent;
+
+#define PHYS_MOVER_FLAG             0b1
+#define PHYS_SOLID_FLAG             0b10
 
 typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
@@ -438,19 +446,22 @@ typedef struct CellComponent_ {
     int clsnVal; // 4 bytes
 } CellComponent;
 
+#define WALK_PRESSED_FLAG       0b1
+#define WALK_TOGGLE_FLAG        0b10 // walking onto this switch toggles the callback
+
 // stepping into this ent's position runs the callback
 typedef struct WalkableComponent_ {
     ComponentHeader header; // 4 bytes
     int currentWeight; // 4 bytes
     int weightToAdd; // 4 bytes
-    int moveTimerLength; // 4 bytes
+    int data[4]; // 16 bytes
     void (*callback)(int entId); // 4 bytes
 } WalkableComponent;
 
 // rotating the arrow next to this ent's position ("slapping" it with the arrow) runs the callback
 typedef struct SlappableComponent_ {
     ComponentHeader header; // 4 bytes
-    int moveTimerLength; // 4 bytes
+    int data[4]; // 16 bytes
     void (*callback)(int entId); // 4 bytes
 } SlappableComponent;
 

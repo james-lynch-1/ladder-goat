@@ -10,6 +10,12 @@ extern const unsigned short checkerboardTiles[48];
 extern const unsigned short checkerboardMap[1024];
 #define checkerboardPalLen 8
 extern const unsigned short checkerboardPal[4];
+#define ScratchLogoSmall1TilesLen 6080
+extern const unsigned short ScratchLogoSmall1Tiles[3040];
+#define ScratchLogoSmall1MapLen 2048
+extern const unsigned short ScratchLogoSmall1Map[1024];
+#define ScratchLogoSmall1PalLen 32
+extern const unsigned short ScratchLogoSmall1Pal[16];
 #define isometricTilesLen 64
 extern const unsigned short isometricTiles[32];
 #define isometricMapLen 2048

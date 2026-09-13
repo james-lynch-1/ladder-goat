@@ -7,7 +7,7 @@
 // each col is a col of 19 on the z axis              z    x
 
 int getClsnVal(CellComponent* cell) {
-    if (cell)
+    if (cell && !isEntInactive(cell->header.entId))
         return cell->clsnVal;
     return 0;
 }
@@ -35,7 +35,20 @@ int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
     int xTriArr[3] = { -xOffsNeg, 0, xOffsPos };
     int zTriArr[3] = { -zOffsNeg, 0, zOffsPos };
     PositionMini nextTilePos = { tilePos.x + xTriBool, tilePos.y, tilePos.z + zTriBool };
-    int clsn = getClsnVal(gColl[tilePos.y][nextTilePos.z + zTriArr[zTriBool + 1]][nextTilePos.x + xTriArr[xTriBool + 1]]);
+    bool isTileOccupiedByPhys = false;
+    for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
+        PhysicsComponent* collPhys = &gPhysCompsDense[i];
+        PositionMini tP = getTilePos(collPhys->header.entId);
+        if (isEqualPosMini(tP, nextTilePos) &&
+            (collPhys->header.flags & PHYS_SOLID_FLAG) &&
+            !((collPhys->header.entId == gPlayerId && phys->header.entId == gLadderId) ||
+                (collPhys->header.entId == gLadderId && phys->header.entId == gPlayerId))) {
+            isTileOccupiedByPhys = true;
+            break;
+        }
+    }
+    int clsn = getClsnVal(gColl[tilePos.y][nextTilePos.z + zTriArr[zTriBool + 1]][nextTilePos.x + xTriArr[xTriBool + 1]]) |
+        isTileOccupiedByPhys;
     if (clsn) return clsn;
 
     checkWalkables(phys->weight, tilePos, nextTilePos, xOffsPos, xOffsNeg, zOffsPos, zOffsNeg, 0);

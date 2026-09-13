@@ -18,7 +18,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
 
     // ladder stuff
     PhysicsComponent* ladderPhys = addComponentPhysics(
-        ladderId, 0, (16 * ladderX) << 16,
+        ladderId, PHYS_SOLID_FLAG, (16 * ladderX) << 16,
         (16 * ladderY) << 16,
         (16 * ladderZ) << 16, 0, 0, 0, 1, 0);
     ladderPhys->hitbox.fwd = ladderPhys->hitbox.bwd = 1;
@@ -27,27 +27,26 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
-        -16,
+        -14,
         COMP_PHYSICS
     );
     updateObj(ladderId);
 
     addComponentRotation(ladderId, 0);
     applyRotations(ladderId);
-    addComponentInput(ladderId, 0, handleInputLadder);
     addComponentMember(ladderId, 0, entId);
 
     // player stuff
     addComponentPhysics(
-        playerId, 0, (16 * playerX) << 16,
+        playerId, PHYS_SOLID_FLAG, (16 * playerX) << 16,
         (16 * playerY) << 16,
         (16 * playerZ) << 16, 0, 0, 0, 2, 0);
     addComponentObj(
-        playerId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_1,
-        ATTR0_AFF_DBL | ATTR0_TALL,
+        playerId, OBJ_AFF_FLAG | OBJ_ZDEPTH_PRIO_1,
+        ATTR0_AFF | ATTR0_TALL,
         ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_PLAYER),
-        -28,
+        4,
         COMP_PHYSICS
     );
     updateObj(playerId);
@@ -116,7 +115,8 @@ void taskChangeLevel(int entId, Task* task) {
     }
     static_assert(sizeof(Task) == 12); // don't want to divide by a non-power of 2
 
-    changeLevel(task->data);
+    gNextLevel = task->data;
+    setGameState(TRANSITION);
 }
 
 void turnEnt(int entId, Task* task, int amount) {
@@ -124,8 +124,8 @@ void turnEnt(int entId, Task* task, int amount) {
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
     phys->angle += amount;
     int visAngle = phys->angle;
-    if ((visAngle & (UINT16_MAX / 2)) == 0x6000) // avoid having the affine matrix be 0
-        visAngle += 128;
+    if (in_range((visAngle % 0x8000) - 0x6000, -128, 128))
+        visAngle += 256;
     if (rot) {
         Matrix3D mtx = { {lu_cos(visAngle) << 4}, {0}, {-lu_sin(visAngle) << 4},
                          {0},{0x10000}, {0},
