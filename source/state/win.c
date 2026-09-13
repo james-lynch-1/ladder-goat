@@ -1,7 +1,5 @@
 #include "state.h"
 
-int scrX = 0, scrY = 0;
-
 void enterWin() {
     loadBG(
         MAP_SBB, BG_MAP, MAP_PAL,
@@ -16,13 +14,15 @@ void enterWin() {
 void updateWin() {
     VBlankIntrWait();
     if ((gFrameCount & 3) == 0) {
-        scrX += 2;
-        scrY++;
-        REG_BG0HOFS = scrX;
-        REG_BG0VOFS = scrY;
+        gScrollX += 2;
+        gScrollY++;
+        REG_BG0HOFS = gScrollX;
+        REG_BG0VOFS = gScrollY;
     }
-    if (key_hit(KEY_START))
+    if (key_hit(KEY_START)) {
+
         reset();
+    }
 }
 
 void exitWin(enum GameState state) {

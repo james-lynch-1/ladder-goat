@@ -1,5 +1,7 @@
 #include "global.h"
 
+int gScrollX = 0;
+int gScrollY = 0;
 int gFrameCount = 0;
 int gNumEnts = 0;
 int gNumCustomPhysArchetypes = 0;
@@ -10,8 +12,8 @@ const CollTileToSpriteMapEntry gCollTileToSpriteMap[128] = {
     {0},
     {spriteCellPurpleTiles, 0, PAL_PURPLE},
     {spriteCellPurpleTiles, 0, PAL_PURPLE},
-    {spriteCellFenceNETiles, 0, PAL_ORANGE},
-    {spriteCellFenceNETiles, ATTR1_HFLIP, PAL_ORANGE},
+    {spriteCellFenceNETiles, 0, PAL_BLUE},
+    {spriteCellFenceNETiles, ATTR1_HFLIP, PAL_BLUE},
     {spriteCellPurpleHalfNETiles, 0, PAL_PURPLE},
     {spriteCellPurpleHalfNETiles, ATTR1_HFLIP, PAL_PURPLE_REVERSED},
     {spriteCellPurpleCrossTiles, 0, PAL_PURPLE},

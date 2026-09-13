@@ -18,6 +18,10 @@ void initialiseGame() {
     irq_init(NULL);
     irq_add(II_VBLANK, NULL);
     initialiseUi();
+    gScrollX = 0;
+    gScrollY = 0;
+    REG_BG0HOFS = 0;
+    REG_BG0VOFS = 0;
     memset32(&gObjAllocArr, OBJ_SLOT_UNUSED, sizeof(gObjAllocArr) / 4);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_OBJ | DCNT_OBJ_1D;
     REG_BG0CNT = BG_PRIO(3) | BG_CBB(CBB_MAP) | BG_SBB(MAP_SBB) | BG_4BPP | BG_REG_32x32;

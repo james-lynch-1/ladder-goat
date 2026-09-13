@@ -18,6 +18,9 @@
 #include "levels.h"
 #include "ent.h"
 
+
+extern int gScrollX;
+extern int gScrollY;
 extern int gFrameCount;
 extern int gNumEnts;
 extern int gNumCustomPhysArchetypes;
