@@ -1,6 +1,6 @@
 # Brother Jauffre's Untitled Puzzle Game with Two Characters and Three Levels, the Last of Which is Fairly Difficult
 
-Submission for the GBA Jam 2026. A truly ugly puzzle game where you control two characters.
+Submission for the GBA Jam 2026 ([itch.io link](https://brotherjauffre.itch.io/brother-jauffres-untitled-puzzle-game)). A truly ugly puzzle game where you control two characters.
 
 If the stick man is obstructed, the arrow can't move forward/backward. If the arrow's rotation is obstructed, the stick man can't rotate either.
 
