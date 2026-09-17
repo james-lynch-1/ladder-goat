@@ -23,7 +23,7 @@ void updateTransition() {
     if ((framesElapsed >= 30 &&
         (obj->attr0 & ATTR0_Y_MASK) > 160 && (obj->attr0 & ATTR0_Y_MASK) < 200) ||
         framesElapsed > 120) {
-        if (gLevelData->levelId == 2) {
+        if (gLevelData->levelId == 2 && !isLevelRestart) {
             setGameState(WIN);
             return;
         }
