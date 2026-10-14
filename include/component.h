@@ -55,6 +55,8 @@ void changePalette(ObjComponent* obj, enum Palette pal);
 /** Updates the pos based on the pos provided by corresponding comp of type posSourceCompType */
 void updateObj(int entId);
 
+void updateObjs();
+
 int getObjZDepthPriority(ObjComponent* obj);
 
 // Input

@@ -11,7 +11,7 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
         {-1, -1},
         {INT16_MAX, INT16_MAX}
     };
-    newObj.attr2 |= ATTR2_PRIO(3);
+    newObj.attr2 |= ATTR2_PRIO(PRIO_MAP);
     for (int i = 0; i < 2; i++) {
         int zDepth = getZDepth(&newObj, i);
         ObjComponent* objIter = getComponent(gDeepestObjEntId[i], COMP_OBJ);
@@ -80,22 +80,21 @@ void changePalette(ObjComponent* obj, enum Palette pal) {
     }
 }
 
-void updateObj(int entId) {
-    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+void updateObjUsingPtr(ObjComponent* obj) {
     if (obj->posSourceCompType >= NUM_COMP_TYPES) return;
     PhysicsComponent* physComp = getComponent(obj->header.entId, obj->posSourceCompType);
     Position pos = *(Position*)((uint32_t)physComp + sizeof(ComponentHeader));
     const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)obj + sizeof(ComponentHeader))); // sizes[0,1]: width, height
     bool isDbl = (obj->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
 
-    PositionMini screenPos = getScreenPos(pos);
+    PositionMini screenPos = getScreenPos(pos, gViewport);
 
     // left of the sprite
     int screenX = screenPos.x - (sizes[0] >> (1 - isDbl));
     // top of the sprite
     int screenY = screenPos.y - sizes[1] + obj->yOffset;
 
-    if (isEntInactive(entId) ||
+    if (isEntInactive(obj->header.entId) ||
         !in_range(screenX, 0 - sizes[0] - isDbl * sizes[0], SCREEN_WIDTH + isDbl * sizes[0] / 2) ||
         !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
         hideObj(obj);
@@ -106,6 +105,17 @@ void updateObj(int entId) {
     obj->attr1 &= ~ATTR1_X_MASK;
     obj->attr0 |= ATTR0_Y(screenY) & ATTR0_Y_MASK;
     obj->attr1 |= ATTR1_X(screenX) & ATTR1_X_MASK;
+}
+
+void updateObj(int entId) {
+    ObjComponent* obj = getComponent(entId, COMP_OBJ);
+    updateObjUsingPtr(obj);
+}
+
+void updateObjs() {
+    for (int i = 0; i < numComps(COMP_OBJ); i++) {
+        updateObjUsingPtr(&gObjCompsDense[i]);
+    }
 }
 
 int getObjZDepthPriority(ObjComponent* obj) {

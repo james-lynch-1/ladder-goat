@@ -1,7 +1,7 @@
 #include "component.h"
 
 void addComponentInput(int entId, int flags, void (*inputHandler)(int entId)) {
-    InputComponent inputComp = { {entId, flags}, inputHandler };
+    InputComponent inputComp = { { entId, flags }, inputHandler };
     addComponentCustom((void*)&inputComp, COMP_INPUT);
 }
 
@@ -19,16 +19,28 @@ void handleInputPlayer(int entId) {
         }
     }
 
+    if (key_is_down(KEY_FIRE | KEY_SHOULDER)) {
+        gViewport.x += 2 * key_tri_shoulder();
+        gViewport.y += 2 * key_tri_fire();
+        // if (gViewport.y >= 272 && gOldViewport.y < 272) gViewport.y -= 512;
+        // else if (gViewport.y <= -272 && gOldViewport.y > -272) gViewport.y += 512;
+    }
+
+    // if (key_hit(KEY_LEFT)) gViewport.x -= 2;
+    // if (key_hit(KEY_RIGHT)) gViewport.x += 2;
+    // if (key_hit(KEY_UP)) gViewport.y -= 2;
+    // if (key_hit(KEY_DOWN)) gViewport.y += 2;
+
     if (key_hit(KEY_START)) {
         addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, gLevelData->levelId);
     }
 
-    #ifdef DEBUG
+#ifdef DEBUG
     if (key_hit(KEY_SELECT)) {
         int nextLevel = getNextLevelIndex();
         addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, nextLevel);
     }
-    #endif
+#endif
 }
 
 void updateInputComps() {

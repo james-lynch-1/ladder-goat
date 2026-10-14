@@ -20,13 +20,11 @@ void initialiseGame() {
     initialiseUi();
     gScrollX = 0;
     gScrollY = 0;
-    REG_BG0HOFS = 0;
-    REG_BG0VOFS = 0;
     memset32(&gObjAllocArr, OBJ_SLOT_UNUSED, sizeof(gObjAllocArr) / 4);
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_BG2 | DCNT_OBJ | DCNT_OBJ_1D;
-    REG_BG0CNT = BG_PRIO(3) | BG_CBB(CBB_MAP) | BG_SBB(MAP_SBB) | BG_4BPP | BG_REG_32x32;
-    REG_BG1CNT = BG_PRIO(2) | BG_CBB(CBB_UI) | BG_SBB(UI_SBB) | BG_4BPP | BG_REG_32x32;
-    REG_BG2CNT = BG_PRIO(0) | BG_CBB(CBB_TEXT) | BG_SBB(TEXT_SBB) | BG_4BPP | BG_REG_32x32;
+    REG_BG0CNT = BG_PRIO(PRIO_BACKDROP) | BG_CBB(CBB_BACKDROP) | BG_SBB(SBB_BACKDROP) | BG_4BPP | BG_REG_32x32;
+    REG_BG1CNT = BG_PRIO(PRIO_MAP) | BG_CBB(CBB_MAP) | BG_SBB(SBB_MAP) | BG_4BPP | BG_REG_32x32;
+    REG_BG2CNT = BG_PRIO(PRIO_UI) | BG_CBB(CBB_UI) | BG_SBB(SBB_UI) | BG_4BPP | BG_REG_32x32;
 
     memset32(&gNumListenersPerType, 0, sizeof(gNumListenersPerType) / 4);
 

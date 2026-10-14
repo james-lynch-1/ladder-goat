@@ -186,8 +186,9 @@ typedef struct EventListener_ {
 // stuff with only one instance
 
 typedef struct Viewport_ {
-    s16 x, xMin, xMax,
+    int x, xMin, xMax,
         y, yMin, yMax;
+    bool canMove;
 } Viewport;
 
 // stuff for entities
@@ -304,6 +305,9 @@ typedef struct LevelData_ {
     PositionMini ladderPos;
     enum Direction playerDir;
     int yHeight;
+    int xWidth;
+    int zWidth;
+    Viewport vp;
     CollLayer clsn[];
 } LevelData;
 

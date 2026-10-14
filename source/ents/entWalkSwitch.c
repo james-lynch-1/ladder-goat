@@ -11,7 +11,7 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
         !addComponentObj(entId, 0, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(walkSwitchTiles, 512)) |
             ATTR2_PALBANK(PAL_BLUE),
-            16,
+            8,
             COMP_PHYSICS) ||
         !addComponentWalkable(entId, walkFlags, data0, data1, data2, data3, callback)) {
         markEntToBeDeleted(entId);
@@ -24,8 +24,8 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
 void walkSwitchCBOpenGate(int entId) {
     WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
-    CellComponent* cellToDeactivate = gColl[0][10][6];
-    volatile int numBtnsPressed = 0;
+    CellComponent* cellToDeactivate = gColl[0][8][4];
+    int numBtnsPressed = 0;
     for (int i = 0; i < numComps(COMP_WALKABLE); i++) {
         WalkableComponent* walkToCheck = &gWalkableCompsDense[i];
         if ((walkToCheck->callback == walkSwitchCBOpenGate) &&

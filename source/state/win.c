@@ -2,7 +2,7 @@
 
 void enterWin() {
     loadBG(
-        MAP_SBB, BG_MAP, MAP_PAL,
+        SBB_MAP, BG_MAP, PAL_MAP,
         isometricPal, isometricPalLen,
         isometricTiles, isometricTilesLen,
         isometricMap, isometricMapLen

@@ -30,18 +30,21 @@ def main():
     numLayers -= 1
     beginStr = "const LevelData " + levelName + " = {\n    " + levelNum + ", 0, " +\
          levelName + "EntArr, sizeof(" + levelName + \
-         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6}, {6, 0, 6}, SOUTHEAST, " +\
+         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6}, {6, 0, 6}, SOUTHEAST, 3, 16, 16, {0, 0, 0, 0, 0, 0, false}," +\
          str(numLayers) + ",\n    {\n"
-    mapWidth = 19
+    mapWidth = 16
 
+    fileExists = False
     stuffToNotOverwrite = "#include \"levels.h\"\n\n" +\
     "const LevelEntData level" + levelNum + "EntArr[] = {\n};\n\n"
     if (os.path.isfile("source/levels/" + levelName + ".c")):
+        fileExists = True
         with open("source/levels/" + levelName + ".c", "r") as f:
-            stuffToNotOverwrite = f.read().split("const LevelData")[0]
+            stuffToNotOverwrite = f.read().split("        {{")[0]
     with open("source/levels/" + levelName + ".c", "w") as f:
         f.write(stuffToNotOverwrite)
-        f.write(beginStr)
+        if not fileExists:
+            f.write(beginStr)
         y = 1
         while y <= numLayers:
             f.write("        {{\n")

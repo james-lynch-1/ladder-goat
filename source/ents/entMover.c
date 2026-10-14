@@ -10,7 +10,7 @@ int spawnEntMover(int tileX, int tileY, int tileZ, int entFlags, int data0, int 
         !addComponentObj(entId, 0, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(spriteMoverTiles, 512)) |
             ATTR2_PALBANK(PAL_ORANGE),
-            8,
+            0,
             COMP_PHYSICS) ||
         !addComponentTaskQueue(entId, 0)) {
         markEntToBeDeleted(entId);

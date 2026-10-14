@@ -11,7 +11,7 @@ int spawnEntSlapSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
         !addComponentObj(entId, 0, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(slapSwitchTiles, 512)) |
             ATTR2_PALBANK(PAL_BLUE),
-            8,
+            0,
             COMP_PHYSICS) ||
         !addComponentSlappable(entId, slapFlags, data0, data1, data2, data3, callback) ||
         !addComponentRotation(entId, 0) ||

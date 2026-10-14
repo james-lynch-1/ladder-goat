@@ -41,9 +41,12 @@ void changeLevel(int levelId) {
     turnEnt(gPlayerId, 0, 0);
     turnEnt(gLadderId, 0, 0);
 
+    gViewport = gLevelData->vp;
+
     updateZDepth(getComponent(gPlayerId, COMP_OBJ));
 
     drawSpriteCells();
+    drawBgTiles();
 
     for (int i = 0; i < gLevelData->entArrLength; i++)
         spawnEnt(
@@ -59,8 +62,7 @@ void changeLevel(int levelId) {
             gLevelData->entArr[i].callback
         );
 
-    updateObj(gPlayerId);
-    updateObj(gLadderId);
+    updateObjs();
     // TODO: change bg layer, when we have those
 }
 

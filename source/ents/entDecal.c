@@ -10,7 +10,7 @@ int spawnEntXAxisDecal(int tileX, int tileY, int tileZ, int entFlags, int data0,
         !addComponentObj(entId, OBJ_ZDEPTH_PRIO_1, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(spriteXAxisTiles, 512)) |
             ATTR2_PALBANK(PAL_ORANGE),
-            0,
+            -8,
             COMP_PHYSICS)) {
         markEntToBeDeleted(entId);
         return -1;
@@ -29,7 +29,7 @@ int spawnEntZAxisDecal(int tileX, int tileY, int tileZ, int entFlags, int data0,
         !addComponentObj(entId, OBJ_ZDEPTH_PRIO_1, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(spriteZAxisTiles, 512)) |
             ATTR2_PALBANK(PAL_ORANGE),
-            0,
+            -8,
             COMP_PHYSICS)) {
         markEntToBeDeleted(entId);
         return -1;

@@ -3,7 +3,7 @@
 
 // basically every other header file includes this one; it has the constants, globals and types
 
-// #define DEBUG
+#define DEBUG
 
 #include "tonc.h"
 #include <stdlib.h>
@@ -21,6 +21,8 @@
 
 extern int gScrollX;
 extern int gScrollY;
+extern Viewport gViewport;
+extern Viewport gOldViewport;
 extern int gFrameCount;
 extern int gNumEnts;
 extern int gNumCustomPhysArchetypes;

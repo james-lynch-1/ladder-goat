@@ -71,16 +71,13 @@ void deallocateObj(int index) {
 void loadBG(int sbbIndex, int bg, int palIdx, const u16* pal, int palLen, const u16* tiles, int tilesLen, const u16* map, int mapLen) {
     memcpy16(&pal_bg_bank[palIdx], pal, palLen / sizeof(u16));
     memcpy32(&tile_mem[bg], tiles, tilesLen / sizeof(u32));
-    int srcWInTiles = 32;
-    for (int row = 0; row < 32; row++) {
-        memcpy32(&se_mem[sbbIndex][row * SBB_WIDTH_T], &map[row * srcWInTiles], SBB_WIDTH_T / 2);
-        for (int col = 0; col < srcWInTiles; col++)
-            se_mem[sbbIndex][row * SBB_WIDTH_T + col] |= SE_PALBANK(palIdx);
-    }
+    memcpy32(&se_mem[sbbIndex], map, mapLen / 4);
+    for (int i = 0; i < mapLen / 2; i++)
+        se_mem[sbbIndex][i] |= SE_PALBANK(palIdx);
 }
 
 void lightenBgPalette(int amount) {
     for (int i = 0; i < 16; i++) {
-        pal_bg_bank[MAP_PAL][i] += amount;
+        pal_bg_bank[PAL_MAP][i] += amount;
     }
 }

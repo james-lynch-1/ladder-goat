@@ -37,8 +37,8 @@
 #define PLAYER_WEIGHT       2
 #define ARROW_WEIGHT        1
 
-#define MAP_WIDTH_X         19
-#define MAP_WIDTH_Z         19
+#define MAP_WIDTH_X         16
+#define MAP_WIDTH_Z         16
 #define NUM_ROWS            21
 #define NUM_COLS            16
 
@@ -52,29 +52,33 @@
 #define TILES_PER_SBB       1024
 
 // BG defines
-#define BG_MAP              0
-#define BG_UI               1
-#define BG_TEXT             2
+#define BG_BACKDROP         0
+#define BG_MAP              1
+#define BG_UI               2
+
+#define ADDR_BG_BACKDROP    REG_BG0CNT
+#define ADDR_BG_MAP         REG_BG1CNT
+#define ADDR_BG_UI          REG_BG2CNT
 
 // SBB defines
-#define UI_SBB              26
-#define TEXT_SBB            27
-#define MAP_SBB             31
+#define SBB_UI              26
+#define SBB_MAP             27
+#define SBB_BACKDROP        28
 
 // CBB defines
-#define CBB_MAP             0
-#define CBB_UI              1
-#define CBB_TEXT            2
+#define CBB_BACKDROP        0
+#define CBB_MAP             1
+#define CBB_UI              2
 
 // BG palette defines
-#define TEXT_PAL            0
-#define UI_PAL              1
-#define MAP_PAL             2
+#define PAL_UI              0
+#define PAL_MAP             1
+#define PAL_BACKDROP        2
 
 // BG priority defines
-#define PRIO_MAP            3
-#define PRIO_UI             2
-#define PRIO_TEXT           1
+#define PRIO_BACKDROP       3
+#define PRIO_MAP            2
+#define PRIO_UI             1
 
 // global flags (gFlags)
 

@@ -27,7 +27,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         ATTR0_AFF_DBL | ATTR0_WIDE,
         ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
         ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
-        -14,
+        -22,
         COMP_PHYSICS
     );
     updateObj(ladderId);
@@ -46,7 +46,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
         ATTR0_AFF | ATTR0_TALL,
         ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_PLAYER),
-        4,
+        -4,
         COMP_PHYSICS
     );
     updateObj(playerId);
@@ -58,6 +58,21 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     addComponentTaskQueue(playerId, 0);
 
     return entId;
+}
+
+void scroll() {
+    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
+    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
+    PositionMini playerScreenPos = getScreenPos(playerPhys->pos, gViewport);
+    PositionMini ladderScreenPos = getScreenPos(ladderPhys->pos, gViewport);
+    int playerX = playerScreenPos.x % 256;
+    int playerY = playerScreenPos.y % 256;
+    int ladderX = ladderScreenPos.x % 256;
+    int ladderY = ladderScreenPos.y % 256;
+    if (playerX < 48 || ladderX < 64) gViewport.x--;
+    if (playerX > SCREEN_WIDTH - 48 || ladderX > SCREEN_WIDTH - 64) gViewport.x++;
+    if (playerY < 64 || ladderY < 64) gViewport.y--;
+    if (playerY > SCREEN_HEIGHT - 16 || ladderY > SCREEN_HEIGHT - 32) gViewport.y++;
 }
 
 void taskMove(int entId, Task* task) {
@@ -127,9 +142,9 @@ void turnEnt(int entId, Task* task, int amount) {
     if (in_range((visAngle % 0x8000) - 0x6000, -128, 128))
         visAngle += 256;
     if (rot) {
-        Matrix3D mtx = { {lu_cos(visAngle) << 4}, {0}, {-lu_sin(visAngle) << 4},
-                         {0},{0x10000}, {0},
-                         {lu_sin(visAngle) << 4}, {0}, {lu_cos(visAngle) << 4} };
+        Matrix3D mtx = { { lu_cos(visAngle) << 4 },{ 0 },{ -lu_sin(visAngle) << 4 },
+                         { 0 },{ 0x10000 },{ 0 },
+                         { lu_sin(visAngle) << 4 },{ 0 },{ lu_cos(visAngle) << 4 } };
         rot->mtx = mtx;
     }
     applyRotations(entId);

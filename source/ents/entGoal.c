@@ -8,7 +8,7 @@ int spawnEntGoal(int tileX, int tileY, int tileZ, int entFlags, int data0, int d
     applyRotations(entId);
 
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
-    obj->yOffset = 2;
+    obj->yOffset = -6;
     stopUsingSprite(obj->attr2 & ATTR2_ID_MASK);
     obj->attr2 &= ~(ATTR2_ID_MASK | ATTR2_PALBANK_MASK);
     obj->attr2 |= fetchSprite(goalTiles, goalTilesLen) | ATTR2_PALBANK(PAL_GOAL);

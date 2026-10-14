@@ -1,15 +1,20 @@
 #include "main.h"
 
 void copyObjAttrsToOAM() { // excluding affine stuff
+    memset32(oam_mem, ATTR0_HIDE, 2 * 128);
     int idx = gDeepestObjEntId[gIsLadderNWFacing];
-    for (int i = 0; i < numComps(COMP_OBJ); i++) {
+    int i = 0;
+    while (idx != INT16_MAX) {
         ObjComponent* o = getComponent(idx, COMP_OBJ);
+        idx = o->nextId[gIsLadderNWFacing];
+        if ((o->attr0 & ATTR0_MODE_MASK) == ATTR0_HIDE) {
+            continue;
+        }
         oam_mem[127 - i].attr0 = o->attr0;
         oam_mem[127 - i].attr1 = o->attr1;
         oam_mem[127 - i].attr2 = o->attr2;
-        idx = o->nextId[gIsLadderNWFacing];
+        i++;
     }
-    memset32(oam_mem, ATTR0_HIDE, 2 * (128 - numComps(COMP_OBJ)));
 }
 
 void copyObjAffinesToOAM() {
@@ -27,6 +32,7 @@ int main() {
     initialiseGame();
 
     while (1) {
+        gOldViewport = gViewport;
         key_poll();
 
         if (gGameState.justChanged) {

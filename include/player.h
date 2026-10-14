@@ -9,6 +9,8 @@
 
 int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ);
 
+void scroll();
+
 void taskMove(int entId, Task* task);
 
 void taskMovePlayerAndLadder(int entId, Task* task);

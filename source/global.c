@@ -2,6 +2,8 @@
 
 int gScrollX = 0;
 int gScrollY = 0;
+Viewport gViewport = {0, 0, 0, 0, 0, 0, true};
+Viewport gOldViewport = {0, 0, 0, 0, 0, 0, true};
 int gFrameCount = 0;
 int gNumEnts = 0;
 int gNumCustomPhysArchetypes = 0;

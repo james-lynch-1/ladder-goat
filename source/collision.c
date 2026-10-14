@@ -13,6 +13,8 @@ int getClsnVal(CellComponent* cell) {
 }
 
 int getClsnValAtTilePos(PositionMini tilePos) {
+    if (!in_range(tilePos.x, 0, MAP_WIDTH_X) || !in_range(tilePos.y, 0, 3) || !in_range(tilePos.z, 0, MAP_WIDTH_Z))
+        return 1;
     CellComponent* cell = gColl[tilePos.y][tilePos.z][tilePos.x];
     return getClsnVal(cell);
 }
@@ -24,10 +26,8 @@ int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
     int xTriBool = xTriBoolFromDirArr[getDirFromAngle(phys->angle)];
     int zTriBool = xTriBoolFromDirArr[3 - getDirFromAngle(phys->angle)];
     PositionMini tilePos = getTilePos(phys->header.entId);
-    int row = (tilePos.x + xTriBool) + (tilePos.z + zTriBool) - 7;
-    int col = (tilePos.x + xTriBool) - (tilePos.z + zTriBool) + 7;
-    if (row <= 0 || row >= NUM_ROWS || col < 0 || col >= NUM_COLS)
-        return 1;
+    if (!in_range(tilePos.x + xTriBool, 0, gLevelData->xWidth) ||
+        !in_range(tilePos.z + zTriBool, 0, gLevelData->zWidth)) return 1;
 
     // translate from hitbox-space offsets to world-space offsets
     int xOffsPos, xOffsNeg, zOffsPos, zOffsNeg;
@@ -35,6 +35,7 @@ int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
     int xTriArr[3] = { -xOffsNeg, 0, xOffsPos };
     int zTriArr[3] = { -zOffsNeg, 0, zOffsPos };
     PositionMini nextTilePos = { tilePos.x + xTriBool, tilePos.y, tilePos.z + zTriBool };
+    if (getClsnValAtTilePos(nextTilePos)) return 1;
     bool isTileOccupiedByPhys = false;
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
         PhysicsComponent* collPhys = &gPhysCompsDense[i];
@@ -64,14 +65,18 @@ int checkCollisionTurn(PhysicsComponent* phys, int turnDir) {
     PositionMini tilePos = getTilePos(phys->header.entId);
     bool isZFacing = (getDirFromAngle(phys->angle)) & 1;
 
-    PositionMini topLeftTilePos = { tilePos.x - 1, tilePos.y, tilePos.z - 1 };
-    PositionMini topRightTilePos = { tilePos.x + 1, tilePos.y, tilePos.z - 1 };
-    PositionMini btmLeftTilePos = { tilePos.x - 1, tilePos.y, tilePos.z + 1 };
-    PositionMini btmRightTilePos = { tilePos.x + 1, tilePos.y, tilePos.z + 1 };
-    PositionMini xPosPos = { tilePos.x + 1, tilePos.y, tilePos.z };
-    PositionMini xNegPos = { tilePos.x - 1, tilePos.y, tilePos.z };
-    PositionMini zPosPos = { tilePos.x, tilePos.y, tilePos.z + 1 };
-    PositionMini zNegPos = { tilePos.x, tilePos.y, tilePos.z - 1 };
+    int tilePosXMinusOne = tilePos.x == 0 ? 0 : tilePos.x - 1;
+    int tilePosZMinusOne = tilePos.z == 0 ? 0 : tilePos.z - 1;
+    int tilePosXPlusOne = tilePos.x == MAP_WIDTH_X - 1 ? 15 : tilePos.x + 1;
+    int tilePosZPlusOne = tilePos.z == MAP_WIDTH_Z - 1 ? 15 : tilePos.z + 1;
+    PositionMini topLeftTilePos = { tilePosXMinusOne, tilePos.y, tilePosZMinusOne };
+    PositionMini topRightTilePos = { tilePosXPlusOne, tilePos.y, tilePosZMinusOne };
+    PositionMini btmLeftTilePos = { tilePosXMinusOne, tilePos.y, tilePosZPlusOne };
+    PositionMini btmRightTilePos = { tilePosXPlusOne, tilePos.y, tilePosZPlusOne };
+    PositionMini xPosPos = { tilePosXPlusOne, tilePos.y, tilePos.z };
+    PositionMini xNegPos = { tilePosXMinusOne, tilePos.y, tilePos.z };
+    PositionMini zPosPos = { tilePos.x, tilePos.y, tilePosZPlusOne };
+    PositionMini zNegPos = { tilePos.x, tilePos.y, tilePosZMinusOne };
     int topLeft = getClsnValAtTilePos(topLeftTilePos);
     int topRight = getClsnValAtTilePos(topRightTilePos);
     int btmLeft = getClsnValAtTilePos(btmLeftTilePos);

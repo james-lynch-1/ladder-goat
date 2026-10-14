@@ -30,11 +30,11 @@ void updateTransition() {
         changeLevel(gNextLevel);
         ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
         ObjComponent* ladderObj = getComponent(gLadderId, COMP_OBJ);
-        playerObj->yOffset = 4;
-        ladderObj->yOffset = -14;
+        playerObj->yOffset = -4;
+        ladderObj->yOffset = -22;
         updateObj(gPlayerId);
         updateObj(gLadderId);
-        addComponentInput(gPlayerId, 0, handleInputPlayer);
+        if (!hasComponent(gPlayerId, COMP_INPUT)) addComponentInput(gPlayerId, 0, handleInputPlayer);
         setGameState(NORMAL);
     }
 }
