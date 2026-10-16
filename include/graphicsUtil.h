@@ -4,7 +4,7 @@
 #include "global.h"
 #include "collision.h"
 
-ScreenPos getScreenPos(Position pos, Viewport vp);
+ScreenPos getScreenPos(Position pos);
 
 int getZDepth(ObjComponent* obj, bool isNW);
 
@@ -23,6 +23,8 @@ void drawBgTileRow(int isBtm);
 void drawBgTileCol(int isRight);
 
 void drawBgTiles();
+
+void scroll();
 
 void deallocateSpriteCells();
 

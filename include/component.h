@@ -18,10 +18,10 @@ ComponentHeader* addComponentCustom(void* data, enum ComponentType componentType
  */
 int removeComponent(int entId, enum ComponentType componentType);
 
-bool hasComponent(s16 entId, enum ComponentType componentType);
+bool hasComponent(int entId, enum ComponentType componentType);
 
 /** Gets the component of a given type on an entity */
-void* getComponent(s16 entId, enum ComponentType componentType);
+void* getComponent(int entId, enum ComponentType componentType);
 
 void* getComponentFromDenseIndex(int denseIndex, enum ComponentType componentType);
 

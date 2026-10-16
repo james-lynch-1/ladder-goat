@@ -18,6 +18,11 @@ void updateWin() {
     REG_BG0VOFS = gScrollY;
     if (key_hit(KEY_START))
         reset();
+
+    copyObjAttrsToOAM();
+    copyObjAffinesToOAM();
+
+    gFrameCount++;
 }
 
 void exitWin(enum GameState state) {

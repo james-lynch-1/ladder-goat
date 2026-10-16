@@ -60,11 +60,11 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     return entId;
 }
 
-void scroll() {
+void updateViewport() {
     PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    ScreenPos playerScreenPos = getScreenPos(playerPhys->pos, gViewport);
-    ScreenPos ladderScreenPos = getScreenPos(ladderPhys->pos, gViewport);
+    ScreenPos playerScreenPos = getScreenPos(playerPhys->pos);
+    ScreenPos ladderScreenPos = getScreenPos(ladderPhys->pos);
     int playerX = playerScreenPos.x % 256;
     int playerY = playerScreenPos.y % 256;
     int ladderX = ladderScreenPos.x % 256;

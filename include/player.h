@@ -9,7 +9,7 @@
 
 int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir);
 
-void scroll();
+void updateViewport();
 
 void taskMove(int entId, Task* task);
 

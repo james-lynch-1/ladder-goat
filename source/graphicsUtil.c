@@ -1,9 +1,9 @@
 #include "graphicsUtil.h"
 
-ScreenPos getScreenPos(Position pos, Viewport vp) {
+ScreenPos getScreenPos(Position pos) {
     ScreenPos screenPos = {
-        ((pos.x.WORD - pos.z.WORD) >> 16) - vp.x + 16 * gLevelData->zWidth + 16,
-        (((pos.x.WORD + pos.z.WORD) / 2 - pos.y.WORD) >> 16) - vp.y + 24
+        ((pos.x.WORD - pos.z.WORD) >> 16) - gViewport.x + 16 * gLevelData->zWidth + 16,
+        (((pos.x.WORD + pos.z.WORD) / 2 - pos.y.WORD) >> 16) - gViewport.y + 24
     };
     return screenPos;
 }
@@ -124,7 +124,7 @@ void drawSpriteCells() {
                     CellComponent* cell = addComponentCell(entId, 0, x, y, z, clsnVal);
                     gColl[y][z][x] = cell;
                     Position pos = *(Position*)((u8*)cell + sizeof(ComponentHeader));
-                    ScreenPos screenPos = getScreenPos(pos, gViewport);
+                    ScreenPos screenPos = getScreenPos(pos);
                     bool isOffScreen = !in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) ||
                         !in_range(screenPos.y, 0 - 16, SCREEN_HEIGHT + 16);
                     addComponentObj(entId,
@@ -259,6 +259,18 @@ void drawBgTiles() {
                 if (isBtmRight | isTopRight) break;
             }
         }
+    }
+}
+
+void scroll() {
+    int scrollYDiff = (gViewport.y & ~0b111) / 8 - (gOldViewport.y & ~0b111) / 8;
+    if (scrollYDiff) {
+        drawBgTileRow(scrollYDiff > 0);
+    }
+
+    int scrollXDiff = (gViewport.x & ~0b1111) / 16 - (gOldViewport.x & ~0b1111) / 16;
+    if (scrollXDiff) {
+        drawBgTileCol(scrollXDiff > 0);
     }
 }
 

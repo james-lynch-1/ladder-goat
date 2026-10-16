@@ -5,6 +5,7 @@
 #include <tonc.h>
 #include "string.h"
 #include <stdlib.h>
+#include "global.h"
 
 #define VA ,(void*)&
 #define log(type, val)  mgbaLog(type, (void*)&val)
@@ -16,6 +17,7 @@
 void mgbaLog(enum Type type, void* messagePtr);
 void logVal(char* prefix, int val);
 void logPos(Position pos);
+void logVpPos();
 char* toHex(int num);
 
 #endif

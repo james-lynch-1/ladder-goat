@@ -37,11 +37,9 @@ void initialiseGame() {
     memset32(gEntsToDelete, 0, sizeof(gEntsToDelete) / 4);
 
     initialiseObjPalettes();
-
-    spawnPlayer(2, 0, 2, 3, 0, 1, SOUTHEAST, SOUTHEAST);
-    gNextLevel = 0;
-    changeLevel(gNextLevel);
+    numComps(COMP_OBJ) = 0;
 
     gGameState.gameStateEnum = INT8_MAX;
+    gNextLevel = 0;
     setGameState(TITLE);
 }

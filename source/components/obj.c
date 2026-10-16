@@ -4,12 +4,12 @@
 ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 attr2, int yOffset, int posSourceCompType) {
     if (gNumCompsPerType[COMP_OBJ] >= MAX_OBJ_COMPONENTS || entId < 0) return NULL;
     ObjComponent newObj = {
-        {entId, flags},
+        { entId, flags },
         attr0, attr1, attr2,
         yOffset,
         posSourceCompType,
-        {-1, -1},
-        {INT16_MAX, INT16_MAX}
+        { -1, -1 },
+        { INT16_MAX, INT16_MAX }
     };
     newObj.attr2 |= ATTR2_PRIO(PRIO_MAP);
     for (int i = 0; i < 2; i++) {
@@ -83,20 +83,21 @@ void changePalette(ObjComponent* obj, enum Palette pal) {
 void updateObjUsingPtr(ObjComponent* obj) {
     if (obj->posSourceCompType >= NUM_COMP_TYPES) return;
     PhysicsComponent* physComp = getComponent(obj->header.entId, obj->posSourceCompType);
-    Position pos = *(Position*)((uint32_t)physComp + sizeof(ComponentHeader));
-    const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)obj + sizeof(ComponentHeader))); // sizes[0,1]: width, height
+    Position pos = *(Position*)(&physComp->pos);
+    const u8* sizes = obj_get_size((OBJ_ATTR*)(&obj->attr0)); // sizes[0,1]: width, height
     bool isDbl = (obj->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
 
-    ScreenPos screenPos = getScreenPos(pos, gViewport);
+    ScreenPos screenPos = getScreenPos(pos);
 
     // left of the sprite
-    int screenX = screenPos.x - (sizes[0] >> (1 - isDbl));
+    int screenX = screenPos.x - (sizes[0] >> !isDbl);
     // top of the sprite
     int screenY = screenPos.y - sizes[1] + obj->yOffset;
 
-    if (isEntInactive(obj->header.entId) ||
-        !in_range(screenX, 0 - sizes[0] - isDbl * sizes[0], SCREEN_WIDTH + isDbl * sizes[0] / 2) ||
-        !in_range(screenY, 0 - sizes[1] - isDbl * sizes[1], SCREEN_HEIGHT + isDbl * sizes[1] / 2)) {
+    if (!in_range(screenX, -96, SCREEN_WIDTH) ||
+        !in_range(screenY, -64, SCREEN_HEIGHT) ||
+        isEntInactive(obj->header.entId)
+        ) {
         hideObj(obj);
     }
     else
@@ -114,7 +115,32 @@ void updateObj(int entId) {
 
 void updateObjs() {
     for (int i = 0; i < numComps(COMP_OBJ); i++) {
-        updateObjUsingPtr(&gObjCompsDense[i]);
+        ObjComponent* obj = &gObjCompsDense[i];
+        if (obj->posSourceCompType >= NUM_COMP_TYPES) return;
+        PhysicsComponent* physComp = getComponent(obj->header.entId, obj->posSourceCompType);
+        Position pos = *(Position*)(&physComp->pos);
+        const u8* sizes = obj_get_size((OBJ_ATTR*)(&obj->attr0)); // sizes[0,1]: width, height
+        bool isDbl = (obj->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
+
+        ScreenPos screenPos = getScreenPos(pos);
+
+        // left of the sprite
+        int screenX = screenPos.x - (sizes[0] >> !isDbl);
+        // top of the sprite
+        int screenY = screenPos.y - sizes[1] + obj->yOffset;
+
+        if (!in_range(screenX, -96, SCREEN_WIDTH) ||
+            !in_range(screenY, -64, SCREEN_HEIGHT) ||
+            isEntInactive(obj->header.entId)
+            ) {
+            hideObj(obj);
+        }
+        else
+            unhideObj(obj);
+        obj->attr0 &= ~ATTR0_Y_MASK;
+        obj->attr1 &= ~ATTR1_X_MASK;
+        obj->attr0 |= ATTR0_Y(screenY) & ATTR0_Y_MASK;
+        obj->attr1 |= ATTR1_X(screenX) & ATTR1_X_MASK;
     }
 }
 

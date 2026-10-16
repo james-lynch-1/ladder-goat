@@ -22,4 +22,8 @@ void loadBG(int sbbIndex, int bg, int palIdx, const u16* pal, int palLen, const 
 
 void lightenBgPalette(int amount);
 
+void copyObjAttrsToOAM();
+
+void copyObjAffinesToOAM();
+
 #endif

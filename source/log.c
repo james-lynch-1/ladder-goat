@@ -110,6 +110,22 @@ void logPos(Position pos) {
     log(CHAR, posStr);
 }
 
+void logVpPos() {
+    tte_erase_line();
+    tte_set_pos(SCREEN_WIDTH - TILE_WIDTH * 12 - 32, SCREEN_HEIGHT - 16);
+    tte_write("x:");
+    char str[8];
+    sprintf(str, "%d", gViewport.x);
+    str[7] = '\0';
+    tte_write(str);
+    tte_set_pos(SCREEN_WIDTH - TILE_WIDTH * 12 + 32, SCREEN_HEIGHT - 16);
+    tte_write("y:");
+    memset32(str, 0, 1);
+    sprintf(str, "%d", gViewport.y);
+    str[7] = '\0';
+    tte_write(str);
+}
+
 char* toHex(int num) {
     char* hex = malloc(sizeof(char) * 9);
     hex[8] = '\n';

@@ -26,13 +26,13 @@ int removeComponent(int entId, enum ComponentType componentType) {
     return replacementEntId;
 }
 
-bool hasComponent(s16 entId, enum ComponentType componentType) {
+bool hasComponent(int entId, enum ComponentType componentType) {
     int index = gCompSetSparse[componentType][entId];
     return index != -1;
 }
 
-void* getComponent(s16 entId, enum ComponentType componentType) {
-    if (entId > -1 && entId < INT16_MAX && hasComponent(entId, componentType))
+void* getComponent(int entId, enum ComponentType componentType) {
+    if (in_range(entId, 0, INT16_MAX - 1) && hasComponent(entId, componentType))
         return denseSetAddr(componentType) + compSize(componentType) * gCompSetSparse[componentType][entId];
     return NULL;
 }

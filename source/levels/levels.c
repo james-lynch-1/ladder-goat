@@ -40,8 +40,7 @@ void changeLevel(int levelId) {
         gLevelData->playerPos.dir);
     turnEnt(gPlayerId, 0, 0);
     turnEnt(gLadderId, 0, 0);
-
-    gViewport = gLevelData->vp;
+    // gViewport = gLevelData->vp;
 
     updateZDepth(getComponent(gPlayerId, COMP_OBJ));
 
