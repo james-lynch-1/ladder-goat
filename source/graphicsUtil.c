@@ -1,7 +1,7 @@
 #include "graphicsUtil.h"
 
-PositionMini getScreenPos(Position pos, Viewport vp) {
-    PositionMini screenPos = {
+ScreenPos getScreenPos(Position pos, Viewport vp) {
+    ScreenPos screenPos = {
         ((pos.x.WORD - pos.z.WORD) >> 16) - vp.x + 16 * gLevelData->zWidth + 16,
         (((pos.x.WORD + pos.z.WORD) / 2 - pos.y.WORD) >> 16) - vp.y + 24
     };
@@ -124,7 +124,7 @@ void drawSpriteCells() {
                     CellComponent* cell = addComponentCell(entId, 0, x, y, z, clsnVal);
                     gColl[y][z][x] = cell;
                     Position pos = *(Position*)((u8*)cell + sizeof(ComponentHeader));
-                    PositionMini screenPos = getScreenPos(pos, gViewport);
+                    ScreenPos screenPos = getScreenPos(pos, gViewport);
                     bool isOffScreen = !in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) ||
                         !in_range(screenPos.y, 0 - 16, SCREEN_HEIGHT + 16);
                     addComponentObj(entId,

@@ -3,7 +3,6 @@
 // normal state functions
 
 void enterNormal() {
-    ADDR_BG_BACKDROP |= BG_REG_64x64;
     ADDR_BG_MAP |= BG_REG_32x32;
     drawBgTiles();
     loadBG(

@@ -41,6 +41,7 @@ void logSomething() {
 
 void reset() {
     log(CHAR, "resetting");
+    RegisterRamReset(0xFF);
     SoftReset();
 }
 

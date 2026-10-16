@@ -32,12 +32,12 @@ void changeLevel(int levelId) {
         (gLevelData->playerPos.x * 16) << 16,
         (gLevelData->playerPos.y * 16) << 16,
         (gLevelData->playerPos.z * 16) << 16,
-        gLevelData->playerDir);
+        gLevelData->playerPos.dir);
     setPhysPosAndDir(gLadderId,
         (gLevelData->ladderPos.x * 16) << 16,
         (gLevelData->ladderPos.y * 16) << 16,
         (gLevelData->ladderPos.z * 16) << 16,
-        gLevelData->playerDir);
+        gLevelData->playerPos.dir);
     turnEnt(gPlayerId, 0, 0);
     turnEnt(gLadderId, 0, 0);
 

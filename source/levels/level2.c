@@ -8,15 +8,15 @@ const LevelEntData level2EntArr[] = {
     { {6, 0, 1}, ENT_Z_AXIS_DECAL, 0, {0}, NULL },
     { {6, 0, 3}, ENT_SLAPSWITCH, 0, {INT32_MAX}, slapSwitchCBMoveMoversX },
     { {6, 0, 3}, ENT_X_AXIS_DECAL, 0, {0}, NULL },
-    { {5, 0, 5}, ENT_WALKSWITCH, 0, {0}, walkSwitchCBOpenGate },
-    { {5, 0, 11}, ENT_WALKSWITCH, 0, {0}, walkSwitchCBOpenGate },
-    { {2, 0, 8}, ENT_WALKSWITCH, 0, {0}, walkSwitchCBEnableGoal },
-    { {1, 0, 6}, ENT_GOAL, ENT_INACTIVE, {0}, walkSwitchCBChangeLevel }
+    { {5, 0, 5}, ENT_WALKSWITCH, 0, {0, 1}, walkSwitchCBOpenGate },
+    { {5, 0, 11}, ENT_WALKSWITCH, 0, {0, 1}, walkSwitchCBOpenGate },
+    { {2, 0, 8}, ENT_WALKSWITCH, 0, {0, 1}, walkSwitchCBEnableGoal },
+    { {1, 0, 6}, ENT_GOAL, ENT_INACTIVE, {0, 2}, walkSwitchCBChangeLevel }
 };
 
 const LevelData level2 = {
     2, 0, level2EntArr, sizeof(level2EntArr) / sizeof(LevelEntData),
-    {8, 0, 8}, {7, 0, 2}, NORTHWEST, 3, 13, 13, {104, 0, 0, 40, 0, 0, false},
+    {8, 0, 8, NORTHWEST}, {7, 0, 2, NORTHWEST}, 3, 13, 13, {104, 0, 0, 40, 0, 0, false},
     {
         {{
             {0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},

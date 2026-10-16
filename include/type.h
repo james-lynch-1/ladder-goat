@@ -67,6 +67,13 @@ enum __attribute__ ((__packed__)) Type {
     USPLITWORD
 };
 
+enum __attribute__ ((__packed__)) Direction {
+    SOUTHEAST,
+    NORTHEAST,
+    NORTHWEST,
+    SOUTHWEST
+};
+
 #define TASK_MVMT_FLAG          0b1
 #define TASK_TURN_FLAG          0b10
 #define TASK_QUEUE_TURN_FLAG    0b100
@@ -200,10 +207,16 @@ typedef struct Position_ {
 } Position;
 
 typedef struct PositionMini_ {
+    s8 x;
+    s8 y;
+    s8 z;
+    enum Direction dir;
+} PositionMini;
+
+typedef struct ScreenPos_ {
     s16 x;
     s16 y;
-    s16 z;
-} PositionMini;
+} ScreenPos;
 
 typedef struct Hitbox_ {
     int fwd : 4;
@@ -264,13 +277,6 @@ typedef struct EncounterSet_ {
     // Scene* scenes;
 } EncounterSet;
 
-enum Direction {
-    SOUTHEAST,
-    NORTHEAST,
-    NORTHWEST,
-    SOUTHWEST
-};
-
 typedef struct LutStruct_ {
     const s16* lut;
     int length;
@@ -293,7 +299,7 @@ typedef struct LevelEntData_ {
     enum EntityKind entKind; // walkable or slappable
     int entFlags;
     int data[4];
-    void (*callback)(int entId);
+    void* callback;
 } LevelEntData;
 
 typedef struct LevelData_ {
@@ -302,14 +308,21 @@ typedef struct LevelData_ {
     const LevelEntData* entArr;
     int entArrLength;
     PositionMini playerPos;
-    PositionMini ladderPos;
-    enum Direction playerDir;
+    PositionMini ladderPos; // todo: make this part of the ent data. Also rename ladder to key
     int yHeight;
     int xWidth;
     int zWidth;
     Viewport vp;
     CollLayer clsn[];
 } LevelData;
+
+// saves
+
+typedef struct SaveData_ {
+    u32 playtime; // in seconds
+    int currLevel;
+    PositionMini playerPos;
+} SaveData;
 
 /* #######  #######  ##   ##  #######  #######  ##    #  #######  ##    #  #######  #######
    #        #     #  # # # #  #     #  #     #  # #   #  #        # #   #     #     #
@@ -457,9 +470,9 @@ typedef struct CellComponent_ {
 typedef struct WalkableComponent_ {
     ComponentHeader header; // 4 bytes
     int currentWeight; // 4 bytes
-    int weightToAdd; // 4 bytes
+    int threshold; // 4 bytes
     int data[4]; // 16 bytes
-    void (*callback)(int entId); // 4 bytes
+    void (*callback)(int entId, int weight); // 4 bytes
 } WalkableComponent;
 
 // rotating the arrow next to this ent's position ("slapping" it with the arrow) runs the callback

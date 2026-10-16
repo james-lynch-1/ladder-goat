@@ -1,7 +1,7 @@
 #include "player.h"
 #include <assert.h>
 
-int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ) {
+int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir) {
     int entId = reserveEntSlot();
     int ladderId = reserveEntSlot();
     int playerId = reserveEntSlot();
@@ -20,7 +20,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     PhysicsComponent* ladderPhys = addComponentPhysics(
         ladderId, PHYS_SOLID_FLAG, (16 * ladderX) << 16,
         (16 * ladderY) << 16,
-        (16 * ladderZ) << 16, 0, 0, 0, 1, 0);
+        (16 * ladderZ) << 16, 0, 0, 0, 1, keyDir * 0x4000);
     ladderPhys->hitbox.fwd = ladderPhys->hitbox.bwd = 1;
     addComponentObj(
         ladderId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_2,
@@ -40,7 +40,7 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
     addComponentPhysics(
         playerId, PHYS_SOLID_FLAG, (16 * playerX) << 16,
         (16 * playerY) << 16,
-        (16 * playerZ) << 16, 0, 0, 0, 2, 0);
+        (16 * playerZ) << 16, 0, 0, 0, 2, playerDir * 0x4000);
     addComponentObj(
         playerId, OBJ_AFF_FLAG | OBJ_ZDEPTH_PRIO_1,
         ATTR0_AFF | ATTR0_TALL,
@@ -63,8 +63,8 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
 void scroll() {
     PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
     PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    PositionMini playerScreenPos = getScreenPos(playerPhys->pos, gViewport);
-    PositionMini ladderScreenPos = getScreenPos(ladderPhys->pos, gViewport);
+    ScreenPos playerScreenPos = getScreenPos(playerPhys->pos, gViewport);
+    ScreenPos ladderScreenPos = getScreenPos(ladderPhys->pos, gViewport);
     int playerX = playerScreenPos.x % 256;
     int playerY = playerScreenPos.y % 256;
     int ladderX = ladderScreenPos.x % 256;

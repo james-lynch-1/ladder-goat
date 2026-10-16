@@ -190,9 +190,7 @@ void removeComponentCell(int entId);
 
 // Walkable
 
-void walkableAddWeight(WalkableComponent* walk, int weight);
-
-WalkableComponent* addComponentWalkable(int entId, int flags, int data0, int data1, int data2, int data3, void(*callback));
+WalkableComponent* addComponentWalkable(int entId, int flags, int threshold, void(*callback));
 
 void removeComponentWalkable(int entId);
 

@@ -4,7 +4,7 @@
 #include "global.h"
 #include "collision.h"
 
-PositionMini getScreenPos(Position pos, Viewport vp);
+ScreenPos getScreenPos(Position pos, Viewport vp);
 
 int getZDepth(ObjComponent* obj, bool isNW);
 

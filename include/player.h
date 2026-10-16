@@ -7,7 +7,7 @@
 
 /** Spawns player with ladder */
 
-int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ);
+int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir);
 
 void scroll();
 

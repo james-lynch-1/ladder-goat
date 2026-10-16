@@ -1,9 +1,10 @@
 #include "ent.h"
 
-int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void(*callback)) {
+int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void* callback) {
     int entId = reserveEntSlot();
-    int walkFlags = data0;
     if (entId == -1) return entId;
+    int walkFlags = data0;
+    int threshold = data1;
     gEntFlags[entId] |= entFlags;
     if (
         !addComponentPhysics(entId, 0, (tileX * 16) << 16, (tileY * 16) << 16, (tileZ * 16) << 16,
@@ -13,7 +14,7 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
             ATTR2_PALBANK(PAL_BLUE),
             8,
             COMP_PHYSICS) ||
-        !addComponentWalkable(entId, walkFlags, data0, data1, data2, data3, callback)) {
+        !addComponentWalkable(entId, walkFlags, threshold, callback)) {
         markEntToBeDeleted(entId);
         return -1;
     }
@@ -21,10 +22,12 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
     return entId;
 }
 
-void walkSwitchCBOpenGate(int entId) {
+void walkSwitchCBOpenGate(int entId, int weight) {
     WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
     CellComponent* cellToDeactivate = gColl[0][8][4];
+    bool wasPressed = walk->currentWeight >= walk->threshold;
+    bool isPressed = walk->currentWeight + weight >= walk->threshold;
     int numBtnsPressed = 0;
     for (int i = 0; i < numComps(COMP_WALKABLE); i++) {
         WalkableComponent* walkToCheck = &gWalkableCompsDense[i];
@@ -32,7 +35,7 @@ void walkSwitchCBOpenGate(int entId) {
             (walkToCheck->header.flags & WALK_PRESSED_FLAG))
             numBtnsPressed++;
     }
-    if (walk->currentWeight + walk->weightToAdd <= 0) {
+    if (wasPressed && !isPressed) {
         if ((walk->callback == walkSwitchCBOpenGate) &&
             (walk->header.flags & WALK_PRESSED_FLAG))
             numBtnsPressed--;
@@ -46,7 +49,7 @@ void walkSwitchCBOpenGate(int entId) {
             makeEntActive(cellToDeactivate->header.entId);
         return;
     }
-    if (walk->currentWeight + walk->weightToAdd >= PLAYER_WEIGHT) {
+    if (!wasPressed && isPressed) {
         numBtnsPressed++;
         walk->header.flags |= WALK_PRESSED_FLAG;
         if (obj) {
@@ -64,48 +67,59 @@ void walkSwitchCBOpenGate(int entId) {
     }
 }
 
-void walkSwitchCBEnableGoal(int entId) {
+void walkSwitchCBEnableGoal(int entId, int weight) {
     WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
-    bool wasPressed = walk->header.flags & WALK_PRESSED_FLAG;
-    if (walk->currentWeight + walk->weightToAdd <= 1) {
+    bool wasPressed = (walk->header.flags & WALK_PRESSED_FLAG) != 0;
+    bool isSteppingOn = walk->currentWeight < walk->threshold && walk->currentWeight + weight >= walk->threshold;
+    bool isSteppingOff = walk->currentWeight + weight < walk->threshold;
+    bool isSwitching = false;
+    if (isSteppingOff && wasPressed) {
         if (walk->header.flags & WALK_TOGGLE_FLAG)
             return;
-        if (wasPressed) {
-            walk->header.flags &= ~WALK_PRESSED_FLAG;
-            toggleGoalsActive();
-            if (obj) {
-                stopUsingSprite(obj->attr2 & ATTR2_ID_MASK);
-                obj->attr2 &= ~(ATTR2_ID_MASK);
-                obj->attr2 |= fetchSprite(walkSwitchTiles, walkSwitchTilesLen);
-            }
-        }
+        walk->header.flags &= ~WALK_PRESSED_FLAG;
+        isSwitching = true;
     }
-
-    if (walk->currentWeight + walk->weightToAdd >= PLAYER_WEIGHT) {
-        walk->header.flags = (walk->header.flags & ~WALK_PRESSED_FLAG) | !wasPressed;
+    if (isSteppingOn) {
+        if (walk->header.flags & WALK_TOGGLE_FLAG)
+            walk->header.flags ^= WALK_PRESSED_FLAG;
+        else
+            walk->header.flags |= WALK_PRESSED_FLAG;
+        isSwitching = true;
+    }
+    if (isSwitching) {
+        const u16* tiles = walk->header.flags & WALK_PRESSED_FLAG ? walkSwitchPressedTiles : walkSwitchTiles;
+        toggleGoalsActive();
         if (obj) {
             stopUsingSprite(obj->attr2 & ATTR2_ID_MASK);
             obj->attr2 &= ~(ATTR2_ID_MASK);
-            if (wasPressed)
-                obj->attr2 |= fetchSprite(walkSwitchTiles, walkSwitchTilesLen);
-            else
-                obj->attr2 |= fetchSprite(walkSwitchPressedTiles, walkSwitchPressedTilesLen);
+            obj->attr2 |= fetchSprite(tiles, walkSwitchTilesLen);
         }
-        toggleGoalsActive();
+    }
+
+}
+
+void walkSwitchCBChangeLevel(int entId, int weight) {
+    WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
+    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
+    TaskQueueComponent* tQ = getComponent(entId, COMP_TASK_QUEUE);
+    bool isSteppingOn = walk->currentWeight + weight >= walk->threshold;
+    if (isSteppingOn) {
+        if (rot && tQ)
+            addTaskToQueue(entId, TASK_SPIN_ENDLESSLY, 0x4);
+        int nextLevel = getNextLevelIndex();
+        addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, nextLevel);
+        removeComponentInput(gPlayerId);
+        return;
     }
 }
 
 void toggleGoalsActive() {
-    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
-    PositionMini playerTilePos = getTilePos(gPlayerId);
     for (int i = 0; i < numComps(COMP_WALKABLE); i++) {
         WalkableComponent* walk = &gWalkableCompsDense[i];
         if (walk->callback == walkSwitchCBChangeLevel) {
             if (isEntInactive(walk->header.entId)) {
                 makeEntActive(walk->header.entId);
-                if (isEqualPosMini(playerTilePos, getTilePos(gWalkableCompsDense[i].header.entId)))
-                    checkWalkableSteppingOn(&gWalkableCompsDense[i], playerPhys->weight);
             }
             else makeEntInactive(walk->header.entId);
             break;
@@ -114,31 +128,13 @@ void toggleGoalsActive() {
 }
 
 void activateGoals() {
-    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
-    PositionMini playerTilePos = getTilePos(gPlayerId);
     for (int i = 0; i < numComps(COMP_WALKABLE); i++) {
         WalkableComponent* walk = &gWalkableCompsDense[i];
         if (walk->callback == walkSwitchCBChangeLevel) {
             if (isEntInactive(walk->header.entId)) {
                 makeEntActive(walk->header.entId);
-                if (isEqualPosMini(playerTilePos, getTilePos(gWalkableCompsDense[i].header.entId)))
-                    checkWalkableSteppingOn(&gWalkableCompsDense[i], playerPhys->weight);
             }
             break;
         }
-    }
-}
-
-void walkSwitchCBChangeLevel(int entId) {
-    WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
-    RotationComponent* rot = getComponent(entId, COMP_ROTATION);
-    TaskQueueComponent* tQ = getComponent(entId, COMP_TASK_QUEUE);
-    if (walk->weightToAdd >= PLAYER_WEIGHT) {
-        if (rot && tQ)
-            addTaskToQueue(entId, TASK_SPIN_ENDLESSLY, 0x4);
-        int nextLevel = getNextLevelIndex();
-        addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, nextLevel);
-        removeComponentInput(gPlayerId);
-        return;
     }
 }

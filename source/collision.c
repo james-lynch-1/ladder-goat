@@ -157,23 +157,14 @@ void checkWalkables(int weight, PositionMini tilePos, PositionMini nextTilePos, 
 
             if (!isOnSwitch && willBeOnSwitch)
                 checkWalkableSteppingOn(walk, weight);
-
-            if (isOnSwitch && !willBeOnSwitch)
-                checkWalkableSteppingOff(walk, weight);
+            else if (isOnSwitch && !willBeOnSwitch)
+                checkWalkableSteppingOn(walk, -weight);
         }
     }
 }
 
 void checkWalkableSteppingOn(WalkableComponent* walk, int weight) {
-    walk->weightToAdd = weight;
-    walk->callback(walk->header.entId);
-    walk->currentWeight += walk->weightToAdd;
-    walk->weightToAdd = 0;
-}
-
-void checkWalkableSteppingOff(WalkableComponent* walk, int weight) {
-    walk->weightToAdd = -weight;
-    walk->callback(walk->header.entId);
-    walk->currentWeight += walk->weightToAdd;
-    walk->weightToAdd = 0;
+    walk->callback(walk->header.entId, weight);
+    walk->currentWeight += weight;
+    walk->currentWeight = clamp(walk->currentWeight, 0, INT32_MAX);
 }

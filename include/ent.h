@@ -5,17 +5,17 @@
 
 int spawnEnt(int entityKind, int x, int y, int z, int entFlags, int data0, int data1, int data2, int data3, void* data);
 
-int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void(*callback));
+int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void* callback);
 
-void walkSwitchCBOpenGate(int entId);
+void walkSwitchCBOpenGate(int entId, int weight);
 
-void walkSwitchCBEnableGoal(int entId);
+void walkSwitchCBEnableGoal(int entId, int weight);
+
+void walkSwitchCBChangeLevel(int entId, int weight);
 
 void toggleGoalsActive();
 
 void activateGoals();
-
-void walkSwitchCBChangeLevel(int entId);
 
 int spawnEntSlapSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void(*callback));
 

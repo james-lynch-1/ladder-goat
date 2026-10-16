@@ -38,7 +38,7 @@ void initialiseGame() {
 
     initialiseObjPalettes();
 
-    spawnPlayer(0, 0, 0, 0, 0, 0);
+    spawnPlayer(2, 0, 2, 3, 0, 1, SOUTHEAST, SOUTHEAST);
     gNextLevel = 0;
     changeLevel(gNextLevel);
 

@@ -24,8 +24,8 @@ extern const unsigned short isometricMap[1024];
 extern const unsigned short isometricPal[4];
 #define towerTilesLen 96
 extern const unsigned short towerTiles[48];
-#define towerMapLen 8192
-extern const unsigned short towerMap[4096];
+#define towerMapLen 2048
+extern const unsigned short towerMap[1024];
 #define towerPalLen 16
 extern const unsigned short towerPal[8];
 #define checkerboard_fgTilesLen 224

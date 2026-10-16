@@ -87,7 +87,7 @@ void updateObjUsingPtr(ObjComponent* obj) {
     const u8* sizes = obj_get_size((OBJ_ATTR*)((u8*)obj + sizeof(ComponentHeader))); // sizes[0,1]: width, height
     bool isDbl = (obj->header.flags & ATTR0_MODE_MASK) == ATTR0_AFF_DBL;
 
-    PositionMini screenPos = getScreenPos(pos, gViewport);
+    ScreenPos screenPos = getScreenPos(pos, gViewport);
 
     // left of the sprite
     int screenX = screenPos.x - (sizes[0] >> (1 - isDbl));

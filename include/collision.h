@@ -23,6 +23,4 @@ void checkWalkables(int weight, PositionMini tilePos, PositionMini nextTilePos, 
 
 void checkWalkableSteppingOn(WalkableComponent * walk, int weight);
 
-void checkWalkableSteppingOff(WalkableComponent* walk, int weight);
-
 #endif
