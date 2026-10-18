@@ -4,9 +4,6 @@ int main() {
     initialiseGame();
 
     while (1) {
-        gOldViewport = gViewport;
-        key_poll();
-
         if (gGameState.justChanged) {
             gGameState.enterFunction();
             gGameState.justChanged = false;

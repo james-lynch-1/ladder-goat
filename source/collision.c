@@ -42,8 +42,8 @@ int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
         PositionMini tP = getTilePos(collPhys->header.entId);
         if (isEqualPosMini(tP, nextTilePos) &&
             (collPhys->header.flags & PHYS_SOLID_FLAG) &&
-            !((collPhys->header.entId == gPlayerId && phys->header.entId == gLadderId) ||
-                (collPhys->header.entId == gLadderId && phys->header.entId == gPlayerId))) {
+            !((collPhys->header.entId == gPlayerId && (phys->header.flags & PHYS_KEY_FLAG)) ||
+                ((collPhys->header.flags & PHYS_KEY_FLAG) && phys->header.entId == gPlayerId))) {
             isTileOccupiedByPhys = true;
             break;
         }

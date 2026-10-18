@@ -30,7 +30,7 @@ def main():
     numLayers -= 1
     beginStr = "const LevelData " + levelName + " = {\n    " + levelNum + ", 0, " +\
          levelName + "EntArr, sizeof(" + levelName + \
-         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6}, {6, 0, 6}, SOUTHEAST, 3, 16, 16, {0, 0, 0, 0, 0, 0, false}," +\
+         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6, SOUTHEAST}, 3, 16, 16, {0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, false}," +\
          str(numLayers) + ",\n    {\n"
     mapWidth = 16
 

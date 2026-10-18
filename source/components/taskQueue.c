@@ -2,11 +2,10 @@
 #include <assert.h>
 
 const TaskData gTaskTable[NUM_TASK_TYPES] = {
-    {taskMove, 1, TASK_MVMT_FLAG},
+    {taskMoveDispatch, 1, TASK_MVMT_FLAG},
     {taskMoveNESW, 16, TASK_MVMT_FLAG},
-    {taskMovePlayer, 16, TASK_MVMT_FLAG},
-    {taskMoveLadder, 16, TASK_MVMT_FLAG},
-    {taskMovePlayerAndLadder, 16, TASK_MVMT_FLAG},
+    {taskMove, 16, TASK_MVMT_FLAG},
+    {taskTurnDispatch, 1, TASK_TURN_FLAG},
     {taskTurn, 16, TASK_TURN_FLAG},
     {taskChangeLevel, 1, 0},
     {taskSpinEndlessly, INT32_MAX, 0},
@@ -32,7 +31,7 @@ void updateTaskQueues() {
             currTask->timeRemaining--;
         if (currTask->timeRemaining <= 0) {
             if (!isTaskQueueEmpty(tQ))
-                tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
+                tQ->head = (tQ->head + 1) % 16; // sizeof(tQ->queue) / sizeof(Task) = 16
             static_assert(sizeof(tQ->queue) == 192);
         }
     }
@@ -59,11 +58,11 @@ bool isTaskWithFlagsInQueue(int taskFlags, int entId, bool includeRunningTask) {
     TaskQueueComponent* tQ = getComponent(entId, COMP_TASK_QUEUE);
     if (!tQ) return true;
     if (isTaskQueueEmpty(tQ)) return false;
-    int i = tQ->head + !includeRunningTask;
+    int i = (tQ->head + !includeRunningTask) % 16;
     while (i != tQ->tail) {
         if (taskFlags & gTaskTable[tQ->queue[i].taskIndex].flags)
             return true;
-        i = (i + 1) % (sizeof(tQ->queue) / sizeof(Task));
+        i = (i + 1) % 16;
     }
     return false;
 }

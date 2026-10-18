@@ -2,8 +2,9 @@
 
 int gScrollX = 0;
 int gScrollY = 0;
-Viewport gViewport = {0, 0, 0, 0, 0, 0, true};
-Viewport gOldViewport = {0, 0, 0, 0, 0, 0, true};
+Viewport gViewport = {0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, true};
+Viewport gOldViewport = {0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, true};
+Viewport gVpBackdrop = {0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, true};
 int gFrameCount = 0;
 int gNumEnts = 0;
 int gNumCustomPhysArchetypes = 0;
@@ -30,10 +31,9 @@ const CollTileToSpriteMapEntry gCollTileToSpriteMap[128] = {
 };
 
 s16 gPlayerId = -1;
-s16 gLadderId = -1;
 
 int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
-bool gIsLadderNWFacing = false;
+bool gIsKeyNWFacing = false;
 const LevelData* gLevelData; // ptr to the level in rom
 CellComponent* gColl[8][18][18]; // collision map we copy to ram and can edit
 int gNextLevel;

@@ -1,42 +1,13 @@
 #include "player.h"
 #include <assert.h>
 
-int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir) {
-    int entId = reserveEntSlot();
-    int ladderId = reserveEntSlot();
+int spawnPlayer(int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir) {
     int playerId = reserveEntSlot();
-    gLadderId = ladderId;
     gPlayerId = playerId;
-    if (entId == -1 || ladderId == -1 || playerId == -1) {
-        markEntToBeDeleted(entId);
-        markEntToBeDeleted(ladderId);
+    if (playerId == -1) {
         markEntToBeDeleted(playerId);
         return -1;
     }
-
-    addComponentGroup(entId, 0, NULL, NULL, 0, ENT_PLAYER);
-
-    // ladder stuff
-    PhysicsComponent* ladderPhys = addComponentPhysics(
-        ladderId, PHYS_SOLID_FLAG, (16 * ladderX) << 16,
-        (16 * ladderY) << 16,
-        (16 * ladderZ) << 16, 0, 0, 0, 1, keyDir * 0x4000);
-    ladderPhys->hitbox.fwd = ladderPhys->hitbox.bwd = 1;
-    addComponentObj(
-        ladderId, OBJ_AFF_DBL_FLAG | OBJ_ZDEPTH_PRIO_2,
-        ATTR0_AFF_DBL | ATTR0_WIDE,
-        ATTR1_SIZE_64x32 | ATTR1_AFF_ID(0),
-        ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_LADDER),
-        -22,
-        COMP_PHYSICS
-    );
-    updateObj(ladderId);
-
-    addComponentRotation(ladderId, 0);
-    applyRotations(ladderId);
-    addComponentMember(ladderId, 0, entId);
-
-    // player stuff
     addComponentPhysics(
         playerId, PHYS_SOLID_FLAG, (16 * playerX) << 16,
         (16 * playerY) << 16,
@@ -53,57 +24,55 @@ int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY,
 
     addComponentRotation(playerId, 0);
     applyRotations(playerId);
-    addComponentInput(playerId, 0, handleInputPlayer);
-    addComponentMember(playerId, 0, entId);
+    addComponentInput(playerId, 0, CBInputComp);
     addComponentTaskQueue(playerId, 0);
-
-    return entId;
+    addComponentGroup(playerId, COMP_PHYSICS, NULL, 0);
+    return playerId;
 }
 
 void updateViewport() {
     PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
-    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
     ScreenPos playerScreenPos = getScreenPos(playerPhys->pos);
-    ScreenPos ladderScreenPos = getScreenPos(ladderPhys->pos);
     int playerX = playerScreenPos.x % 256;
     int playerY = playerScreenPos.y % 256;
-    int ladderX = ladderScreenPos.x % 256;
-    int ladderY = ladderScreenPos.y % 256;
-    if (playerX < 48 || ladderX < 64) gViewport.x--;
-    if (playerX > SCREEN_WIDTH - 48 || ladderX > SCREEN_WIDTH - 64) gViewport.x++;
-    if (playerY < 64 || ladderY < 64) gViewport.y--;
-    if (playerY > SCREEN_HEIGHT - 16 || ladderY > SCREEN_HEIGHT - 32) gViewport.y++;
+    if (playerX < 48)
+        // gViewport.x -= (48 - playerX);
+        gViewport.x--;
+    if (playerX > SCREEN_WIDTH - 48)
+        gViewport.x++;
+        // gViewport.x += (playerX - (SCREEN_WIDTH - 48));
+    if (playerY < 64)
+        // gViewport.y -= (64 - playerY);
+        gViewport.y--;
+    if (playerY > SCREEN_HEIGHT - 16)
+        // gViewport.y += (playerY - (SCREEN_HEIGHT - 16));
+        gViewport.y++;
 }
 
-void taskMove(int entId, Task* task) {
-    PhysicsComponent* playerPhys = getComponent(gPlayerId, COMP_PHYSICS);
-    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    bool canMovePlayer = checkCollisionMove(playerPhys, task->data) == 0;
-    bool canMoveLadder = checkCollisionMove(ladderPhys, task->data) == 0;
-    const int taskIndexes[4] = { 0, TASK_MOVE_PLAYER, 0, TASK_MOVE_PLAYER_AND_LADDER };
-    int taskIndexesIndex = (canMoveLadder << 1) | canMovePlayer;
-    if (taskIndexesIndex == 0) return;
-    if (taskIndexes[taskIndexesIndex] == 0) {
+void taskMoveDispatch(int entId, Task* task) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    if (checkCollisionMove(phys, task->data)) {
         task->timeRemaining = 0;
         return;
     }
-
-    task->taskIndex = taskIndexes[taskIndexesIndex];
-    task->timeRemaining = gTaskTable[task->taskIndex].length;
+    notify(entId, COMP_SLAPPABLE, E_MOVETASK_QUEUED);
+    task->taskIndex = TASK_MOVE;
+    task->timeRemaining = gTaskTable[TASK_MOVE].length;
     gTaskTable[task->taskIndex].fn(entId, task);
+
+    // now for the key(s)
+    GroupComponent* group = getComponent(entId, COMP_GROUP);
+    if (group && (group->header.flags == COMP_PHYSICS)) {
+        for (int i = 0; i < group->numMembers; i++) {
+            PhysicsComponent* memberPhys = getComponent(group->memberIds[i], COMP_PHYSICS);
+            if (memberPhys && !checkCollisionMove(memberPhys, task->data))
+                addTaskToQueue(memberPhys->header.entId, TASK_MOVE, task->data);
+        }
+    }
 }
 
-void taskMovePlayerAndLadder(int entId, Task* task) {
-    moveEnt(gLadderId, task, task->data);
-    moveEnt(gPlayerId, task, task->data);
-}
-
-void taskMovePlayer(int entId, Task* task) {
-    moveEnt(gPlayerId, task, task->data);
-}
-
-void taskMoveLadder(int entId, Task* task) {
-    moveEnt(gLadderId, task, task->data);
+void taskMove(int entId, Task* task) {
+    moveEnt(entId, task, task->data);
 }
 
 void moveEnt(int entId, Task* task, int dir) {
@@ -112,18 +81,36 @@ void moveEnt(int entId, Task* task, int dir) {
     phys->vec.z.WORD = dir * -lu_sin(phys->angle) << 4;
 }
 
-void taskTurn(int entId, Task* task) {
-    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    if (task->timeRemaining == gTaskTable[task->taskIndex].length &&
-        checkCollisionTurn(ladderPhys, task->data)) {
-        task->timeRemaining = 1;
-        return;
+void taskTurnDispatch(int entId, Task* task) {
+    bool canTurn = true;
+    GroupComponent* group = getComponent(entId, COMP_GROUP);
+    if (group && (group->header.flags == COMP_PHYSICS)) {
+        for (int i = 0; i < group->numMembers; i++) {
+            PhysicsComponent* memberPhys = getComponent(group->memberIds[i], COMP_PHYSICS);
+            if (memberPhys && checkCollisionTurn(memberPhys, task->data)) {
+                canTurn = false;
+                break;
+            }
+        }
     }
-    turnEnt(gLadderId, task, task->data * 0x4000 / 16);
-    turnEnt(gPlayerId, task, task->data * 0x4000 / 16);
+    if (canTurn) {
+        task->taskIndex = TASK_TURN;
+        task->timeRemaining = gTaskTable[TASK_TURN].length;
+        notify(entId, COMP_SLAPPABLE, E_MOVETASK_QUEUED);
+        gTaskTable[task->taskIndex].fn(entId, task);
+        for (int i = 0; i < group->numMembers; i++)
+            addTaskToQueue(group->memberIds[i], TASK_TURN, task->data);
+    }
+    else
+        task->timeRemaining = 0;
+}
+
+void taskTurn(int entId, Task* task) {
+    turnEnt(entId, task, task->data * 0x4000 / 16);
 }
 
 void taskChangeLevel(int entId, Task* task) {
+    ((InputComponent*)getComponent(gPlayerId, COMP_INPUT))->inputHandler = NULL;
     TaskQueueComponent* tQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
     while (!isTaskQueueEmpty(tQ)) {
         tQ->head = (tQ->head + 1) % (sizeof(tQ->queue) / sizeof(Task));
@@ -138,20 +125,16 @@ void turnEnt(int entId, Task* task, int amount) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
     phys->angle += amount;
-    int visAngle = phys->angle;
-    if (in_range((visAngle % 0x8000) - 0x6000, -128, 128))
-        visAngle += 256;
-    if (rot) {
-        Matrix3D mtx = { { lu_cos(visAngle) << 4 },{ 0 },{ -lu_sin(visAngle) << 4 },
-                         { 0 },{ 0x10000 },{ 0 },
-                         { lu_sin(visAngle) << 4 },{ 0 },{ lu_cos(visAngle) << 4 } };
-        rot->mtx = mtx;
-    }
+    if (rot) setInitMatrix(phys, rot);
     applyRotations(entId);
 }
 
 void updatePlayerStuff() {
-    PhysicsComponent* ladderPhys = getComponent(gLadderId, COMP_PHYSICS);
-    gIsLadderNWFacing = ladderPhys->angle >= 0xE000 || ladderPhys->angle <= 0x1FFF ||
-        (ladderPhys->angle >= 0x6000 && ladderPhys->angle <= 0x9FFF);
+    GroupComponent* group = getComponent(gPlayerId, COMP_GROUP);
+    if (group && (group->numMembers > 0)) {
+        PhysicsComponent* keyPhys = getComponent(group->memberIds[0], COMP_PHYSICS);
+        if (keyPhys)
+            gIsKeyNWFacing = keyPhys->angle >= 0xE000 || keyPhys->angle <= 0x1FFF ||
+            (keyPhys->angle >= 0x6000 && keyPhys->angle <= 0x9FFF);
+    }
 }

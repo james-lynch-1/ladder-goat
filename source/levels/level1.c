@@ -1,13 +1,14 @@
 #include "levels.h"
 
 const LevelEntData level1EntArr[] = {
-    { {0, 0, 0}, ENT_SLAPSWITCH, 0, {2, 0x300}, slapSwitchCBEnableGoal },
+    { {7, 0, 7}, ENT_KEY, 0, {SOUTHEAST}, NULL },
+    { {0, 0, 0}, ENT_SLAPSWITCH, 0, {3, 0x300}, slapSwitchCBEnableGoal },
     { {1, 0, 4}, ENT_GOAL, ENT_INACTIVE, {0, 2}, walkSwitchCBChangeLevel }
 };
 
 const LevelData level1 = {
     1, 0, level1EntArr, sizeof(level1EntArr) / sizeof(LevelEntData),
-    {7, 0, 7, SOUTHEAST}, {7, 0, 7, SOUTHEAST}, 3, 8, 8, {24, 0, 0, -16, 0, 0, false},
+    {7, 0, 7, SOUTHEAST}, 3, 8, 8, {24, 0, 0, INT32_MAX, -16, 0, 0, INT32_MAX, false},
     {
         {{
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},

@@ -8,6 +8,14 @@ ScreenPos getScreenPos(Position pos) {
     return screenPos;
 }
 
+ScreenPos getScreenPosFromViewportXY(Position pos, int levelIndex, int vpX, int vpY) {
+    ScreenPos screenPos = {
+        ((pos.x.WORD - pos.z.WORD) >> 16) - vpX + 16 * gLevels[levelIndex]->zWidth + 16,
+        (((pos.x.WORD + pos.z.WORD) / 2 - pos.y.WORD) >> 16) - vpY + 24
+    };
+    return screenPos;
+}
+
 int getZDepth(ObjComponent* obj, bool isNW) {
     Position pos = ((PhysicsComponent*)getComponent(obj->header.entId, obj->posSourceCompType))->pos;
     PositionMini tilePos = {
@@ -116,8 +124,8 @@ void resetObjZDepth(ObjComponent* toBeReset) {
 void drawSpriteCells() {
     int entId = -1;
     for (int y = 0; y < gLevelData->yHeight; y++) {
-        for (int z = 0; z < MAP_WIDTH_Z; z++) {
-            for (int x = 0; x < MAP_WIDTH_X; x++) {
+        for (int z = 0; z < gLevelData->zWidth; z++) {
+            for (int x = 0; x < gLevelData->xWidth; x++) {
                 if (gLevelData->clsn[y].cell[z][x]) {
                     int clsnVal = gLevelData->clsn[y].cell[z][x];
                     entId = reserveEntSlot();

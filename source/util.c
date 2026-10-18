@@ -1,10 +1,10 @@
 #include "util.h"
 
 u8 attr1SizesArr[4][4] = {
-    {ATTR1_SIZE_8x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_8x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_8x32 >> ATTR1_SIZE_SHIFT, 0},
-    {ATTR1_SIZE_16x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_16x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_16x32 >> ATTR1_SIZE_SHIFT, 0},
-    {ATTR1_SIZE_32x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x32 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x64 >> ATTR1_SIZE_SHIFT},
-    {0, 0, ATTR1_SIZE_64x32 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_64x64 >> ATTR1_SIZE_SHIFT}
+    { ATTR1_SIZE_8x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_8x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_8x32 >> ATTR1_SIZE_SHIFT, 0 },
+    { ATTR1_SIZE_16x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_16x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_16x32 >> ATTR1_SIZE_SHIFT, 0 },
+    { ATTR1_SIZE_32x8 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x16 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x32 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_32x64 >> ATTR1_SIZE_SHIFT },
+    { 0, 0, ATTR1_SIZE_64x32 >> ATTR1_SIZE_SHIFT, ATTR1_SIZE_64x64 >> ATTR1_SIZE_SHIFT }
 };
 
 int getAppropriateSpriteSize(int width, int height) {
@@ -66,6 +66,11 @@ SWord multSWord(SWord a, SWord b) {
     return result;
 }
 
+void setMatrix(Matrix3D* mtx, int* valuesArr) {
+    for (int i = 0; i < 9; i++)
+        ((int*)mtx)[i] = valuesArr[i];
+}
+
 void multMatrix2D(s16* result, s16* m1, s16* m2) {
     // s16 temp[4] = {result[0], result[1], result[2], result[3]};
     s16 temp[4];
@@ -79,15 +84,15 @@ void multMatrix2D(s16* result, s16* m1, s16* m2) {
 
 Matrix3D* multMatrix3D(Matrix3D* result, Matrix3D* m1, Matrix3D* m2) {
     Matrix3D temp = {
-        {multSWord(m1->m00, m2->m00).WORD + multSWord(m1->m01, m2->m10).WORD + multSWord(m1->m02, m2->m20).WORD},
-        {multSWord(m1->m00, m2->m01).WORD + multSWord(m1->m01, m2->m11).WORD + multSWord(m1->m02, m2->m21).WORD},
-        {multSWord(m1->m00, m2->m02).WORD + multSWord(m1->m01, m2->m12).WORD + multSWord(m1->m02, m2->m22).WORD},
-        {multSWord(m1->m10, m2->m00).WORD + multSWord(m1->m11, m2->m10).WORD + multSWord(m1->m12, m2->m20).WORD},
-        {multSWord(m1->m10, m2->m01).WORD + multSWord(m1->m11, m2->m11).WORD + multSWord(m1->m12, m2->m21).WORD},
-        {multSWord(m1->m10, m2->m02).WORD + multSWord(m1->m11, m2->m12).WORD + multSWord(m1->m12, m2->m22).WORD},
-        {multSWord(m1->m20, m2->m00).WORD + multSWord(m1->m21, m2->m10).WORD + multSWord(m1->m22, m2->m20).WORD},
-        {multSWord(m1->m20, m2->m01).WORD + multSWord(m1->m21, m2->m11).WORD + multSWord(m1->m22, m2->m21).WORD},
-        {multSWord(m1->m20, m2->m02).WORD + multSWord(m1->m21, m2->m12).WORD + multSWord(m1->m22, m2->m22).WORD}
+        { multSWord(m1->m00, m2->m00).WORD + multSWord(m1->m01, m2->m10).WORD + multSWord(m1->m02, m2->m20).WORD },
+        { multSWord(m1->m00, m2->m01).WORD + multSWord(m1->m01, m2->m11).WORD + multSWord(m1->m02, m2->m21).WORD },
+        { multSWord(m1->m00, m2->m02).WORD + multSWord(m1->m01, m2->m12).WORD + multSWord(m1->m02, m2->m22).WORD },
+        { multSWord(m1->m10, m2->m00).WORD + multSWord(m1->m11, m2->m10).WORD + multSWord(m1->m12, m2->m20).WORD },
+        { multSWord(m1->m10, m2->m01).WORD + multSWord(m1->m11, m2->m11).WORD + multSWord(m1->m12, m2->m21).WORD },
+        { multSWord(m1->m10, m2->m02).WORD + multSWord(m1->m11, m2->m12).WORD + multSWord(m1->m12, m2->m22).WORD },
+        { multSWord(m1->m20, m2->m00).WORD + multSWord(m1->m21, m2->m10).WORD + multSWord(m1->m22, m2->m20).WORD },
+        { multSWord(m1->m20, m2->m01).WORD + multSWord(m1->m21, m2->m11).WORD + multSWord(m1->m22, m2->m21).WORD },
+        { multSWord(m1->m20, m2->m02).WORD + multSWord(m1->m21, m2->m12).WORD + multSWord(m1->m22, m2->m22).WORD }
     };
     memcpy32(result, &temp, sizeof(Matrix3D) / 4);
     return result;

@@ -7,6 +7,8 @@ void enterWin() {
 }
 
 void updateWin() {
+    key_poll();
+    gOldViewport = gViewport;
     VBlankIntrWait();
     if ((gFrameCount & 1) == 0) {
         gScrollX++;

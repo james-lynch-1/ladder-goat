@@ -1,6 +1,7 @@
 #include "levels.h"
 
 const LevelEntData level2EntArr[] = {
+    { {7, 0, 2}, ENT_KEY, 0, {NORTHWEST}, NULL },
     { {7, 0, 8}, ENT_MOVER, 0, {0}, NULL }, // nw
     { {8, 0, 7}, ENT_MOVER, 0, {0}, NULL }, // ne
     { {8, 0, 9}, ENT_MOVER, 0, {0}, NULL }, // sw
@@ -16,7 +17,7 @@ const LevelEntData level2EntArr[] = {
 
 const LevelData level2 = {
     2, 0, level2EntArr, sizeof(level2EntArr) / sizeof(LevelEntData),
-    {8, 0, 8, NORTHWEST}, {7, 0, 2, NORTHWEST}, 3, 13, 13, {104, 0, 0, 40, 0, 0, false},
+    {8, 0, 8, NORTHWEST}, 3, 13, 13, {104, 0, 0, INT32_MAX, 40, 0, 0, INT32_MAX, false},
     {
         {{
             {0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0},

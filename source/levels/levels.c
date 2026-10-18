@@ -8,44 +8,32 @@ int getNextLevelIndex() {
 void changeLevel(int levelId) {
     gLevelData = gLevels[levelId];
     memset32(&gColl, 0, sizeof(gColl) / 4);
-
-    int playerGroupId = -1;
-    for (int i = 0; i < numComps(COMP_GROUP); i++) {
-        if ((gGroupCompsDense[i].memberIds[0] == gPlayerId) || (gGroupCompsDense[i].memberIds[0] == gLadderId)) {
-            playerGroupId = gGroupCompsDense[i].header.entId;
-            break;
-        }
-    }
     int i = 0, j = 0;
     while (i < gNumEnts && j < MAX_ENTS) {
         if (gEntFlags[i]) {
-            if (i != gPlayerId && i != gLadderId && i != playerGroupId)
-                markEntToBeDeleted(i++);
-            else i++;
+            if (i != gPlayerId)
+                markEntToBeDeleted(i);
+            i++;
         }
         j++;
     }
     deleteMarkedEnts();
     gNumListenersPerType[COMP_SLAPPABLE] = 0;
 
+    ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
+    playerObj->prevId[0] = playerObj->prevId[1] = -1;
+    playerObj->nextId[0] = playerObj->nextId[1] = INT16_MAX;
+    gDeepestObjEntId[0] = gDeepestObjEntId[1] = gPlayerId;
+
     setPhysPosAndDir(gPlayerId,
         (gLevelData->playerPos.x * 16) << 16,
         (gLevelData->playerPos.y * 16) << 16,
         (gLevelData->playerPos.z * 16) << 16,
         gLevelData->playerPos.dir);
-    setPhysPosAndDir(gLadderId,
-        (gLevelData->ladderPos.x * 16) << 16,
-        (gLevelData->ladderPos.y * 16) << 16,
-        (gLevelData->ladderPos.z * 16) << 16,
-        gLevelData->playerPos.dir);
-    turnEnt(gPlayerId, 0, 0);
-    turnEnt(gLadderId, 0, 0);
-    // gViewport = gLevelData->vp;
-
-    updateZDepth(getComponent(gPlayerId, COMP_OBJ));
+    turnEnt(gPlayerId, NULL, 0);
+    gViewport.canMove = gLevelData->vp.canMove;
 
     drawSpriteCells();
-    drawBgTiles();
 
     for (int i = 0; i < gLevelData->entArrLength; i++)
         spawnEnt(
@@ -61,7 +49,6 @@ void changeLevel(int levelId) {
             gLevelData->entArr[i].callback
         );
 
-    updateObjs();
     // TODO: change bg layer, when we have those
 }
 

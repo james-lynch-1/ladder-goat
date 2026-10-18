@@ -41,13 +41,3 @@ void removeMemberCompFromGroup(int entIdMem, int entIdGroup) {
         }
     }
 }
-
-void doGroupCallbacks(int entId) {
-    MemberComponent* m = getComponent(entId, COMP_MEMBER);
-    if (!m) return;
-    for (int i = 0; i < MAX_GROUPS_PER_MEMBER; i++) {
-        GroupComponent* g = getComponent(m->groupIds[i], COMP_GROUP);
-        if (!g) break;
-        if (g->fn) g->fn(m, g);
-    }
-}

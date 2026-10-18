@@ -11,7 +11,6 @@
 #define MAX_EVENT_LISTENERS_PER_TYPE    32
 
 #define MAX_OBJ_COMPONENTS              78
-#define MAX_OBJ_AFF_COMPONENTS          32
 #define MAX_INPUT_COMPONENTS            4
 #define MAX_PHYSICS_COMPONENTS          32
 #define MAX_ROTATION_COMPONENTS         8

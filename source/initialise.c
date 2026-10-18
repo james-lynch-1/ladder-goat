@@ -2,7 +2,7 @@
 
 void initialiseObjPalettes() {
     memcpy32(&pal_obj_bank[PAL_PLAYER], spritePlayerPal, spritePlayerPalLen / sizeof(u32));
-    memcpy32(&pal_obj_bank[PAL_LADDER], spriteHoriPal, spriteHoriPalLen / sizeof(u32));
+    memcpy32(&pal_obj_bank[PAL_KEY], spriteHoriPal, spriteHoriPalLen / sizeof(u32));
     memcpy32(&pal_obj_bank[PAL_PURPLE], spriteCellPurplePal, spriteCellPurplePalLen / sizeof(u32));
     pal_obj_bank[PAL_PURPLE_REVERSED][0] = spriteCellPurplePal[0];
     pal_obj_bank[PAL_PURPLE_REVERSED][1] = spriteCellPurplePal[1];

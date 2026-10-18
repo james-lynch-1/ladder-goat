@@ -63,7 +63,9 @@ int getObjZDepthPriority(ObjComponent* obj);
 
 void addComponentInput(int entId, int flags, void (*inputHandler)(int entId));
 
-void handleInputPlayer(int entId);
+void handleInput();
+
+void CBInputComp(int entId);
 
 void updateInputComps();
 
@@ -89,6 +91,8 @@ enum Direction getDirFromAngle(int angle);
 
 void updatePhysics();
 
+void updatePhysicsSingleEnt(PhysicsComponent* phys);
+
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir);
 
 void taskMoveNESW(int entId, Task * task);
@@ -98,6 +102,8 @@ PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, 
 void removeComponentPhysics(int entId);
 
 // Rotation
+
+void setInitMatrix(PhysicsComponent* phys, RotationComponent* rot);
 
 void applyRotations(int entId);
 
@@ -155,12 +161,10 @@ void removeComponentMember(int entId);
 /** Removes a member from a group without deleting any components. */
 void removeMemberCompFromGroup(int entIdMem, int entIdGroup);
 
-void doGroupCallbacks(int entId);
-
 // Group
 
 /** Helper function for creating a group component */
-GroupComponent* addComponentGroup(s16 entId, u16 flags, s16* memberIds, void (*fn)(struct MemberComponent_*, struct GroupComponent_*), int numMembers, int entKind);
+GroupComponent* addComponentGroup(s16 entId, u16 flags, s16* memberIdsArr, int numMembers);
 
 void removeComponentGroup(int entId);
 

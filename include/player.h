@@ -5,22 +5,18 @@
 #include "eventListener.h"
 #include "collision.h"
 
-/** Spawns player with ladder */
-
-int spawnPlayer(int ladderX, int ladderY, int ladderZ, int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir);
+int spawnPlayer(int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir);
 
 void updateViewport();
 
+void taskMoveDispatch(int entId, Task* task);
+
 void taskMove(int entId, Task* task);
-
-void taskMovePlayerAndLadder(int entId, Task* task);
-
-void taskMovePlayer(int entId, Task* task);
-
-void taskMoveLadder(int entId, Task* task);
 
 /** dir must be 1 or -1 */
 void moveEnt(int entId, Task* task, int dir);
+
+void taskTurnDispatch(int entId, Task* task);
 
 void taskTurn(int entId, Task* task);
 

@@ -25,6 +25,7 @@ void enterTitle() {
 }
 
 void updateTitle() {
+    key_poll();
     if (key_hit(KEY_START))
         setGameState(NORMAL);
 }
@@ -32,9 +33,11 @@ void updateTitle() {
 void exitTitle(enum GameState state) {
     tte_erase_screen();
 
-    spawnPlayer(2, 0, 2, 3, 0, 1, SOUTHEAST, SOUTHEAST);
+    spawnPlayer(3, 0, 1, SOUTHEAST, SOUTHEAST);
     gNextLevel = 0;
     changeLevel(gNextLevel);
+    gViewport = gLevelData->vp;
+    drawBgTiles();
     loadBG(
         SBB_BACKDROP,
         BG_BACKDROP,

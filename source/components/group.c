@@ -1,14 +1,14 @@
 #include "component.h"
 
-GroupComponent* addComponentGroup(s16 entId, u16 flags, s16* memberIds, void (*fn)(struct MemberComponent_*, struct GroupComponent_*), int numMembers, int entKind) {
-    GroupComponent g = { {entId, 0}, {-1, -1, -1, -1}, NULL, 0, numMembers };
-    if (memberIds && (numMembers > 0))
+GroupComponent* addComponentGroup(s16 entId, u16 flags, s16* memberIdsArr, int numMembers) {
+    GroupComponent g = { {entId, flags}, {}, numMembers };
+    memset16(&g.memberIds, -1, MAX_MEMBERS_PER_GROUP);
+    if (memberIdsArr && (numMembers > 0))
         for (int i = 0; i < numMembers; i++) {
-            MemberComponent* mComp = getComponent(memberIds[i], COMP_MEMBER);
-            if (!mComp) addComponentMember(memberIds[i], entKind, entId);
-            g.memberIds[i] = memberIds[i];
+            MemberComponent* mComp = getComponent(memberIdsArr[i], COMP_MEMBER);
+            if (!mComp) addComponentMember(memberIdsArr[i], 0, entId);
+            g.memberIds[i] = memberIdsArr[i];
         }
-    g.fn = fn;
     return (GroupComponent*)addComponentCustom(&g, COMP_GROUP);
 }
 

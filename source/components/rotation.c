@@ -1,5 +1,15 @@
 #include "component.h"
 
+void setInitMatrix(PhysicsComponent* phys, RotationComponent* rot) {
+    int visAngle = phys->angle;
+    if (in_range((visAngle % 0x8000) - 0x6000, -128, 128))
+        visAngle += 256;
+    Matrix3D mtx = { { lu_cos(visAngle) << 4 },{ 0 },{ -lu_sin(visAngle) << 4 },
+                     { 0 },{ 0x10000 },{ 0 },
+                     { lu_sin(visAngle) << 4 },{ 0 },{ lu_cos(visAngle) << 4 } };
+    rot->mtx = mtx;
+}
+
 void applyRotations(int entId) {
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
     if (!rot) return;
@@ -19,9 +29,9 @@ void applyRotations(int entId) {
     // };
     // above matrices multiplied to produce the matrix below
     const Matrix3D worldMatrix = {
-        {0xB505}, {0}, {0xB505},
-        {0x592F}, {0XDEB0}, {-0X5930},
-        {-0x9D8}, {0x7E20}, {0X9D7}
+        { 0xB505 },{ 0 },{ 0xB505 },
+        { 0x592F },{ 0XDEB0 },{ -0X5930 },
+        { -0x9D8 },{ 0x7E20 },{ 0X9D7 }
     };
     multMatrix3D(&initMatrix, (Matrix3D*)&worldMatrix, &initMatrix);
 
@@ -56,19 +66,19 @@ void makeRotation(Matrix3D* initMatrix, int angle, Vector3D* a) {
     SWord ayaz = multSWord(y, a->z);
 
     Matrix3D m = {
-        {c.WORD + multSWord(x, a->x).WORD}, {axay.WORD - multSWord(s, a->z).WORD}, {axaz.WORD + multSWord(s, a->y).WORD},
-        {axay.WORD + multSWord(s, a->z).WORD}, {c.WORD + multSWord(y, a->y).WORD}, {ayaz.WORD - multSWord(s, a->x).WORD},
-        {axaz.WORD - multSWord(s, a->y).WORD}, {ayaz.WORD + multSWord(s, a->x).WORD}, {c.WORD + multSWord(z, a->z).WORD}
+        { c.WORD + multSWord(x, a->x).WORD },{ axay.WORD - multSWord(s, a->z).WORD },{ axaz.WORD + multSWord(s, a->y).WORD },
+        { axay.WORD + multSWord(s, a->z).WORD },{ c.WORD + multSWord(y, a->y).WORD },{ ayaz.WORD - multSWord(s, a->x).WORD },
+        { axaz.WORD - multSWord(s, a->y).WORD },{ ayaz.WORD + multSWord(s, a->x).WORD },{ c.WORD + multSWord(z, a->z).WORD }
     };
     multMatrix3D(initMatrix, initMatrix, &m);
 }
 
 void multQtrn(Quaternion* result, Quaternion* q1, Quaternion* q2) {
     Quaternion temp = {
-        {multSWord(q1->w, q2->x).WORD + multSWord(q1->x, q2->w).WORD + multSWord(q1->y, q2->z).WORD - multSWord(q1->z, q2->y).WORD},
-        {multSWord(q1->w, q2->y).WORD - multSWord(q1->x, q2->z).WORD + multSWord(q1->y, q2->w).WORD + multSWord(q1->z, q2->x).WORD},
-        {multSWord(q1->w, q2->z).WORD + multSWord(q1->x, q2->y).WORD - multSWord(q1->y, q2->x).WORD + multSWord(q1->z, q2->w).WORD},
-        {multSWord(q1->w, q2->w).WORD - multSWord(q1->x, q2->x).WORD - multSWord(q1->y, q2->y).WORD - multSWord(q1->z, q2->z).WORD}
+        { multSWord(q1->w, q2->x).WORD + multSWord(q1->x, q2->w).WORD + multSWord(q1->y, q2->z).WORD - multSWord(q1->z, q2->y).WORD },
+        { multSWord(q1->w, q2->y).WORD - multSWord(q1->x, q2->z).WORD + multSWord(q1->y, q2->w).WORD + multSWord(q1->z, q2->x).WORD },
+        { multSWord(q1->w, q2->z).WORD + multSWord(q1->x, q2->y).WORD - multSWord(q1->y, q2->x).WORD + multSWord(q1->z, q2->w).WORD },
+        { multSWord(q1->w, q2->w).WORD - multSWord(q1->x, q2->x).WORD - multSWord(q1->y, q2->y).WORD - multSWord(q1->z, q2->z).WORD }
     };
     memcpy32(result, &temp, sizeof(Quaternion) / 4);
 }
@@ -78,21 +88,21 @@ void getRotMatrixFromQtrn(Matrix3D* result, Quaternion* q) {
         xy = multSWord(q->x, q->y), xz = multSWord(q->x, q->z), yz = multSWord(q->y, q->z),
         wx = multSWord(q->w, q->x), wy = multSWord(q->w, q->y), wz = multSWord(q->w, q->z);
     Matrix3D temp = {
-        {0x10000 - multSWord((SWord)0x20000, (SWord)(y2.WORD + z2.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(xy.WORD - wz.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(xz.WORD + wy.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(xy.WORD + wz.WORD)).WORD},
-        {0x10000 - multSWord((SWord)0x20000, (SWord)(x2.WORD + z2.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(yz.WORD - wx.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(xz.WORD - wy.WORD)).WORD},
-        {multSWord((SWord)0x20000, (SWord)(yz.WORD + wx.WORD)).WORD},
-        {0x10000 - multSWord((SWord)0x20000, (SWord)(x2.WORD + y2.WORD)).WORD}
+        { 0x10000 - multSWord((SWord)0x20000, (SWord)(y2.WORD + z2.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(xy.WORD - wz.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(xz.WORD + wy.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(xy.WORD + wz.WORD)).WORD },
+        { 0x10000 - multSWord((SWord)0x20000, (SWord)(x2.WORD + z2.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(yz.WORD - wx.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(xz.WORD - wy.WORD)).WORD },
+        { multSWord((SWord)0x20000, (SWord)(yz.WORD + wx.WORD)).WORD },
+        { 0x10000 - multSWord((SWord)0x20000, (SWord)(x2.WORD + y2.WORD)).WORD }
     };
     memcpy32(result, &temp, sizeof(Matrix3D) / 4);
 }
 
 void addVecs(Vector3D* result, const Vector3D* a, const Vector3D* b) {
-    Vector3D temp = { {a->x.WORD + b->x.WORD}, {a->y.WORD + b->y.WORD}, {a->z.WORD + b->z.WORD} };
+    Vector3D temp = { { a->x.WORD + b->x.WORD },{ a->y.WORD + b->y.WORD },{ a->z.WORD + b->z.WORD } };
     memcpy32(result, &temp, sizeof(Vector3D) / 4);
 }
 
@@ -125,14 +135,14 @@ SWord dot(const Vector3D* a, const Vector3D* b) {
 }
 
 void cross(Vector3D* result, const Vector3D* a, const Vector3D* b) {
-    Vector3D temp = { {multSWord(a->y, b->z).WORD - multSWord(a->z, b->y).WORD},
-                      {multSWord(a->z, b->x).WORD - multSWord(a->x, b->z).WORD},
-                      {multSWord(a->x, b->y).WORD - multSWord(a->y, b->x).WORD} };
+    Vector3D temp = { { multSWord(a->y, b->z).WORD - multSWord(a->z, b->y).WORD },
+                      { multSWord(a->z, b->x).WORD - multSWord(a->x, b->z).WORD },
+                      { multSWord(a->x, b->y).WORD - multSWord(a->y, b->x).WORD } };
     memcpy32(result, &temp, sizeof(Vector3D) / 4);
 }
 
 RotationComponent* addComponentRotation(int entId, u16 flags) {
-    RotationComponent rot = { {entId, flags}, { {0x10000}, {0}, {0}, {0}, {0x10000}, {0}, {0}, {0}, {0x10000} } };
+    RotationComponent rot = { { entId, flags },{ { 0x10000 },{ 0 },{ 0 },{ 0 },{ 0x10000 },{ 0 },{ 0 },{ 0 },{ 0x10000 } } };
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
     if (obj) {
         obj->header.flags |= ATTR0_AFF;
@@ -148,6 +158,8 @@ void removeComponentRotation(int entId) {
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
     int objAffId = 0;
     if (!rot) return;
+    int identity[9] = {0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0x10000};
+    setMatrix(&rot->mtx, identity);
     if (obj) {
         objAffId = obj->attr1 & ATTR1_AFF_ID_MASK;
         obj->attr1 &= ~ATTR1_AFF_ID_MASK;

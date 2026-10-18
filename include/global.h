@@ -23,6 +23,7 @@ extern int gScrollX;
 extern int gScrollY;
 extern Viewport gViewport;
 extern Viewport gOldViewport;
+extern Viewport gVpBackdrop;
 extern int gFrameCount;
 extern int gNumEnts;
 extern int gNumCustomPhysArchetypes;
@@ -32,10 +33,9 @@ extern int gNumEntsToDelete;
 extern const CollTileToSpriteMapEntry gCollTileToSpriteMap[128];
 
 extern s16 gPlayerId;
-extern s16 gLadderId;
 
 extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
-extern bool gIsLadderNWFacing;
+extern bool gIsKeyNWFacing;
 extern const LevelData* gLevelData;
 extern CellComponent* gColl[8][18][18];
 extern int gNextLevel;

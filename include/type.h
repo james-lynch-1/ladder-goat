@@ -31,6 +31,7 @@ enum __attribute__ ((__packed__)) EntityKind {
     ENT_MOVER,
     ENT_X_AXIS_DECAL,
     ENT_Z_AXIS_DECAL,
+    ENT_KEY,
     NUM_ENT_KINDS
 };
 
@@ -79,11 +80,10 @@ enum __attribute__ ((__packed__)) Direction {
 #define TASK_QUEUE_TURN_FLAG    0b100
 
 enum __attribute__ ((__packed__)) TaskType {
-    TASK_MOVE,
+    TASK_MOVE_DISPATCH,
     TASK_MOVE_NESW,
-    TASK_MOVE_PLAYER,
-    TASK_MOVE_LADDER,
-    TASK_MOVE_PLAYER_AND_LADDER,
+    TASK_MOVE,
+    TASK_TURN_DISPATCH,
     TASK_TURN,
     TASK_CHANGE_LEVEL,
     TASK_SPIN_ENDLESSLY,
@@ -101,7 +101,7 @@ enum EventType {
 
 enum __attribute__ ((__packed__)) Palette {
     PAL_PLAYER,
-    PAL_LADDER,
+    PAL_KEY,
     PAL_PURPLE,
     PAL_PURPLE_REVERSED,
     PAL_ORANGE,
@@ -193,8 +193,8 @@ typedef struct EventListener_ {
 // stuff with only one instance
 
 typedef struct Viewport_ {
-    int x, xMin, xMax,
-        y, yMin, yMax;
+    int x, xMin, xMax, targetX,
+        y, yMin, yMax, targetY;
     bool canMove;
 } Viewport;
 
@@ -308,7 +308,6 @@ typedef struct LevelData_ {
     const LevelEntData* entArr;
     int entArrLength;
     PositionMini playerPos;
-    PositionMini ladderPos; // todo: make this part of the ent data. Also rename ladder to key
     int yHeight;
     int xWidth;
     int zWidth;
@@ -402,10 +401,11 @@ typedef struct ALIGN4 InputComponent_ {
 
 #define PHYS_MOVER_FLAG             0b1
 #define PHYS_SOLID_FLAG             0b10
+#define PHYS_KEY_FLAG               0b100
 
 typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
-    Position pos; // 8 bytes. should always be after header for updateObjs()
+    Position pos; // 12 bytes. should always be after header for updateObjs()
     Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
     Vector3D vec; // 8 bytes
     int weight; // 4 bytes
@@ -444,9 +444,6 @@ typedef struct ALIGN4 MemberComponent_ {
 typedef struct ALIGN4 GroupComponent_ {
     ComponentHeader header; // 4 bytes
     s16 memberIds[MAX_MEMBERS_PER_GROUP]; // 48 bytes - max 24 members
-    void (*fn)(struct MemberComponent_*, struct GroupComponent_*); // 4 bytes
-    u16 counter; // 2 bytes
-    u8 numCollected; // 1 byte
     u8 numMembers; // 1 byte
 } GroupComponent;
 

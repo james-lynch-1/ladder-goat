@@ -1,7 +1,7 @@
 #include "ent.h"
 
 int (*gEntSpawners[NUM_ENT_KINDS])(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void(*callback)) = {
-    0, spawnEntWalkSwitch, spawnEntSlapSwitch, spawnEntGoal, spawnEntMover, spawnEntXAxisDecal, spawnEntZAxisDecal
+    0, spawnEntWalkSwitch, spawnEntSlapSwitch, spawnEntGoal, spawnEntMover, spawnEntXAxisDecal, spawnEntZAxisDecal, spawnEntKey
 };
 
 int spawnEnt(int entKind, int x, int y, int z, int entFlags, int data0, int data1, int data2, int data3, void* data) {

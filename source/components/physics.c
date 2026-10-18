@@ -6,19 +6,23 @@ enum Direction getDirFromAngle(int angle) {
 
 void updatePhysics() {
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
-        PhysicsComponent* ent = &gPhysCompsDense[i];
-        PositionMini oldTilePos = getTilePos(ent->header.entId);
-        ent->pos.x.WORD += ent->vec.x.WORD; //       |y
-        ent->pos.y.WORD += ent->vec.y.WORD; //       .
-        ent->pos.z.WORD += ent->vec.z.WORD; //     z/ \x
-        if (ent->vec.x.WORD || ent->vec.y.WORD || ent->vec.z.WORD)
-            updateObj(ent->header.entId);
-
-        PositionMini newTilePos = getTilePos(ent->header.entId);
-        if (!isEqualPosMini(oldTilePos, newTilePos))
-            updateZDepth(getComponent(ent->header.entId, COMP_OBJ));
-        memset32(&ent->vec, 0, 3);
+        PhysicsComponent* phys = &gPhysCompsDense[i];
+        updatePhysicsSingleEnt(phys);
     }
+}
+
+inline void updatePhysicsSingleEnt(PhysicsComponent* phys) {
+    PositionMini oldTilePos = getTilePos(phys->header.entId);
+    phys->pos.x.WORD += phys->vec.x.WORD; //       |y
+    phys->pos.y.WORD += phys->vec.y.WORD; //       .
+    phys->pos.z.WORD += phys->vec.z.WORD; //     z/ \x
+    if (phys->vec.x.WORD || phys->vec.y.WORD || phys->vec.z.WORD)
+        updateObj(phys->header.entId);
+
+    PositionMini newTilePos = getTilePos(phys->header.entId);
+    if (!isEqualPosMini(oldTilePos, newTilePos))
+        updateZDepth(getComponent(phys->header.entId, COMP_OBJ));
+    phys->vec.x.WORD = phys->vec.y.WORD = phys->vec.z.WORD = 0;
 }
 
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {

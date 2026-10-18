@@ -109,7 +109,6 @@ void walkSwitchCBChangeLevel(int entId, int weight) {
             addTaskToQueue(entId, TASK_SPIN_ENDLESSLY, 0x4);
         int nextLevel = getNextLevelIndex();
         addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, nextLevel);
-        removeComponentInput(gPlayerId);
         return;
     }
 }

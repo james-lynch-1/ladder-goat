@@ -26,6 +26,8 @@ SWord setSWord(s16 hi, u16 lo);
 
 SWord multSWord(SWord a, SWord b);
 
+void setMatrix(Matrix3D* mtx, int* valuesArr);
+
 void multMatrix2D(s16* result, s16* m1, s16* m2);
 
 Matrix3D* multMatrix3D(Matrix3D* result, Matrix3D* m1, Matrix3D* m2);

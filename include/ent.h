@@ -23,6 +23,8 @@ int spawnEntXAxisDecal(int tileX, int tileY, int tileZ, int entFlags, int data0,
 
 int spawnEntZAxisDecal(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void(*callback));
 
+int spawnEntKey(int tileX, int tileY, int tileZ, int entFlags, int data0, int data1, int data2, int data3, void* data);
+
 void slapSwitchStartSpinning(int entId);
 
 void slapSwitchCBEnableGoal(int entId);

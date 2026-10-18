@@ -84,11 +84,12 @@ void lightenBgPalette(int amount) {
 
 void copyObjAttrsToOAM() { // excluding affine stuff
     memset32(oam_mem, ATTR0_HIDE, 2 * 128);
-    int idx = gDeepestObjEntId[gIsLadderNWFacing];
-    int i = 0;
-    while (idx != INT16_MAX) {
+    int idx = gDeepestObjEntId[gIsKeyNWFacing];
+    int i = 0, j = 0;
+    while (idx != INT16_MAX && j < 128) {
+        j++;
         ObjComponent* o = getComponent(idx, COMP_OBJ);
-        idx = o->nextId[gIsLadderNWFacing];
+        idx = o->nextId[gIsKeyNWFacing];
         if ((o->attr0 & ATTR0_MODE_MASK) == ATTR0_HIDE) {
             continue;
         }
@@ -108,4 +109,6 @@ void copyObjAffinesToOAM() {
         oamAffPtr->pc = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pc;
         oamAffPtr->pd = gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]].pd;
     }
+    for (int i = numComps(COMP_ROTATION); i < MAX_ROTATION_COMPONENTS; i++)
+        obj_aff_identity(&obj_aff_mem[i]);
 }

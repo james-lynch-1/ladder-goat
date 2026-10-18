@@ -27,9 +27,7 @@ int spawnEntSlapSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
 void slapSwitchStartSpinning(int entId) {
     SlappableComponent* slap = getComponent(entId, COMP_SLAPPABLE);
     TaskQueueComponent* playerTQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
-    int turnDir = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN) &&
-        (playerTQ->queue[playerTQ->head].data == 1) ?
-        -1 : 1;
+    int turnDir = playerTQ->queue[playerTQ->head].data;
     TaskQueueComponent* switchTQ = getComponent(entId, COMP_TASK_QUEUE);
     int timeRemaining = slap->data[0] == INT32_MAX ? 6 : slap->data[0];
     if (!isTaskQueueEmpty(switchTQ))
@@ -50,27 +48,27 @@ void slapSwitchCBEnableGoal(int entId) {
 
 void slapSwitchCBMoveMoversX(int entId) {
     TaskQueueComponent* playerTQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
-    bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN) &&
-        (playerTQ->queue[playerTQ->head].data == 1) ?
+    bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN_DISPATCH) &&
+        (playerTQ->queue[playerTQ->head].data == -1) ?
         true : false;
-    addTaskToQueue(entId, TASK_SPIN, isCW ? -1 : 1);
+    addTaskToQueue(entId, TASK_SPIN, playerTQ->queue[playerTQ->head].data);
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
         PhysicsComponent* phys = &gPhysCompsDense[i];
         if (phys->header.flags & PHYS_MOVER_FLAG)
-            addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (SOUTHEAST + 2 * !isCW) % 4);
+            addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (SOUTHEAST + 2 * isCW) % 4);
     }
 }
 
 void slapSwitchCBMoveMoversZ(int entId) {
     TaskQueueComponent* playerTQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
-    bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN) &&
-        (playerTQ->queue[playerTQ->head].data == 1) ?
+    bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN_DISPATCH) &&
+        (playerTQ->queue[playerTQ->head].data == -1) ?
         true : false;
     addTaskToQueue(entId, TASK_SPIN, isCW ? -1 : 1);
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
         PhysicsComponent* phys = &gPhysCompsDense[i];
         if (phys->header.flags & PHYS_MOVER_FLAG)
-            addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (NORTHEAST + 2 * isCW) % 4);
+            addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (NORTHEAST + 2 * !isCW) % 4);
     }
 }
 
@@ -88,8 +86,8 @@ void eLDecrementSpinTaskSpeed(EventListener* eL, int entId) {
     if (!switchTQ)
         return;
     if (!isTaskQueueEmpty(switchTQ)) {
-        int timeRemaining = switchTQ->queue[switchTQ->head].data;
-        int decrement = timeRemaining < 0 ? 1 : timeRemaining == INT32_MAX ? 0 : -1;
+        int stepsRemaining = switchTQ->queue[switchTQ->head].data;
+        int decrement = stepsRemaining < 0 ? 1 : stepsRemaining == INT32_MAX ? 0 : -1;
         switchTQ->queue[switchTQ->head].data += decrement;
         if (switchTQ->queue[switchTQ->head].data == 0) {
             switchTQ->head = (switchTQ->head + 1) % (sizeof(switchTQ->queue) / sizeof(Task));
