@@ -35,7 +35,8 @@ s16 gPlayerId = -1;
 int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
 bool gIsKeyNWFacing = false;
 const LevelData* gLevelData; // ptr to the level in rom
-CellComponent* gColl[8][18][18]; // collision map we copy to ram and can edit
+int gLevelXWidthZWidthProduct;
+CellComponent* gColl[64 * 64]; // collision map we copy to ram and can edit
 int gNextLevel;
 
 ObjAffStruct gObjAffBuffer[32];

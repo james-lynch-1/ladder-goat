@@ -1,8 +1,15 @@
-# takes a csv file(s) and turns into our level data format
+# takes a csv file(s) exported by Tiled and converts to our level data format
 # takes as arguments the relative path to the directory containing the csv file(s) and the name of the level
 
 import sys, os
 from pathlib import Path
+
+def replaceField(string: str, field: str, val: int):
+    start = string.find(field + " = ") + len(field) + 3
+    end = start
+    while string[end].isdigit():
+        end += 1
+    return string[:start] + str(val) + string[end:]
 
 def main():
     if len(sys.argv) != 3:
@@ -28,42 +35,49 @@ def main():
         else:
             break
     numLayers -= 1
-    beginStr = "const LevelData " + levelName + " = {\n    " + levelNum + ", 0, " +\
-         levelName + "EntArr, sizeof(" + levelName + \
-         "EntArr) / sizeof(LevelEntData),\n    {6, 0, 6, SOUTHEAST}, 3, 16, 16, {0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, false}," +\
-         str(numLayers) + ",\n    {\n"
-    mapWidth = 16
 
-    fileExists = False
-    stuffToNotOverwrite = "#include \"levels.h\"\n\n" +\
-    "const LevelEntData level" + levelNum + "EntArr[] = {\n};\n\n"
     if (os.path.isfile("source/levels/" + levelName + ".c")):
-        fileExists = True
         with open("source/levels/" + levelName + ".c", "r") as f:
-            stuffToNotOverwrite = f.read().split("        {{")[0]
+            result = [f.read().split(".clsn")[0] + ".clsn =\n    {\n"]
+    else:
+        result = ["#include \"levels.h\"\n\n" +\
+        "const LevelEntData level" + levelNum + "EntArr[] = {\n};\n\n" +\
+        "const LevelData " + levelName + " = {\n" +\
+        "    .levelId = " + levelNum + ",\n" +\
+        "    .bgIndex = 0,\n" +\
+        "    .entArr = " + levelName + "EntArr,\n" + \
+        "    .entArrLength = sizeof(" + levelName + "EntArr) / sizeof(LevelEntData),\n" +\
+        "    .playerPos = { 6, 0, 6, SOUTHEAST },\n" +\
+        "    .yHeight = 3,\n" +\
+        "    .xWidth = 16,\n" +\
+        "    .zWidth = 16,\n" +\
+        "    .vp = { 0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, false },\n" +\
+        "    .clsn =\n    {\n"]
+    chunks = [""]
+    y = 1
+    csvList = None
+    while y <= numLayers:
+        filePath = path + "/" + levelName + "_Tile Layer " + str(y) + ".csv"
+        with open(filePath, "r") as csv:
+            csvStr = csv.read()
+        csvList = csvStr.splitlines()
+        i = 0
+        while i < len(csvList):
+            csvList[i] = csvList[i].replace("-1", "0") # empty spaces should be 0 but Tiled exports them as -1
+            csvList[i] = "        " + csvList[i] + ",\n"
+            i += 1
+        chunks = chunks + csvList
+        chunks.append("\n")
+        y = y + 1
+    chunks[len(chunks) - 1] = "    }\n};\n" # replace the last newline with the closing braces
+
+    if csvList is not None:
+        xWidth = csvList[0].count(",")
+        zWidth = len(csvList)
+        result[0] = replaceField(result[0], "xWidth", xWidth)
+        result[0] = replaceField(result[0], "zWidth", zWidth)
+
     with open("source/levels/" + levelName + ".c", "w") as f:
-        f.write(stuffToNotOverwrite)
-        if not fileExists:
-            f.write(beginStr)
-        y = 1
-        while y <= numLayers:
-            f.write("        {{\n")
-            filePath = path + "/" + levelName + "_Tile Layer " + str(y) + ".csv"
-            with open(filePath, "r") as csv:
-                csvStr = csv.read()
-                for z in range(mapWidth):
-                    f.write("            {")
-                    rowArr = csvStr.split("\n")[z].split(",")
-                    for x in rowArr:
-                        f.write(x + ",")
-                    f.seek(f.seek(0, os.SEEK_END) - 1)
-                    f.truncate()
-                    f.write("},\n")
-                f.seek(f.seek(0, os.SEEK_END) - 2)
-                f.truncate()
-                f.write("\n")
-            f.write("        }},\n")
-            y = y + 1
-        f.write("    }\n};\n")
+        f.write("".join(result + chunks))
 
 main()

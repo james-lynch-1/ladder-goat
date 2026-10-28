@@ -7,6 +7,7 @@ int getNextLevelIndex() {
 
 void changeLevel(int levelId) {
     gLevelData = gLevels[levelId];
+    gLevelXWidthZWidthProduct = gLevelData->xWidth * gLevelData->zWidth;
     memset32(&gColl, 0, sizeof(gColl) / 4);
     int i = 0, j = 0;
     while (i < gNumEnts && j < MAX_ENTS) {

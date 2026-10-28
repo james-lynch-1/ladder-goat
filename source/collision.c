@@ -13,9 +13,12 @@ int getClsnVal(CellComponent* cell) {
 }
 
 int getClsnValAtTilePos(PositionMini tilePos) {
-    if (!in_range(tilePos.x, 0, MAP_WIDTH_X) || !in_range(tilePos.y, 0, 3) || !in_range(tilePos.z, 0, MAP_WIDTH_Z))
+    if (!in_range(tilePos.x, 0, gLevelData->xWidth) || !in_range(tilePos.y, 0, 3) || !in_range(tilePos.z, 0, gLevelData->zWidth))
         return 1;
-    CellComponent* cell = gColl[tilePos.y][tilePos.z][tilePos.x];
+    const int offs = tilePos.y * gLevelXWidthZWidthProduct +
+        tilePos.z * gLevelData->xWidth +
+        tilePos.x;
+    CellComponent* cell = gColl[offs];
     return getClsnVal(cell);
 }
 
@@ -48,8 +51,10 @@ int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
             break;
         }
     }
-    int clsn = getClsnVal(gColl[tilePos.y][nextTilePos.z + zTriArr[zTriBool + 1]][nextTilePos.x + xTriArr[xTriBool + 1]]) |
-        isTileOccupiedByPhys;
+    // int clsn = getClsnVal(gColl[tilePos.y][nextTilePos.z + zTriArr[zTriBool + 1]][nextTilePos.x + xTriArr[xTriBool + 1]]) |
+    //     isTileOccupiedByPhys;
+    PositionMini tilePosToCheck = { nextTilePos.x + xTriArr[xTriBool + 1], tilePos.y, nextTilePos.z + zTriArr[zTriBool + 1] };
+    int clsn = getClsnValAtTilePos(tilePosToCheck) | isTileOccupiedByPhys;
     if (clsn) return clsn;
 
     checkWalkables(phys->weight, tilePos, nextTilePos, xOffsPos, xOffsNeg, zOffsPos, zOffsNeg, 0);

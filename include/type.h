@@ -284,10 +284,6 @@ typedef struct LutStruct_ {
     int period;
 } LutStruct;
 
-typedef struct CollLayer_ {
-    u8 cell[MAP_WIDTH_Z][MAP_WIDTH_X];
-} CollLayer;
-
 typedef struct CollTileToSpriteMapEntry_ {
     const u16* tiles;
     u16 flipFlags;
@@ -312,7 +308,7 @@ typedef struct LevelData_ {
     int xWidth;
     int zWidth;
     Viewport vp;
-    CollLayer clsn[];
+    u8 clsn[];
 } LevelData;
 
 // saves

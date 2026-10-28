@@ -123,14 +123,15 @@ void resetObjZDepth(ObjComponent* toBeReset) {
 
 void drawSpriteCells() {
     int entId = -1;
+    u8* ptr = (u8*)gLevelData->clsn;
+    int i = 0;
     for (int y = 0; y < gLevelData->yHeight; y++) {
         for (int z = 0; z < gLevelData->zWidth; z++) {
             for (int x = 0; x < gLevelData->xWidth; x++) {
-                if (gLevelData->clsn[y].cell[z][x]) {
-                    int clsnVal = gLevelData->clsn[y].cell[z][x];
+                if (*ptr != 0) {
                     entId = reserveEntSlot();
-                    CellComponent* cell = addComponentCell(entId, 0, x, y, z, clsnVal);
-                    gColl[y][z][x] = cell;
+                    CellComponent* cell = addComponentCell(entId, 0, x, y, z, *ptr);
+                    gColl[i] = cell;
                     Position pos = *(Position*)((u8*)cell + sizeof(ComponentHeader));
                     ScreenPos screenPos = getScreenPos(pos);
                     bool isOffScreen = !in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) ||
@@ -138,12 +139,14 @@ void drawSpriteCells() {
                     addComponentObj(entId,
                         0,
                         ATTR0_SQUARE | (isOffScreen << 9),
-                        ATTR1_SIZE_32x32 | gCollTileToSpriteMap[clsnVal].flipFlags,
-                        ATTR2_ID(fetchSprite(gCollTileToSpriteMap[clsnVal].tiles, 512)) |
-                        ATTR2_PALBANK(gCollTileToSpriteMap[clsnVal].palIndex),
+                        ATTR1_SIZE_32x32 | gCollTileToSpriteMap[*ptr].flipFlags,
+                        ATTR2_ID(fetchSprite(gCollTileToSpriteMap[*ptr].tiles, 512)) |
+                        ATTR2_PALBANK(gCollTileToSpriteMap[*ptr].palIndex),
                         0,
                         COMP_CELL);
                 }
+                ptr++;
+                i++;
             }
         }
     }

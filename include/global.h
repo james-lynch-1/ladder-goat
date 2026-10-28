@@ -37,7 +37,9 @@ extern s16 gPlayerId;
 extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
 extern bool gIsKeyNWFacing;
 extern const LevelData* gLevelData;
-extern CellComponent* gColl[8][18][18];
+extern int gLevelXWidthZWidthProduct;
+extern CellComponent* gColl[64 * 64]; // eg level can be 1 block tall and 64*64 x*z,
+                                      // or 3 blocks tall and 36*36 x*z
 extern int gNextLevel;
 
 extern const LevelData* gLevels[];

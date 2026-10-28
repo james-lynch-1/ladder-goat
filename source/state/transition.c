@@ -33,8 +33,10 @@ void isrVCountTransition() {
     ObjComponent oldPlayerObj = *(ObjComponent*)getComponent(gPlayerId, COMP_OBJ);
     int y = (oldPlayerObj.attr0 & ATTR0_Y_MASK) >> ATTR0_Y_SHIFT;
     int x = (oldPlayerObj.attr1 & ATTR1_X_MASK) >> ATTR1_X_SHIFT;
+    int xDiff = SGN3(targetScreenPos.x - x);
     y += SGN3(targetScreenPos.y - y);
-    x += SGN3(targetScreenPos.x - x);
+    x += xDiff;
+    gVpBackdrop.x += xDiff;
     updateObjs();
     ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
     *playerObj = oldPlayerObj;
@@ -48,7 +50,8 @@ void isrVBlankTransition() {
         copyObjAttrsToOAM();
         copyObjAffinesToOAM();
     }
-    REG_BG0VOFS = gVpBackdrop.y--;
+    REG_BG0VOFS = --gVpBackdrop.y;
+    REG_BG0HOFS = gVpBackdrop.x;
     REG_BG1VOFS = gViewport.y;
     REG_BG1HOFS = gViewport.x;
 }

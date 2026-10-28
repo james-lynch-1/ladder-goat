@@ -25,7 +25,7 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
 void walkSwitchCBOpenGate(int entId, int weight) {
     WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
-    CellComponent* cellToDeactivate = gColl[0][8][4];
+    CellComponent* cellToDeactivate = gColl[8 * gLevelData->xWidth + 4];
     bool wasPressed = walk->currentWeight >= walk->threshold;
     bool isPressed = walk->currentWeight + weight >= walk->threshold;
     int numBtnsPressed = 0;

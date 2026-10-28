@@ -5,7 +5,7 @@ int spawnEntKey(int tileX, int tileY, int tileZ, int entFlags, int data0, int da
     if (entId == -1) return -1;
     enum Direction dir = data0;
     PhysicsComponent* phys = addComponentPhysics(entId, PHYS_KEY_FLAG, (16 * tileX) << 16, (16 * tileY) << 16, (16 * tileZ) << 16,
-        0, 0, 0, 1, dir * 0x2000);
+        0, 0, 0, 1, dir * 0x4000);
     RotationComponent* rot = addComponentRotation(entId, 0);
     if (!phys ||
         !rot ||
