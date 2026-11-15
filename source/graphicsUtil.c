@@ -8,6 +8,14 @@ ScreenPos getScreenPos(Position pos) {
     return screenPos;
 }
 
+ScreenPos getScreenPosFromOldViewport(Position pos) {
+    ScreenPos screenPos = {
+        ((pos.x.WORD - pos.z.WORD) >> 16) - gOldViewport.x + 16 * gLevelData->zWidth + 16,
+        (((pos.x.WORD + pos.z.WORD) / 2 - pos.y.WORD) >> 16) - gOldViewport.y + 24
+    };
+    return screenPos;
+}
+
 ScreenPos getScreenPosFromViewportXY(Position pos, int levelIndex, int vpX, int vpY) {
     ScreenPos screenPos = {
         ((pos.x.WORD - pos.z.WORD) >> 16) - vpX + 16 * gLevels[levelIndex]->zWidth + 16,
@@ -131,7 +139,7 @@ void drawSpriteCells() {
                 if (*ptr != 0) {
                     entId = reserveEntSlot();
                     CellComponent* cell = addComponentCell(entId, 0, x, y, z, *ptr);
-                    gColl[i] = cell;
+                    gClsn[i] = (ComponentHeader*)cell;
                     Position pos = *(Position*)((u8*)cell + sizeof(ComponentHeader));
                     ScreenPos screenPos = getScreenPos(pos);
                     bool isOffScreen = !in_range(screenPos.x, 0 - 16, SCREEN_WIDTH + 16) ||

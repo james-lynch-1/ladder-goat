@@ -33,15 +33,11 @@ void CBInputComp(int entId) {
     }
 #endif
 
-    if (key_is_down(KEY_UP | KEY_DOWN)) {
-        if (!isTaskWithFlagsInQueue(TASK_MVMT_FLAG, entId, true))
-            addTaskToQueue(entId, TASK_MOVE_DISPATCH, key_is_down(KEY_UP) ? 1 : -1);
-    }
-    if (key_is_down(KEY_LEFT | KEY_RIGHT)) {
-        bool isTurnInQueue = isTaskWithFlagsInQueue(TASK_TURN_FLAG, entId, true);
-        if (!isTurnInQueue)
-            addTaskToQueue(entId, TASK_TURN_DISPATCH, key_is_down(KEY_LEFT) ? 1 : -1);
-    }
+    if (key_hit(KEY_UP | KEY_DOWN))
+        addMove(entId, key_is_down(KEY_UP) ? 1 : -1);
+
+    if (key_hit(KEY_LEFT | KEY_RIGHT))
+        addTurn(gPlayerId, key_is_down(KEY_RIGHT) != 0);
 }
 
 void updateInputComps() {

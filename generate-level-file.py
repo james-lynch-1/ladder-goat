@@ -17,7 +17,11 @@ def main():
         return
     path = os.getcwd() + "/" + sys.argv[1]
     levelName = sys.argv[2]
-    levelNum = levelName.rsplit("level", 1)[1]
+    i = 0
+    while i < len(levelName):
+        if levelName[i].isdigit(): break
+        i += 1
+    levelNum = levelName[i:]
     if not os.path.isdir(path):
         print("Invalid path supplied as arg 1.")
         return
@@ -41,14 +45,14 @@ def main():
             result = [f.read().split(".clsn")[0] + ".clsn =\n    {\n"]
     else:
         result = ["#include \"levels.h\"\n\n" +\
-        "const LevelEntData level" + levelNum + "EntArr[] = {\n};\n\n" +\
+        "const LevelEntData " + levelName + "EntArr[] = {\n};\n\n" +\
         "const LevelData " + levelName + " = {\n" +\
         "    .levelId = " + levelNum + ",\n" +\
         "    .bgIndex = 0,\n" +\
         "    .entArr = " + levelName + "EntArr,\n" + \
         "    .entArrLength = sizeof(" + levelName + "EntArr) / sizeof(LevelEntData),\n" +\
         "    .playerPos = { 6, 0, 6, SOUTHEAST },\n" +\
-        "    .yHeight = 3,\n" +\
+        "    .yHeight = " + str(numLayers) + ",\n" +\
         "    .xWidth = 16,\n" +\
         "    .zWidth = 16,\n" +\
         "    .vp = { 0, 0, 0, INT32_MAX, 0, 0, 0, INT32_MAX, false },\n" +\
@@ -76,6 +80,7 @@ def main():
         zWidth = len(csvList)
         result[0] = replaceField(result[0], "xWidth", xWidth)
         result[0] = replaceField(result[0], "zWidth", zWidth)
+        result[0] = replaceField(result[0], "yHeight", numLayers)
 
     with open("source/levels/" + levelName + ".c", "w") as f:
         f.write("".join(result + chunks))

@@ -27,9 +27,10 @@ void updateNormal() {
     gOldViewport = gViewport;
     key_poll();
 
-    updateTaskQueues();
     handleInput();
     updateInputComps();
+    if (gNumActionsCached > 0) processActions();
+    updateTaskQueues();
     updatePlayerStuff();
     updateTimers();
     updatePhysics();

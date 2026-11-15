@@ -33,11 +33,22 @@
 #define NUM_SPRITE_CELLS    26
 #define ATTR0_GFX_MASK      0x0C00
 
+#define MAX_TASKS_GLOBAL    16
+#define MAX_MOVES_CACHED    16
+
 #define PLAYER_WEIGHT       2
 #define ARROW_WEIGHT        1
 
 #define MAP_WIDTH_X         16
 #define MAP_WIDTH_Z         16
+#define CLSN_SIZE           64 * 64
+#define MAX_UNDO_AMOUNT     256
+#define CLSNFLAG_ENTERED_XPOS   0b1
+#define CLSNFLAG_ENTERED_ZNEG   0b10
+#define CLSNFLAG_ENTERED_XNEG   0b100
+#define CLSNFLAG_ENTERED_ZPOS   0b1000
+#define CLSNFLAG_ENTERED_MASK   0b1111
+#define CLSNFLAG_VISITED        0b10000
 #define NUM_ROWS            21
 #define NUM_COLS            16
 

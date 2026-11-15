@@ -2,6 +2,7 @@
 #define STATE
 
 #include "main.h"
+#include "taskListGlobal.h"
 
 void setGameState(enum GameState state);
 

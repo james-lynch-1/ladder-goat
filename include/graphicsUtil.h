@@ -6,6 +6,8 @@
 
 ScreenPos getScreenPos(Position pos);
 
+ScreenPos getScreenPosFromOldViewport(Position pos);
+
 ScreenPos getScreenPosFromViewportXY(Position pos, int levelIndex, int vpX, int vpY);
 
 int getZDepth(ObjComponent* obj, bool isNW);

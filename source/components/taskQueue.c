@@ -21,19 +21,23 @@ void removeComponentTaskQueue(int entId) {
     removeComponent(entId, COMP_TASK_QUEUE);
 }
 
-void updateTaskQueues() {
-    for (int i = 0; i < numComps(COMP_TASK_QUEUE); i++) {
-        TaskQueueComponent* tQ = &gTaskQueueCompsDense[i];
-        if (isTaskQueueEmpty(tQ)) continue;
-        Task* currTask = &tQ->queue[tQ->head];
-        gTaskTable[currTask->taskIndex].fn(tQ->header.entId, currTask);
-        if (currTask->timeRemaining != INT32_MAX)
-            currTask->timeRemaining--;
-        if (currTask->timeRemaining <= 0) {
+void executeTask(TaskQueueComponent* tQ) {
+        Task* task = &tQ->queue[tQ->head];
+        gTaskTable[task->taskIndex].fn(tQ->header.entId, task);
+        if (task->timeRemaining != INT32_MAX)
+            task->timeRemaining--;
+        if (task->timeRemaining <= 0) {
             if (!isTaskQueueEmpty(tQ))
                 tQ->head = (tQ->head + 1) % 16; // sizeof(tQ->queue) / sizeof(Task) = 16
             static_assert(sizeof(tQ->queue) == 192);
         }
+}
+
+void updateTaskQueues() {
+    for (int i = 0; i < numComps(COMP_TASK_QUEUE); i++) {
+        TaskQueueComponent* tQ = &gTaskQueueCompsDense[i];
+        if (isTaskQueueEmpty(tQ)) continue;
+        executeTask(tQ);
     }
 }
 

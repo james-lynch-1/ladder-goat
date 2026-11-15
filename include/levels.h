@@ -3,6 +3,7 @@
 
 #include "global.h"
 
+extern const LevelData map0;
 extern const LevelData level0;
 extern const LevelData level1;
 extern const LevelData level2;

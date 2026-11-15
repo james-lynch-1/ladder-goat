@@ -105,3 +105,20 @@ bool isEqualPos(Position pos1, Position pos2) {
 bool isEqualPosMini(PositionMini pos1, PositionMini pos2) {
     return pos1.x == pos2.x && pos1.y == pos2.y && pos1.z == pos2.z;
 }
+
+bool isPowerOf2(int num) {
+    return (num & (num - 1)) == 0;
+}
+
+bool isEqualHitbox(Hitbox hb1, Hitbox hb2) {
+    return hb1.bwd == hb2.bwd &&
+        hb1.fwd == hb2.fwd &&
+        hb1.l == hb2.l &&
+        hb1.r == hb2.r &&
+        hb1.u == hb2.u &&
+        hb1.d == hb2.d;
+}
+
+bool isZeroHitbox(Hitbox hb) {
+    return !hb.bwd && !hb.fwd && !hb.l && !hb.r && !hb.u && !hb.d;
+}

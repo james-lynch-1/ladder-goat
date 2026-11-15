@@ -8,7 +8,7 @@ int getNextLevelIndex() {
 void changeLevel(int levelId) {
     gLevelData = gLevels[levelId];
     gLevelXWidthZWidthProduct = gLevelData->xWidth * gLevelData->zWidth;
-    memset32(&gColl, 0, sizeof(gColl) / 4);
+    memset32(&gClsn, 0, sizeof(gClsn) / 4);
     int i = 0, j = 0;
     while (i < gNumEnts && j < MAX_ENTS) {
         if (gEntFlags[i]) {
@@ -31,6 +31,11 @@ void changeLevel(int levelId) {
         (gLevelData->playerPos.y * 16) << 16,
         (gLevelData->playerPos.z * 16) << 16,
         gLevelData->playerPos.dir);
+    setPosMiniAndDir(gPlayerId, gLevelData->playerPos.x,
+        gLevelData->playerPos.y,
+        gLevelData->playerPos.z,
+        gLevelData->playerPos.dir);
+        
     turnEnt(gPlayerId, NULL, 0);
     gViewport.canMove = gLevelData->vp.canMove;
 
@@ -54,7 +59,7 @@ void changeLevel(int levelId) {
 }
 
 const LevelData* gLevels[3] = {
-    &level0,
+    &map0,
     &level1,
     &level2
 };

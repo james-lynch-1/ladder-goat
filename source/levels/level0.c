@@ -1,8 +1,8 @@
 #include "levels.h"
 
 const LevelEntData level0EntArr[] = {
-    { { 2, 0, 2 }, ENT_KEY, 0,{ SOUTHEAST }, NULL },
-    { { 7, 0, 1 }, ENT_WALKSWITCH, 0,{ WALK_TOGGLE_FLAG, 2 }, walkSwitchCBEnableGoal },
+    { { 2, 0, 2 }, ENT_KEY, 0, { SOUTHEAST }, NULL },
+    { { 7, 0, 1 }, ENT_WALKSWITCH, 0, { WALK_TOGGLE_FLAG, 2 }, walkSwitchCBEnableGoal },
     { { 6, 0, 5 }, ENT_GOAL, ENT_INACTIVE,{ 0, 2 }, walkSwitchCBChangeLevel }
 };
 

@@ -31,6 +31,10 @@ bool hasComponent(int entId, enum ComponentType componentType) {
     return index != -1;
 }
 
+ComponentHeader* getComponentHeader(int entId) {
+    return (ComponentHeader*)getComponent(entId, 0);
+}
+
 void* getComponent(int entId, enum ComponentType componentType) {
     if (in_range(entId, 0, INT16_MAX - 1) && hasComponent(entId, componentType))
         return denseSetAddr(componentType) + compSize(componentType) * gCompSetSparse[componentType][entId];
@@ -42,6 +46,7 @@ void* getComponentFromDenseIndex(int denseIndex, enum ComponentType componentTyp
 }
 
 enum ComponentType getComponentType(ComponentHeader* compPtr) {
+    if (!compPtr) return -1;
     for (int i = 0; i < NUM_COMP_TYPES; i++)
         if ((uint32_t)compPtr >= (uint32_t)denseSetAddr(i))
             return i;

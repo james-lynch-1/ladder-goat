@@ -18,7 +18,6 @@
 #include "levels.h"
 #include "ent.h"
 
-
 extern int gScrollX;
 extern int gScrollY;
 extern Viewport gViewport;
@@ -37,10 +36,14 @@ extern s16 gPlayerId;
 extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
 extern bool gIsKeyNWFacing;
 extern const LevelData* gLevelData;
-extern int gLevelXWidthZWidthProduct;
-extern CellComponent* gColl[64 * 64]; // eg level can be 1 block tall and 64*64 x*z,
-                                      // or 3 blocks tall and 36*36 x*z
 extern int gNextLevel;
+extern int gLevelXWidthZWidthProduct;
+extern ComponentHeader* gClsn[CLSN_SIZE]; // eg level can be 1 block y and 64*64 x*z, or 3 blocks y and 36*36
+extern ClsnData gClsnData[CLSN_SIZE];
+extern Action gActionList[MAX_UNDO_AMOUNT];
+extern int gNumMovesUndone;
+extern Action gActionCache[MAX_MOVES_CACHED];
+extern int gNumActionsCached;
 
 extern const LevelData* gLevels[];
 
@@ -50,10 +53,12 @@ extern SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];
 extern u8 gEntFlags[MAX_ENTS];
 extern u8 gEntsToDelete[MAX_ENTS];
 
+extern TaskGlobal gTasksGlobal[MAX_TASKS_GLOBAL];
+extern int gNumTasksGlobal;
 extern GameState gGameState;
 extern u32 gFlags;
 
-// // events and listeners
+// events and listeners
 extern int gNumListenersPerType[NUM_COMP_TYPES];
 extern EventListener gEventListeners[NUM_COMP_TYPES][MAX_EVENT_LISTENERS_PER_TYPE];
 
@@ -73,7 +78,7 @@ extern SlappableComponent gSlappableCompsDense[MAX_SLAPPABLE_COMPONENTS];
 
 extern int gNumCompsPerType[NUM_COMP_TYPES];
 
-/** Table with addresses of comp dense sets, sizes of comps, max comps per type and comp removers */
+/** Table with addresses of comp dense sets, sizes of comps, max comps/type and comp removers */
 enum gCompTableIndexes { COMP_DSET_ADDRESSES, COMP_SIZES, COMP_MAX_PER_TYPE, COMP_REMOVERS };
 
 #define denseSetAddr(x) (void*)gCompTable[x][COMP_DSET_ADDRESSES]

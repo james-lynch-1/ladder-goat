@@ -11,18 +11,27 @@ void updatePhysics() {
     }
 }
 
-inline void updatePhysicsSingleEnt(PhysicsComponent* phys) {
+void updatePhysicsSingleEnt(PhysicsComponent* phys) {
     PositionMini oldTilePos = getTilePos(phys->header.entId);
-    phys->pos.x.WORD += phys->vec.x.WORD; //       |y
-    phys->pos.y.WORD += phys->vec.y.WORD; //       .
-    phys->pos.z.WORD += phys->vec.z.WORD; //     z/ \x
-    if (phys->vec.x.WORD || phys->vec.y.WORD || phys->vec.z.WORD)
-        updateObj(phys->header.entId);
-
-    PositionMini newTilePos = getTilePos(phys->header.entId);
-    if (!isEqualPosMini(oldTilePos, newTilePos))
-        updateZDepth(getComponent(phys->header.entId, COMP_OBJ));
-    phys->vec.x.WORD = phys->vec.y.WORD = phys->vec.z.WORD = 0;
+    Position tilePosToPos;
+    getPosFromTilePos(&tilePosToPos, phys->tilePos);
+    bool changedPos = false;
+    for (int i = 0; i < 3; i++) {
+        SWord* posDim = (SWord*)&phys->pos + i;
+        SWord* tPDim = (SWord*)&tilePosToPos + i;
+        int diff = tPDim->HALF.HI - posDim->HALF.HI;
+        if (diff) {
+            changedPos = true;
+            if (ABS(diff) >= 2)
+                posDim->HALF.HI += SGN3(diff) * (1 + (ABS(diff) / 16));
+            else posDim->WORD = tPDim->WORD;
+        }
+    }
+    if (hasComponent(phys->header.entId, COMP_OBJ)) {
+        if (changedPos) updateObj(phys->header.entId);
+        if (!isEqualPosMini(oldTilePos, getTilePos(phys->header.entId)))
+            updateZDepth(getComponent(phys->header.entId, COMP_OBJ));
+    }
 }
 
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {
@@ -34,20 +43,31 @@ void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {
     phys->angle = dir * 0x4000;
 }
 
-void taskMoveNESW(int entId, Task* task) {
+void setPosMiniAndDir(int entId, int x, int y, int z, enum Direction dir) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     if (!phys) return;
-    enum Direction dir = task->data;
-    int angle = dir * 0x4000;
-    phys->angle = angle;
-    if (task->timeRemaining == 16) {
-        bool canMove = checkCollisionMove(phys, 1) == 0;
-        if (!canMove) {
-            task->timeRemaining = 1;
-            return;
-        }
-    }
-    moveEnt(entId, task, 1);
+    if (phys->header.flags & PHYS_SOLID_FLAG) setClsnVal(phys->tilePos, NULL);
+    phys->tilePos.x = x;
+    phys->tilePos.y = y;
+    phys->tilePos.z = z;
+    phys->tilePos.dir = dir;
+    if (phys->header.flags & PHYS_SOLID_FLAG) setClsnVal(phys->tilePos, (ComponentHeader*)phys);
+}
+
+void taskMoveNESW(int entId, Task* task) {
+    // PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    // if (!phys) return;
+    // enum Direction dir = task->data;
+    // int angle = dir * 0x4000;
+    // phys->angle = angle;
+    // if (task->timeRemaining == 16) {
+    //     bool canMove = checkCollisionMove(phys, 1) == 0;
+    //     if (!canMove) {
+    //         task->timeRemaining = 1;
+    //         return;
+    //     }
+    // }
+    // moveEnt(entId, task, 1);
 }
 
 // utils
@@ -90,6 +110,11 @@ Vector3D scalarMultVec(Vector3D vec, int scalar) {
     return newVec;
 }
 
+void getPosFromTilePos(Position* pos, PositionMini tP) {
+    Position p = { { (tP.x << 16) * 16 },{ (tP.y << 16) * 16 },{ (tP.z << 16) * 16 } };
+    *pos = p;
+}
+
 PositionMini getTilePos(int entId) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     PositionMini p = {
@@ -102,12 +127,14 @@ PositionMini getTilePos(int entId) {
 
 PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, int posZ, int vecX, int vecY, int vecZ, int weight, u16 angle) {
     PhysicsComponent phys = {
-        { entId, flags },
-        { (SWord)posX, (SWord)posY, (SWord)posZ },
-        { 0, 0, 0, 0, 0, 0 },
-        { (SWord)vecX, (SWord)vecY, (SWord)vecZ },
-        weight,
-        angle
+        .header = { entId, flags },
+        .pos = { (SWord)posX, (SWord)posY, (SWord)posZ },
+        .tilePos = { ((SWord)posX).HALF.HI / 16, ((SWord)posY).HALF.HI / 16, ((SWord)posZ).HALF.HI / 16, getDirFromAngle(angle) },
+        .hitbox = { 0, 0, 0, 0, 0, 0 },
+        .vec = { (SWord)vecX, (SWord)vecY, (SWord)vecZ },
+        .actionCacheIndex = -1,
+        .weight = weight,
+        .angle = angle
     };
     return (PhysicsComponent*)addComponentCustom(&phys, COMP_PHYSICS);
 }

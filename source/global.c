@@ -35,9 +35,14 @@ s16 gPlayerId = -1;
 int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
 bool gIsKeyNWFacing = false;
 const LevelData* gLevelData; // ptr to the level in rom
-int gLevelXWidthZWidthProduct;
-CellComponent* gColl[64 * 64]; // collision map we copy to ram and can edit
 int gNextLevel;
+int gLevelXWidthZWidthProduct;
+EWRAM_BSS ComponentHeader* gClsn[CLSN_SIZE]; // collision map we copy to ram and can edit
+EWRAM_BSS ClsnData gClsnData[CLSN_SIZE] = {0};
+Action gActionList[MAX_UNDO_AMOUNT] = {0};
+int gNumMovesUndone = 0;
+Action gActionCache[MAX_MOVES_CACHED];
+int gNumActionsCached = 0;
 
 ObjAffStruct gObjAffBuffer[32];
 enum ObjSlotEnum gObjAllocArr[1024];
@@ -45,6 +50,8 @@ SpriteAllocList gSpriteAllocList[MAX_ALLOC_SPRITES];
 u8 gEntFlags[MAX_ENTS];
 u8 gEntsToDelete[MAX_ENTS];
 
+TaskGlobal gTasksGlobal[MAX_TASKS_GLOBAL];
+int gNumTasksGlobal = 0;
 GameState gGameState;
 u32 gFlags = 0;
 

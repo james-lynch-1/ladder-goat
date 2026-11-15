@@ -6,9 +6,9 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
     int walkFlags = data0;
     int threshold = data1;
     gEntFlags[entId] |= entFlags;
+    PhysicsComponent* phys = addComponentPhysics(entId, 0, (tileX * 16) << 16, (tileY * 16) << 16, (tileZ * 16) << 16, 0, 0, 0, 1, 0);
     if (
-        !addComponentPhysics(entId, 0, (tileX * 16) << 16, (tileY * 16) << 16, (tileZ * 16) << 16,
-            0, 0, 0, 1, 0) ||
+        !phys ||
         !addComponentObj(entId, 0, 0, ATTR1_SIZE_32x32,
             ATTR2_ID(fetchSprite(walkSwitchTiles, 512)) |
             ATTR2_PALBANK(PAL_BLUE),
@@ -25,7 +25,7 @@ int spawnEntWalkSwitch(int tileX, int tileY, int tileZ, int entFlags, int data0,
 void walkSwitchCBOpenGate(int entId, int weight) {
     WalkableComponent* walk = getComponent(entId, COMP_WALKABLE);
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
-    CellComponent* cellToDeactivate = gColl[8 * gLevelData->xWidth + 4];
+    CellComponent* cellToDeactivate = (CellComponent*)gClsn[8 * gLevelData->xWidth + 4];
     bool wasPressed = walk->currentWeight >= walk->threshold;
     bool isPressed = walk->currentWeight + weight >= walk->threshold;
     int numBtnsPressed = 0;

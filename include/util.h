@@ -36,4 +36,10 @@ bool isEqualPos(Position pos1, Position pos2);
 
 bool isEqualPosMini(PositionMini pos1, PositionMini pos2);
 
+bool isPowerOf2(int num);
+
+bool isEqualHitbox(Hitbox hb1, Hitbox hb2);
+
+bool isZeroHitbox(Hitbox hb);
+
 #endif

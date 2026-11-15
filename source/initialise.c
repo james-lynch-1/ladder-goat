@@ -36,6 +36,9 @@ void initialiseGame() {
     memset16(gCompSetSparse, -1, NUM_COMP_TYPES * MAX_ENTS);
     memset32(gEntsToDelete, 0, sizeof(gEntsToDelete) / 4);
 
+    u32 defaultClsnData = 0xFFFF;
+    memset32(gClsnData, *(u32*)&defaultClsnData, sizeof(gClsnData) / 4);
+
     initialiseObjPalettes();
     numComps(COMP_OBJ) = 0;
 

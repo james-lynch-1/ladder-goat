@@ -20,6 +20,8 @@ int removeComponent(int entId, enum ComponentType componentType);
 
 bool hasComponent(int entId, enum ComponentType componentType);
 
+ComponentHeader* getComponentHeader(int entId);
+
 /** Gets the component of a given type on an entity */
 void* getComponent(int entId, enum ComponentType componentType);
 
@@ -83,6 +85,8 @@ Vector3D normaliseVec(Vector3D vec);
 
 Vector3D scalarMultVec(Vector3D vec, int scalar);
 
+void getPosFromTilePos(Position* pos, PositionMini tP);
+
 PositionMini getTilePos(int entId);
 
 // Physics
@@ -94,6 +98,8 @@ void updatePhysics();
 void updatePhysicsSingleEnt(PhysicsComponent* phys);
 
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir);
+
+void setPosMiniAndDir(int entId, int x, int y, int z, enum Direction dir);
 
 void taskMoveNESW(int entId, Task * task);
 
@@ -173,6 +179,8 @@ void removeComponentGroup(int entId);
 TaskQueueComponent* addComponentTaskQueue(int entId, int flags);
 
 void removeComponentTaskQueue(int entId);
+
+void executeTask(TaskQueueComponent* tQ);
 
 void updateTaskQueues();
 

@@ -47,16 +47,20 @@ void slapSwitchCBEnableGoal(int entId) {
 }
 
 void slapSwitchCBMoveMoversX(int entId) {
-    TaskQueueComponent* playerTQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
-    bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN_DISPATCH) &&
-        (playerTQ->queue[playerTQ->head].data == -1) ?
-        true : false;
-    addTaskToQueue(entId, TASK_SPIN, playerTQ->queue[playerTQ->head].data);
-    for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
-        PhysicsComponent* phys = &gPhysCompsDense[i];
-        if (phys->header.flags & PHYS_MOVER_FLAG)
-            addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (SOUTHEAST + 2 * isCW) % 4);
-    }
+    // TaskQueueComponent* playerTQ = getComponent(gPlayerId, COMP_TASK_QUEUE);
+    // // bool isCW = (playerTQ->queue[playerTQ->head].taskIndex == TASK_TURN_DISPATCH) &&
+    // //     (playerTQ->queue[playerTQ->head].data == -1) ?
+    // //     true : false;
+    // // bool isCW = 
+    // addTaskToQueue(entId, TASK_SPIN, playerTQ->queue[playerTQ->head].data);
+    // for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
+    //     PhysicsComponent* phys = &gPhysCompsDense[i];
+    //     if (phys->header.flags & PHYS_MOVER_FLAG) {
+    //         phys->tilePos.dir = (SOUTHEAST + 2 * isCW) % 4;
+    //         addMove(phys->header.entId, 1);
+    //     }
+    //         // addTaskToQueue(phys->header.entId, TASK_MOVE_NESW, (SOUTHEAST + 2 * isCW) % 4);
+    // }
 }
 
 void slapSwitchCBMoveMoversZ(int entId) {

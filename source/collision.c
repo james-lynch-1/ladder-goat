@@ -1,68 +1,263 @@
 #include "collision.h"
+#include "assert.h"
 
-//                                                      y
-//                                                      ↑
-//                                                      o
-// each row is a row of 19 on the x axis               ↙ ↘
-// each col is a col of 19 on the z axis              z    x
-
-int getClsnVal(CellComponent* cell) {
-    if (cell && !isEntInactive(cell->header.entId))
-        return cell->clsnVal;
-    return 0;
-}
+//   y
+//   ↑
+//   o
+//  ↙ ↘
+// z    x
 
 int getClsnValAtTilePos(PositionMini tilePos) {
     if (!in_range(tilePos.x, 0, gLevelData->xWidth) || !in_range(tilePos.y, 0, 3) || !in_range(tilePos.z, 0, gLevelData->zWidth))
         return 1;
-    const int offs = tilePos.y * gLevelXWidthZWidthProduct +
+    const int offs = getClsnOffsFromTilePos(tilePos);
+    return gClsn[offs] != NULL;
+}
+
+int getClsnOffsFromTilePos(PositionMini tilePos) {
+    return tilePos.y * gLevelXWidthZWidthProduct +
         tilePos.z * gLevelData->xWidth +
         tilePos.x;
-    CellComponent* cell = gColl[offs];
-    return getClsnVal(cell);
 }
 
-#define FWD 1
-#define BWD -1
-int checkCollisionMove(PhysicsComponent* phys, int fwdBwdTribool) {
+void setClsnVal(PositionMini tP, ComponentHeader* comp) {
+    int offs = getClsnOffsFromTilePos(tP);
+    gClsn[offs] = comp;
+}
+
+bool isTilePosWithinBounds(PositionMini tP) {
+    return (in_range(tP.x, 0, gLevelData->xWidth) &&
+        in_range(tP.y, 0, gLevelData->yHeight) &&
+        in_range(tP.z, 0, gLevelData->zWidth));
+}
+
+PositionMini getNextTilePos(PositionMini tP, int fwdBwdTribool) {
+    static_assert(sizeof(PositionMini) == 4);
     int xTriBoolFromDirArr[4] = { fwdBwdTribool, 0, -fwdBwdTribool, 0 };
-    int xTriBool = xTriBoolFromDirArr[getDirFromAngle(phys->angle)];
-    int zTriBool = xTriBoolFromDirArr[3 - getDirFromAngle(phys->angle)];
-    PositionMini tilePos = getTilePos(phys->header.entId);
-    if (!in_range(tilePos.x + xTriBool, 0, gLevelData->xWidth) ||
-        !in_range(tilePos.z + zTriBool, 0, gLevelData->zWidth)) return 1;
-
-    // translate from hitbox-space offsets to world-space offsets
-    int xOffsPos, xOffsNeg, zOffsPos, zOffsNeg;
-    getXZOffsets(phys->angle, phys->hitbox, &xOffsPos, &xOffsNeg, &zOffsPos, &zOffsNeg);
-    int xTriArr[3] = { -xOffsNeg, 0, xOffsPos };
-    int zTriArr[3] = { -zOffsNeg, 0, zOffsPos };
-    PositionMini nextTilePos = { tilePos.x + xTriBool, tilePos.y, tilePos.z + zTriBool };
-    if (getClsnValAtTilePos(nextTilePos)) return 1;
-    bool isTileOccupiedByPhys = false;
-    for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
-        PhysicsComponent* collPhys = &gPhysCompsDense[i];
-        PositionMini tP = getTilePos(collPhys->header.entId);
-        if (isEqualPosMini(tP, nextTilePos) &&
-            (collPhys->header.flags & PHYS_SOLID_FLAG) &&
-            !((collPhys->header.entId == gPlayerId && (phys->header.flags & PHYS_KEY_FLAG)) ||
-                ((collPhys->header.flags & PHYS_KEY_FLAG) && phys->header.entId == gPlayerId))) {
-            isTileOccupiedByPhys = true;
-            break;
-        }
-    }
-    // int clsn = getClsnVal(gColl[tilePos.y][nextTilePos.z + zTriArr[zTriBool + 1]][nextTilePos.x + xTriArr[xTriBool + 1]]) |
-    //     isTileOccupiedByPhys;
-    PositionMini tilePosToCheck = { nextTilePos.x + xTriArr[xTriBool + 1], tilePos.y, nextTilePos.z + zTriArr[zTriBool + 1] };
-    int clsn = getClsnValAtTilePos(tilePosToCheck) | isTileOccupiedByPhys;
-    if (clsn) return clsn;
-
-    checkWalkables(phys->weight, tilePos, nextTilePos, xOffsPos, xOffsNeg, zOffsPos, zOffsNeg, 0);
-
-    return clsn;
+    int xTriBool = xTriBoolFromDirArr[tP.dir];
+    int zTriBool = xTriBoolFromDirArr[3 - tP.dir];
+    PositionMini tilePosBeingEntered = {
+        .x = tP.x + xTriBool,
+        .y = tP.y,
+        .z = tP.z + zTriBool,
+        .dir = tP.dir
+    };
+    return tilePosBeingEntered;
 }
-#undef FWD
-#undef BWD
+
+void setClsnDataActionCacheIndex(PositionMini tilePos, int idx) {
+    gClsnData[getClsnOffsFromTilePos(tilePos)].actionCacheIndex = idx;
+}
+
+void addAction(PhysicsComponent* phys, int flags, PositionMini startPos, PositionMini endPos) {
+    Action a = { .entId = phys->header.entId, .flags = flags, .startPos = startPos, .endPos = endPos };
+    phys->actionCacheIndex = gNumActionsCached;
+    setClsnDataActionCacheIndex(startPos, gNumActionsCached);
+    gActionCache[gNumActionsCached] = a;
+    addEnteredFlagsToClsnData(startPos, endPos);
+    gNumActionsCached++;
+}
+
+bool addTurn(int entId, bool isCW) {
+    if (gNumActionsCached >= MAX_MOVES_CACHED - 1) {
+#ifdef DEBUG
+        log(CHAR, "too many moves!");
+#endif
+        return false;
+    }
+
+    GroupComponent* g = getComponent(entId, COMP_GROUP);
+    if (g)
+        for (int i = 0; i < g->numMembers; i++)
+            if (!addTurn(g->memberIds[i], isCW)) return false;
+
+    // if this ent is an edge-type ent, calculate the end pos and do addAction()s.
+    // if this ent is the master (centre) ent, we don't move but we do change dir.
+    int dirSign = isCW ? -1 : 1;
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+
+    // getting the final pos
+    PositionMini endPos = phys->tilePos;
+    endPos.dir = (endPos.dir + dirSign) & 3;
+
+    PositionMini endPosIntermediate = endPos;
+    if (phys->header.flags & PHYS_EDGE_MASK) {
+        int frontPhysOffsArr[4][2] = { { -1, -1 },{ -1, 1 },{ 1, 1 },{ 1, -1 } };
+        // SE-NE, NE-NW, NW-SW, SW-SE
+        int backEdgeOffs = (phys->header.flags & PHYS_BACK_EDGE_FLAG) != 0 ? 2 : 0;
+        int arrIdx = (phys->tilePos.dir + backEdgeOffs + isCW) % 4;
+        endPos.x = phys->tilePos.x + frontPhysOffsArr[arrIdx][0];
+        endPos.z = phys->tilePos.z + frontPhysOffsArr[arrIdx][1];
+        if (phys->tilePos.dir & 1) // NE or SW - only change x
+            endPosIntermediate.x = endPos.x;
+        else
+            endPosIntermediate.z = endPos.z;
+        // add an intermediate action that is not run, but is checked and
+        // whose success decides whether the final action is run
+        addAction(phys, ACTION_INTERMEDIATE_FLAG | ACTION_INVALIDATE_PARENT_FLAG, phys->tilePos, endPosIntermediate);
+        addAction(phys, ACTION_FINAL_FLAG | ACTION_INVALIDATE_PARENT_FLAG, endPosIntermediate, endPos);
+    }
+    else
+        addAction(phys, ACTION_TURN_ONLY_FLAG, phys->tilePos, endPos);
+    return true;
+}
+
+bool addMove(int entId, int fwdBwdTribool) {
+    if (gNumActionsCached == MAX_MOVES_CACHED) {
+#ifdef DEBUG
+        log(CHAR, "too many moves!");
+#endif
+        return false;
+    }
+
+    GroupComponent* g = getComponent(entId, COMP_GROUP);
+    if (g)
+        for (int i = 0; i < g->numMembers; i++)
+            addMove(g->memberIds[i], key_is_down(KEY_UP) ? 1 : -1);
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    PositionMini endPos = getNextTilePos(phys->tilePos, fwdBwdTribool);
+    addAction(phys, 0, phys->tilePos, endPos);
+    return true;
+}
+
+void addEnteredFlagsToClsnData(PositionMini startPos, PositionMini endPos) {
+    enum Direction dir;
+    if (startPos.x < endPos.x) dir = SOUTHEAST;
+    else if (startPos.x > endPos.x) dir = NORTHWEST;
+    else if (startPos.z < endPos.z) dir = SOUTHWEST;
+    else if (startPos.z > endPos.z) dir = NORTHEAST;
+    else return;
+    switch (dir) {
+        case SOUTHEAST:
+            gClsnData[getClsnOffsFromTilePos(endPos)].flags |= CLSNFLAG_ENTERED_XNEG;
+            break;
+        case NORTHEAST:
+            gClsnData[getClsnOffsFromTilePos(endPos)].flags |= CLSNFLAG_ENTERED_ZPOS;
+            break;
+        case NORTHWEST:
+            gClsnData[getClsnOffsFromTilePos(endPos)].flags |= CLSNFLAG_ENTERED_XPOS;
+            break;
+        case SOUTHWEST:
+            gClsnData[getClsnOffsFromTilePos(endPos)].flags |= CLSNFLAG_ENTERED_ZNEG;
+            break;
+    }
+}
+
+void processActions() {
+    for (int i = 0; i < gNumActionsCached; i++) {
+        Action* a = &gActionCache[i];
+        if (!(gClsnData[getClsnOffsFromTilePos(a->startPos)].flags & CLSNFLAG_ENTERED_MASK))
+            processAction(a->startPos);
+    }
+    for (int i = 0; i < gNumActionsCached; i++) {
+        Action* a = &gActionCache[i];
+        PhysicsComponent* phys = getComponent(a->entId, COMP_PHYSICS);
+        if (!(a->flags & ACTION_INVALID_FLAG))
+            doMove(phys, a);
+        phys->actionCacheIndex = -1;
+    }
+    for (int i = 0; i < gNumActionsCached; i++) {
+        Action* a = &gActionCache[i];
+        int startOffs = getClsnOffsFromTilePos(a->startPos);
+        int endOffs = getClsnOffsFromTilePos(a->endPos);
+        gClsnData[startOffs].flags = gClsnData[endOffs].flags = 0;
+        gClsnData[startOffs].actionCacheIndex = gClsnData[endOffs].actionCacheIndex = -1;
+    }
+    gNumActionsCached = 0;
+}
+
+void doMove(PhysicsComponent* phys, Action* a) {
+    PositionMini old = phys->tilePos;
+    // take start position directly from the phys comp in case this move had an intermediate move
+    if (!(a->flags & ACTION_INTERMEDIATE_FLAG))
+        phys->tilePos = a->endPos;
+    if (a->flags & ACTION_TURN_ONLY_FLAG || !(phys->header.flags & PHYS_SOLID_FLAG))
+        return;
+    int oldOffs = getClsnOffsFromTilePos(old);
+    if (!(a->flags & ACTION_INTERMEDIATE_FLAG))
+        setClsnVal(a->endPos, (ComponentHeader*)phys);
+    int enteredFlags = gClsnData[oldOffs].flags & CLSNFLAG_ENTERED_MASK;
+    if (a->flags & ACTION_FINAL_FLAG ||
+        (enteredFlags && isPowerOf2(enteredFlags))) return;
+    setClsnVal(old, NULL);
+}
+
+void invalidateChildMoves(int entId) {
+    GroupComponent* g = getComponent(entId, COMP_GROUP);
+    if (!g) return;
+    for (int i = 0; i < g->numMembers; i++) {
+        invalidateChildMoves(g->memberIds[i]);
+        PhysicsComponent* p = getComponent(g->memberIds[i], COMP_PHYSICS);
+        if (p && (p->actionCacheIndex != -1))
+            gActionCache[p->actionCacheIndex].flags |= ACTION_INVALID_FLAG;
+    }
+}
+
+void invalidateSiblingAndParentMoves(int entId) {
+    MemberComponent* m = getComponent(entId, COMP_MEMBER);
+    if (!m) return;
+    GroupComponent* g = getComponent(m->groupIds[0], COMP_GROUP);
+    PhysicsComponent* groupPhys = getComponent(g->header.entId, COMP_PHYSICS);
+    if (groupPhys && groupPhys->actionCacheIndex != -1)
+        gActionCache[groupPhys->actionCacheIndex].flags |= ACTION_INVALID_FLAG;
+    invalidateSiblingAndParentMoves(g->header.entId);
+    for (int i = 0; i < g->numMembers; i++) {
+        PhysicsComponent* p = getComponent(g->memberIds[i], COMP_PHYSICS);
+        if (p && p->actionCacheIndex != -1)
+            gActionCache[p->actionCacheIndex].flags |= ACTION_INVALID_FLAG;
+    }
+}
+
+bool doFalseThings(Action* action) {
+    if (action->flags & ACTION_INVALIDATE_PARENT_FLAG)
+        invalidateSiblingAndParentMoves(action->entId);
+    invalidateChildMoves(action->entId);
+    return false;
+}
+
+bool processAction(PositionMini tP) {
+    int offs = getClsnOffsFromTilePos(tP);
+    if (gClsnData[offs].actionCacheIndex == -1) return false;
+
+    Action* action = &gActionCache[gClsnData[offs].actionCacheIndex];
+    enum ComponentType compType = getComponentType(gClsn[offs]);
+    if (compType == COMP_CELL || gClsnData[offs].actionCacheIndex == -1)
+        return doFalseThings(action);
+
+    PhysicsComponent* phys = getComponent(action->entId, COMP_PHYSICS);
+    if (action->flags & ACTION_INVALID_FLAG)
+        return doFalseThings(action);
+
+    if (gClsnData[offs].flags & CLSNFLAG_VISITED) {
+        action->flags |= ACTION_INVALID_FLAG;
+        if (action->flags & ACTION_INTERMEDIATE_FLAG) {
+            Action* finalAction = &gActionCache[phys->actionCacheIndex];
+            finalAction->flags |= ACTION_INVALID_FLAG;
+        }
+        return doFalseThings(action);
+    }
+    gClsnData[offs].flags |= CLSNFLAG_VISITED;
+
+    if (!isTilePosWithinBounds(action->endPos)) {
+        action->flags |= ACTION_INVALID_FLAG;
+        return doFalseThings(action);
+    }
+
+    if (action->flags & ACTION_TURN_ONLY_FLAG)
+        return false;
+
+    int nextOffs = getClsnOffsFromTilePos(action->endPos);
+    if ((gClsn[nextOffs] == NULL && gClsnData[nextOffs].actionCacheIndex == -1) ||
+        processAction(action->endPos))
+        return true;
+
+    action->flags |= ACTION_INVALID_FLAG;
+    if (action->flags & ACTION_INTERMEDIATE_FLAG) {
+        Action* finalAction = &gActionCache[phys->actionCacheIndex];
+        finalAction->flags |= ACTION_INVALID_FLAG;
+    }
+    return doFalseThings(action);
+}
 
 #define CW  -1
 #define CCW 1

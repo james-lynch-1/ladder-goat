@@ -96,7 +96,8 @@ enum EventType {
     E_WALKABLE_WALK_ON = 0b1,
     E_WALKABLE_WALK_OFF = 0b10,
     E_MOVETASK_QUEUED = 0b100,
-    E_SLAPPABLE_STOPPED = 0b1000
+    E_PLAYER_MOVED = 0b1000,
+    E_SLAPPABLE_STOPPED = 0b10000
 };
 
 enum __attribute__ ((__packed__)) Palette {
@@ -176,6 +177,13 @@ typedef struct ALIGN4 TaskData_ {
     int length;
     u32 flags;
 } TaskData;
+
+typedef struct ALIGN4 TaskGlobal_ { // runs tasks concurrently
+    void (*fn)(int entId, int data);
+    int timeRemaining;
+    int entId;
+    int data;
+} TaskGlobal;
 
 // Events and Listeners
 
@@ -290,6 +298,24 @@ typedef struct CollTileToSpriteMapEntry_ {
     u16 palIndex;
 } CollTileToSpriteMapEntry;
 
+typedef struct ClsnData_ {
+    s16 actionCacheIndex;
+    u16 flags;
+} ClsnData;
+
+#define ACTION_INVALID_FLAG             0b1
+#define ACTION_INTERMEDIATE_FLAG        0b10
+#define ACTION_FINAL_FLAG               0b100
+#define ACTION_TURN_ONLY_FLAG           0b1000
+#define ACTION_INVALIDATE_PARENT_FLAG   0b10000
+
+typedef struct Action_ {
+    int entId;
+    int flags;
+    PositionMini startPos;
+    PositionMini endPos;
+} Action;
+
 typedef struct LevelEntData_ {
     PositionMini tilePos;
     enum EntityKind entKind; // walkable or slappable
@@ -395,16 +421,21 @@ typedef struct ALIGN4 InputComponent_ {
     void (*inputHandler)(int entId);
 } InputComponent;
 
-#define PHYS_MOVER_FLAG             0b1
-#define PHYS_SOLID_FLAG             0b10
-#define PHYS_KEY_FLAG               0b100
+#define PHYS_MOVER_FLAG         0b1
+#define PHYS_SOLID_FLAG         0b10
+#define PHYS_KEY_FLAG           0b100
+#define PHYS_BACK_EDGE_FLAG     0b1000
+#define PHYS_FRONT_EDGE_FLAG    0b10000
+#define PHYS_EDGE_MASK          0b11000
 
 typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
     Position pos; // 12 bytes. should always be after header for updateObjs()
+    PositionMini tilePos; // 4 bytes
     Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
-    Vector3D vec; // 8 bytes
-    int weight; // 4 bytes
+    Vector3D vec; // 12 bytes
+    int actionCacheIndex;
+    u16 weight; // 2 bytes
     u16 angle; // 2 bytes
 } PhysicsComponent;
 
@@ -412,7 +443,6 @@ typedef struct ALIGN4 PhysicsComponent_ {
 typedef struct ALIGN4 RotationComponent_ {
     ComponentHeader header; // 4 bytes
     Matrix3D mtx; // 36 bytes
-    // int objAffIndex; // 4 bytes
 } RotationComponent;
 
 #define TIMER_DELETE_ENT            0b1

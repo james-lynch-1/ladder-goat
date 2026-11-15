@@ -4,12 +4,17 @@
 #include "component.h"
 #include "eventListener.h"
 #include "collision.h"
+#include "taskListGlobal.h"
 
 int spawnPlayer(int playerX, int playerY, int playerZ, enum Direction playerDir, enum Direction keyDir);
+
+void viewportMoveTowardTarget(int speedX, int speedY);
 
 void updateViewport();
 
 void taskMoveDispatch(int entId, Task* task);
+
+void getXZTribools(enum Direction dir, int fwdBwdTribool, int* xTribool, int* zTribool);
 
 void taskMove(int entId, Task* task);
 
