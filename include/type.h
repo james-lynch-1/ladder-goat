@@ -377,8 +377,8 @@ typedef struct ALIGN4 ObjComponent_ {
     u16 attr2; // 2 bytes
     s16 yOffset;
     u16 posSourceCompType; // 1 byte. The componentType of the obj holding the ent's position
-    s16 prevId[2]; // 4 bytes. [0]: NE, [1]: NW
-    s16 nextId[2]; // 4 bytes. [0]: NE, [1]: NW
+    s16 prevId; // 2 bytes
+    s16 nextId; // 2 bytes
 } ObjComponent;
 
 typedef struct ALIGN4 ObjAffStruct_ {
@@ -432,6 +432,7 @@ typedef struct ALIGN4 PhysicsComponent_ {
     ComponentHeader header; // 4 bytes
     Position pos; // 12 bytes. should always be after header for updateObjs()
     PositionMini tilePos; // 4 bytes
+    PositionMini targetPos; // 4 bytes
     Hitbox hitbox; // 4 bytes. should always be after header and pos for updateObjs()
     Vector3D vec; // 12 bytes
     int actionCacheIndex;

@@ -32,7 +32,7 @@ const CollTileToSpriteMapEntry gCollTileToSpriteMap[128] = {
 
 s16 gPlayerId = -1;
 
-int gDeepestObjEntId[2] = {-1, -1}; // NW-SE and NE-SW orientations
+int gDeepestObjEntId = -1;
 bool gIsKeyNWFacing = false;
 const LevelData* gLevelData; // ptr to the level in rom
 int gNextLevel;

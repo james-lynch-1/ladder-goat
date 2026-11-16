@@ -29,6 +29,4 @@ void taskChangeLevel(int entId, Task * task);
 
 void turnEnt(int entId, Task* task, int amount);
 
-void updatePlayerStuff();
-
 #endif

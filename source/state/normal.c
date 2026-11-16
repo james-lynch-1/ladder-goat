@@ -31,7 +31,6 @@ void updateNormal() {
     updateInputComps();
     if (gNumActionsCached > 0) processActions();
     updateTaskQueues();
-    updatePlayerStuff();
     updateTimers();
     updatePhysics();
     deleteMarkedEnts();

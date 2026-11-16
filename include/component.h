@@ -25,6 +25,8 @@ ComponentHeader* getComponentHeader(int entId);
 /** Gets the component of a given type on an entity */
 void* getComponent(int entId, enum ComponentType componentType);
 
+void* getComponentUnsafe(int entId, enum ComponentType componentType);
+
 void* getComponentFromDenseIndex(int denseIndex, enum ComponentType componentType);
 
 /** Get a component's type by checking if it is in the memory range of
@@ -57,6 +59,8 @@ void changePalette(ObjComponent* obj, enum Palette pal);
 /** Updates the pos based on the pos provided by corresponding comp of type posSourceCompType */
 void updateObj(int entId);
 
+void updateObjUsingPtr(ObjComponent* obj);
+
 void updateObjs();
 
 int getObjZDepthPriority(ObjComponent* obj);
@@ -87,7 +91,9 @@ Vector3D scalarMultVec(Vector3D vec, int scalar);
 
 void getPosFromTilePos(Position* pos, PositionMini tP);
 
-PositionMini getTilePos(int entId);
+PositionMini getTilePos(PhysicsComponent* phys);
+
+PositionMini getTilePosFromPos(Position pos);
 
 // Physics
 
@@ -99,7 +105,9 @@ void updatePhysicsSingleEnt(PhysicsComponent* phys);
 
 void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir);
 
-void setPosMiniAndDir(int entId, int x, int y, int z, enum Direction dir);
+void setTilePos(int entId, int x, int y, int z, enum Direction dir);
+
+void setPosMini(PositionMini* tP, int x, int y, int z, enum Direction dir);
 
 void taskMoveNESW(int entId, Task * task);
 
@@ -110,6 +118,8 @@ void removeComponentPhysics(int entId);
 // Rotation
 
 void setInitMatrix(PhysicsComponent* phys, RotationComponent* rot);
+
+int getRotSrcEntId(MemberComponent* member);
 
 void applyRotations(int entId);
 

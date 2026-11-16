@@ -22,16 +22,16 @@ void changeLevel(int levelId) {
     gNumListenersPerType[COMP_SLAPPABLE] = 0;
 
     ObjComponent* playerObj = getComponent(gPlayerId, COMP_OBJ);
-    playerObj->prevId[0] = playerObj->prevId[1] = -1;
-    playerObj->nextId[0] = playerObj->nextId[1] = INT16_MAX;
-    gDeepestObjEntId[0] = gDeepestObjEntId[1] = gPlayerId;
+    playerObj->prevId = -1;
+    playerObj->nextId = INT16_MAX;
+    gDeepestObjEntId = gPlayerId;
 
     setPhysPosAndDir(gPlayerId,
         (gLevelData->playerPos.x * 16) << 16,
         (gLevelData->playerPos.y * 16) << 16,
         (gLevelData->playerPos.z * 16) << 16,
         gLevelData->playerPos.dir);
-    setPosMiniAndDir(gPlayerId, gLevelData->playerPos.x,
+    setTilePos(gPlayerId, gLevelData->playerPos.x,
         gLevelData->playerPos.y,
         gLevelData->playerPos.z,
         gLevelData->playerPos.dir);

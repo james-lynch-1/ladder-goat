@@ -8,41 +8,41 @@ ObjComponent* addComponentObj(s16 entId, u16 flags, u16 attr0, u16 attr1, u16 at
         attr0, attr1, attr2,
         yOffset,
         posSourceCompType,
-        { -1, -1 },
-        { INT16_MAX, INT16_MAX }
+        -1,
+        INT16_MAX,
     };
     newObj.attr2 |= ATTR2_PRIO(PRIO_MAP);
-    for (int i = 0; i < 2; i++) {
-        int zDepth = getZDepth(&newObj, i);
-        ObjComponent* objIter = getComponent(gDeepestObjEntId[i], COMP_OBJ);
+    for (int i = 0; i < 1; i++) {
+        int zDepth = getZDepth(&newObj);
+        ObjComponent* objIter = getComponent(gDeepestObjEntId, COMP_OBJ);
         if (!objIter) {
-            gDeepestObjEntId[i] = entId;
+            gDeepestObjEntId = entId;
             continue;
         }
-        int objIterZDepth = getZDepth(objIter, i);
+        int objIterZDepth = getZDepth(objIter);
         if (zDepth <= objIterZDepth) {
-            newObj.nextId[i] = gDeepestObjEntId[i];
-            objIter->prevId[i] = newObj.header.entId;
-            gDeepestObjEntId[i] = newObj.header.entId;
+            newObj.nextId = gDeepestObjEntId;
+            objIter->prevId = newObj.header.entId;
+            gDeepestObjEntId = newObj.header.entId;
             continue;
         }
         // iterate through the list of obj comps and insert where zDepth is appropriate
-        while ((zDepth > objIterZDepth) && objIter->nextId[i] != INT16_MAX) {
-            objIter = getComponent(objIter->nextId[i], COMP_OBJ);
-            objIterZDepth = getZDepth(objIter, i);
+        while ((zDepth > objIterZDepth) && objIter->nextId != INT16_MAX) {
+            objIter = getComponent(objIter->nextId, COMP_OBJ);
+            objIterZDepth = getZDepth(objIter);
         }
         if (zDepth > objIterZDepth) { // insert newObj at the end
-            newObj.prevId[i] = objIter->header.entId;
-            newObj.nextId[i] = objIter->nextId[i];
-            objIter->nextId[i] = newObj.header.entId;
-            if (newObj.nextId[i] != INT16_MAX)
-                ((ObjComponent*)getComponent(newObj.nextId[i], COMP_OBJ))->prevId[i] = newObj.header.entId;
+            newObj.prevId = objIter->header.entId;
+            newObj.nextId = objIter->nextId;
+            objIter->nextId = newObj.header.entId;
+            if (newObj.nextId != INT16_MAX)
+                ((ObjComponent*)getComponent(newObj.nextId, COMP_OBJ))->prevId = newObj.header.entId;
         }
         else { // insert newObj before currObj, whose zDepth is greater
-            newObj.prevId[i] = objIter->prevId[i];
-            newObj.nextId[i] = objIter->header.entId;
-            ((ObjComponent*)getComponent(objIter->prevId[i], COMP_OBJ))->nextId[i] = newObj.header.entId;
-            objIter->prevId[i] = newObj.header.entId;
+            newObj.prevId = objIter->prevId;
+            newObj.nextId = objIter->header.entId;
+            ((ObjComponent*)getComponent(objIter->prevId, COMP_OBJ))->nextId = newObj.header.entId;
+            objIter->prevId = newObj.header.entId;
         }
     }
     return (ObjComponent*)addComponentCustom(&newObj, COMP_OBJ);
@@ -52,12 +52,12 @@ void removeComponentObj(int entId) {
     ObjComponent* obj = getComponent(entId, COMP_OBJ);
     if (!obj) return;
     for (int i = 0; i < 2; i++) {
-        ObjComponent* nextObj = getComponent(obj->nextId[i], COMP_OBJ);
-        if (nextObj) nextObj->prevId[i] = obj->prevId[i];
-        if (obj->prevId[i] == -1)
-            gDeepestObjEntId[i] = obj->nextId[i];
+        ObjComponent* nextObj = getComponent(obj->nextId, COMP_OBJ);
+        if (nextObj) nextObj->prevId = obj->prevId;
+        if (obj->prevId == -1)
+            gDeepestObjEntId = obj->nextId;
         else
-            ((ObjComponent*)getComponent(obj->prevId[i], COMP_OBJ))->nextId[i] = obj->nextId[i];
+            ((ObjComponent*)getComponent(obj->prevId, COMP_OBJ))->nextId = obj->nextId;
     }
     stopUsingSprite(obj->attr2 & ATTR2_ID_MASK);
     removeComponent(entId, COMP_OBJ);

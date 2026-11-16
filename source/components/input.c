@@ -10,11 +10,12 @@ void handleInput() {
         gViewport.x += 2 * key_tri_shoulder();
         gViewport.y += 2 * key_tri_fire();
     }
-
     if (key_hit(KEY_A)) {
         PhysicsComponent* phys = getComponent(gPlayerId, COMP_PHYSICS);
-        logVal("playerX: ", phys->pos.x.HALF.HI / 16);
-        logVal("playerZ: ", phys->pos.z.HALF.HI / 16);
+        // logVal("playerX: ", phys->pos.x.HALF.HI / 16);
+        // logVal("playerZ: ", phys->pos.z.HALF.HI / 16);
+        logVal("tileDir: ", phys->tilePos.dir);
+        logVal("targetDir: ", phys->targetPos.dir);
         // ObjComponent* obj = getComponent(gPlayerId, COMP_OBJ);
         // logVal("screenX: ", (obj->attr1 & ATTR1_X_MASK));
         // logVal("screenY: ", (obj->attr0 & ATTR0_Y_MASK));
@@ -25,17 +26,14 @@ void CBInputComp(int entId) {
     if (key_hit(KEY_START)) {
         addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, gLevelData->levelId);
     }
-
 #ifdef DEBUG
     if (key_hit(KEY_SELECT)) {
         int nextLevel = getNextLevelIndex();
         addTaskToQueue(gPlayerId, TASK_CHANGE_LEVEL, nextLevel);
     }
 #endif
-
     if (key_hit(KEY_UP | KEY_DOWN))
         addMove(entId, key_is_down(KEY_UP) ? 1 : -1);
-
     if (key_hit(KEY_LEFT | KEY_RIGHT))
         addTurn(gPlayerId, key_is_down(KEY_RIGHT) != 0);
 }

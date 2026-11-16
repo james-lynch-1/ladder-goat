@@ -29,14 +29,14 @@ int spawnEntKey(int tileX, int tileY, int tileZ, int entFlags, int data0, int da
         phys->pos.z.WORD - ((zOffs * 16) << 16),
         0, 0, 0, 1, dir * 0x4000
     );
-    addComponentObj(frontEntId, OBJ_AFF_FLAG | OBJ_ZDEPTH_PRIO_1,
+    addComponentObj(frontEntId, OBJ_AFF_FLAG,
         ATTR0_AFF | ATTR0_TALL,
         ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_KEY),
         -4,
         COMP_PHYSICS
     );
-    addComponentObj(backEntId, OBJ_AFF_FLAG | OBJ_ZDEPTH_PRIO_1,
+    addComponentObj(backEntId, OBJ_AFF_FLAG,
         ATTR0_AFF | ATTR0_TALL,
         ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
         ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_KEY),
@@ -57,7 +57,7 @@ int spawnEntKey(int tileX, int tileY, int tileZ, int entFlags, int data0, int da
         //     ATTR2_ID(fetchSprite(spriteHoriTiles, spriteHoriTilesLen)) | ATTR2_PALBANK(PAL_KEY),
         //     -22,
         //     COMP_PHYSICS) ||
-        !addComponentObj(entId, OBJ_AFF_FLAG | OBJ_ZDEPTH_PRIO_1,
+        !addComponentObj(entId, OBJ_AFF_FLAG,
             ATTR0_AFF | ATTR0_TALL,
             ATTR1_SIZE_32x64 | ATTR1_AFF_ID(1),
             ATTR2_ID(fetchSprite(spritePlayerTiles, spritePlayerTilesLen)) | ATTR2_PALBANK(PAL_KEY),

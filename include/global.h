@@ -33,7 +33,7 @@ extern const CollTileToSpriteMapEntry gCollTileToSpriteMap[128];
 
 extern s16 gPlayerId;
 
-extern int gDeepestObjEntId[2]; // NW-SE and NE-SW orientations
+extern int gDeepestObjEntId; // NW-SE and NE-SW orientations
 extern bool gIsKeyNWFacing;
 extern const LevelData* gLevelData;
 extern int gNextLevel;

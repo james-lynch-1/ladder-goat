@@ -1,36 +1,83 @@
 #include "component.h"
 
 enum Direction getDirFromAngle(int angle) {
-    return angle / 0x4000;
+    return ((angle + 0x2000) / 0x4000) & 3;
 }
 
 void updatePhysics() {
     for (int i = 0; i < numComps(COMP_PHYSICS); i++) {
-        PhysicsComponent* phys = &gPhysCompsDense[i];
-        updatePhysicsSingleEnt(phys);
+        updatePhysicsSingleEnt(&gPhysCompsDense[i]);
     }
 }
 
 void updatePhysicsSingleEnt(PhysicsComponent* phys) {
-    PositionMini oldTilePos = getTilePos(phys->header.entId);
-    Position tilePosToPos;
-    getPosFromTilePos(&tilePosToPos, phys->tilePos);
-    bool changedPos = false;
-    for (int i = 0; i < 3; i++) {
-        SWord* posDim = (SWord*)&phys->pos + i;
-        SWord* tPDim = (SWord*)&tilePosToPos + i;
-        int diff = tPDim->HALF.HI - posDim->HALF.HI;
-        if (diff) {
-            changedPos = true;
-            if (ABS(diff) >= 2)
-                posDim->HALF.HI += SGN3(diff) * (1 + (ABS(diff) / 16));
-            else posDim->WORD = tPDim->WORD;
+    PositionMini oldTilePos = getTilePosFromPos(phys->pos);
+    Position newPos = phys->pos;
+    RotationComponent* rot = getComponent(phys->header.entId, COMP_ROTATION);
+    MemberComponent* member = getComponent(phys->header.entId, COMP_MEMBER);
+    PhysicsComponent* parentPhys = member ? getComponent(member->groupIds[0], COMP_PHYSICS) : NULL;
+
+    int targetAngle = phys->targetPos.dir * 0x4000;
+    int angle = phys->angle;
+    if (rot && angle != targetAngle) {
+        int rotSrcEntId = getRotSrcEntId(member);
+        RotationComponent* masterRot = getComponent(rotSrcEntId, COMP_ROTATION);
+        if (masterRot) { // member ents derive rotation from (grand...)parent
+            rot->mtx = masterRot->mtx;
+            PhysicsComponent* masterPhys = getComponent(rotSrcEntId, COMP_PHYSICS);
+            phys->angle = masterPhys->angle;
+            gObjAffBuffer[gCompSetSparse[COMP_ROTATION][rot->header.entId]] =
+                gObjAffBuffer[gCompSetSparse[COMP_ROTATION][masterRot->header.entId]];
+        }
+        else {
+            if (targetAngle == 0 && angle > 0x8000) targetAngle += 0x10000;
+            else if (targetAngle == SOUTHWEST * 0x4000 && angle == 0) angle += 0x10000;
+            int goFast = ABS(targetAngle - angle) > 0x4000 ? 3 : 0;
+            int diff = targetAngle - angle;
+            angle += (SGN3(diff) << (11 + goFast));
+            if (getDirFromAngle(angle) == phys->targetPos.dir &&
+                phys->targetPos.dir != phys->tilePos.dir)
+                phys->targetPos = phys->tilePos;
+            else {
+                phys->angle = angle;
+                setInitMatrix(phys, rot);
+                applyRotations(rot->header.entId);
+            }
         }
     }
-    if (hasComponent(phys->header.entId, COMP_OBJ)) {
-        if (changedPos) updateObj(phys->header.entId);
-        if (!isEqualPosMini(oldTilePos, getTilePos(phys->header.entId)))
-            updateZDepth(getComponent(phys->header.entId, COMP_OBJ));
+
+    if ((phys->targetPos.x << 16) * 16 != newPos.x.WORD ||
+        (phys->targetPos.z << 16) * 16 != newPos.z.WORD) {
+        if (phys->header.flags & PHYS_EDGE_MASK) { // edge of long ent derives pos from parent
+            const int offs = phys->header.flags & PHYS_FRONT_EDGE_FLAG ? 1 : -1;
+            newPos.x.WORD = parentPhys->pos.x.WORD + offs * (lu_cos(parentPhys->angle) << 4) * 16;
+            newPos.z.WORD = parentPhys->pos.z.WORD - offs * (lu_sin(parentPhys->angle) << 4) * 16;
+        }
+        else {
+            const Position targetPosToWorldPos = {
+                .x = { (phys->targetPos.x << 16) * 16 },
+                .z = { (phys->targetPos.z << 16) * 16 }
+            };
+            newPos.x.WORD += (targetPosToWorldPos.x.WORD - phys->pos.x.WORD) >> 3;
+            if (ABS(newPos.x.WORD - targetPosToWorldPos.x.WORD) < 0x20000) newPos.x = targetPosToWorldPos.x;
+            newPos.z.WORD += (targetPosToWorldPos.z.WORD - phys->pos.z.WORD) >> 3;
+            if (ABS(newPos.z.WORD - targetPosToWorldPos.z.WORD) < 0x20000) newPos.z = targetPosToWorldPos.z;
+        }
+        if (isEqualPosMini(getTilePosFromPos(newPos), phys->targetPos) &&
+            !isEqualPosMini(phys->tilePos, phys->targetPos)) {
+            phys->targetPos = phys->tilePos;
+            if (parentPhys) parentPhys->targetPos = parentPhys->tilePos;
+            return;
+        }
+        if (!isEqualPos(phys->pos, newPos)) {
+            phys->pos = newPos;
+            ObjComponent* obj = getComponent(phys->header.entId, COMP_OBJ);
+            if (obj) {
+                updateObjUsingPtr(obj);
+                if (!isEqualPosMini(oldTilePos, getTilePosFromPos(phys->pos)))
+                    updateZDepth(obj);
+            }
+        }
     }
 }
 
@@ -43,7 +90,7 @@ void setPhysPosAndDir(int entId, int x, int y, int z, enum Direction dir) {
     phys->angle = dir * 0x4000;
 }
 
-void setPosMiniAndDir(int entId, int x, int y, int z, enum Direction dir) {
+void setTilePos(int entId, int x, int y, int z, enum Direction dir) {
     PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
     if (!phys) return;
     if (phys->header.flags & PHYS_SOLID_FLAG) setClsnVal(phys->tilePos, NULL);
@@ -51,7 +98,15 @@ void setPosMiniAndDir(int entId, int x, int y, int z, enum Direction dir) {
     phys->tilePos.y = y;
     phys->tilePos.z = z;
     phys->tilePos.dir = dir;
+    phys->targetPos = phys->tilePos;
     if (phys->header.flags & PHYS_SOLID_FLAG) setClsnVal(phys->tilePos, (ComponentHeader*)phys);
+}
+
+void setPosMini(PositionMini* tP, int x, int y, int z, enum Direction dir) {
+    tP->x = x;
+    tP->y = y;
+    tP->z = z;
+    tP->dir = dir;
 }
 
 void taskMoveNESW(int entId, Task* task) {
@@ -115,12 +170,22 @@ void getPosFromTilePos(Position* pos, PositionMini tP) {
     *pos = p;
 }
 
-PositionMini getTilePos(int entId) {
-    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+PositionMini getTilePos(PhysicsComponent* phys) {
     PositionMini p = {
         (phys->pos.x.WORD / 16 + 0x8000) >> 16,
         (phys->pos.y.WORD / 16 + 0x8000) >> 16,
         (phys->pos.z.WORD / 16 + 0x8000) >> 16,
+        getDirFromAngle(phys->angle)
+    };
+    return p;
+}
+
+PositionMini getTilePosFromPos(Position pos) {
+    PositionMini p = {
+        (pos.x.WORD / 16 + 0x8000) >> 16,
+        (pos.y.WORD / 16 + 0x8000) >> 16,
+        (pos.z.WORD / 16 + 0x8000) >> 16,
+        0
     };
     return p;
 }
@@ -136,6 +201,7 @@ PhysicsComponent* addComponentPhysics(int entId, u16 flags, int posX, int posY, 
         .weight = weight,
         .angle = angle
     };
+    phys.targetPos = phys.tilePos;
     return (PhysicsComponent*)addComponentCustom(&phys, COMP_PHYSICS);
 }
 

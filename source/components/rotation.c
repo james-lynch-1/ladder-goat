@@ -10,6 +10,17 @@ void setInitMatrix(PhysicsComponent* phys, RotationComponent* rot) {
     rot->mtx = mtx;
 }
 
+int getRotSrcEntId(MemberComponent* member) {
+    if (!member) return -1;
+    MemberComponent* mem;
+    MemberComponent* nextMem = member;
+    while (nextMem) {
+        mem = nextMem;
+        nextMem = getComponent(mem->groupIds[0], COMP_MEMBER);
+    }
+    return mem->groupIds[0];
+}
+
 void applyRotations(int entId) {
     RotationComponent* rot = getComponent(entId, COMP_ROTATION);
     if (!rot) return;

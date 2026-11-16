@@ -10,7 +10,7 @@ ScreenPos getScreenPosFromOldViewport(Position pos);
 
 ScreenPos getScreenPosFromViewportXY(Position pos, int levelIndex, int vpX, int vpY);
 
-int getZDepth(ObjComponent* obj, bool isNW);
+int getZDepth(ObjComponent* obj);
 
 /** This function iterates through the obj linked list and finds an appropriate spot for
  * an obj based on its zDepth.

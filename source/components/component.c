@@ -41,6 +41,10 @@ void* getComponent(int entId, enum ComponentType componentType) {
     return NULL;
 }
 
+void* getComponentUnsafe(int entId, enum ComponentType componentType) {
+    return denseSetAddr(componentType) + compSize(componentType) * gCompSetSparse[componentType][entId];
+}
+
 void* getComponentFromDenseIndex(int denseIndex, enum ComponentType componentType) {
     return denseSetAddr(componentType) + compSize(componentType) * denseIndex;
 }

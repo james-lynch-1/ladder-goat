@@ -59,9 +59,11 @@ void addAction(PhysicsComponent* phys, int flags, PositionMini startPos, Positio
 }
 
 bool addTurn(int entId, bool isCW) {
-    if (gNumActionsCached >= MAX_MOVES_CACHED - 1) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    if ((phys && phys->actionCacheIndex != -1) || gNumActionsCached >= MAX_MOVES_CACHED - 1) {
 #ifdef DEBUG
-        log(CHAR, "too many moves!");
+        if (gNumActionsCached >= MAX_MOVES_CACHED - 1)
+            log(CHAR, "too many moves!");
 #endif
         return false;
     }
@@ -74,7 +76,6 @@ bool addTurn(int entId, bool isCW) {
     // if this ent is an edge-type ent, calculate the end pos and do addAction()s.
     // if this ent is the master (centre) ent, we don't move but we do change dir.
     int dirSign = isCW ? -1 : 1;
-    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
 
     // getting the final pos
     PositionMini endPos = phys->tilePos;
@@ -103,9 +104,11 @@ bool addTurn(int entId, bool isCW) {
 }
 
 bool addMove(int entId, int fwdBwdTribool) {
-    if (gNumActionsCached == MAX_MOVES_CACHED) {
+    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+    if ((phys && phys->actionCacheIndex != -1) || gNumActionsCached == MAX_MOVES_CACHED) {
 #ifdef DEBUG
-        log(CHAR, "too many moves!");
+        if (gNumActionsCached == MAX_MOVES_CACHED)
+            log(CHAR, "too many moves!");
 #endif
         return false;
     }
@@ -113,8 +116,7 @@ bool addMove(int entId, int fwdBwdTribool) {
     GroupComponent* g = getComponent(entId, COMP_GROUP);
     if (g)
         for (int i = 0; i < g->numMembers; i++)
-            addMove(g->memberIds[i], key_is_down(KEY_UP) ? 1 : -1);
-    PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
+            addMove(g->memberIds[i], fwdBwdTribool);
     PositionMini endPos = getNextTilePos(phys->tilePos, fwdBwdTribool);
     addAction(phys, 0, phys->tilePos, endPos);
     return true;
@@ -152,8 +154,7 @@ void processActions() {
     for (int i = 0; i < gNumActionsCached; i++) {
         Action* a = &gActionCache[i];
         PhysicsComponent* phys = getComponent(a->entId, COMP_PHYSICS);
-        if (!(a->flags & ACTION_INVALID_FLAG))
-            doMove(phys, a);
+        doMove(phys, a);
         phys->actionCacheIndex = -1;
     }
     for (int i = 0; i < gNumActionsCached; i++) {
@@ -167,6 +168,9 @@ void processActions() {
 }
 
 void doMove(PhysicsComponent* phys, Action* a) {
+    if (!(a->flags & ACTION_INTERMEDIATE_FLAG))
+        phys->targetPos = a->endPos;
+    if (a->flags & ACTION_INVALID_FLAG) return;
     PositionMini old = phys->tilePos;
     // take start position directly from the phys comp in case this move had an intermediate move
     if (!(a->flags & ACTION_INTERMEDIATE_FLAG))
@@ -262,7 +266,7 @@ bool processAction(PositionMini tP) {
 #define CW  -1
 #define CCW 1
 int checkCollisionTurn(PhysicsComponent* phys, int turnDir) {
-    PositionMini tilePos = getTilePos(phys->header.entId);
+    PositionMini tilePos = getTilePos(phys);
     bool isZFacing = (getDirFromAngle(phys->angle)) & 1;
 
     int tilePosXMinusOne = tilePos.x == 0 ? 0 : tilePos.x - 1;
@@ -302,7 +306,7 @@ int checkCollisionTurn(PhysicsComponent* phys, int turnDir) {
     int numSlapped = 0;
     for (int i = 0; i < numComps(COMP_SLAPPABLE); i++) {
         SlappableComponent* slap = &gSlappableCompsDense[i];
-        PositionMini slapTilePos = getTilePos(slap->header.entId);
+        PositionMini slapTilePos = getTilePos((PhysicsComponent*)getComponent(slap->header.entId, COMP_PHYSICS));
         if (isEqualPosMini(slapTilePos, slappablePositions[0]) ||
             isEqualPosMini(slapTilePos, slappablePositions[1]) ||
             isEqualPosMini(slapTilePos, slappablePositions[2]) ||
@@ -347,7 +351,7 @@ void checkWalkables(int weight, PositionMini tilePos, PositionMini nextTilePos, 
         int walkId = walk->header.entId;
         PhysicsComponent* walkSwitchPhys = getComponent(walkId, COMP_PHYSICS);
         if (walkSwitchPhys && !isEntInactive(walkId)) {
-            PositionMini switchTilePos = getTilePos(walkId);
+            PositionMini switchTilePos = getTilePos(walkSwitchPhys);
             bool isOnSwitch = !isEntInactive(walkId) &&
                 in_range(switchTilePos.x, tilePos.x - xOffsNeg, tilePos.x + xOffsPos + 1) &&
                 in_range(switchTilePos.z, tilePos.z - zOffsNeg, tilePos.z + zOffsPos + 1);

@@ -121,53 +121,6 @@ void getXZTribools(enum Direction dir, int fwdBwdTribool, int* xTribool, int* zT
     *zTribool = xTriBoolFromDirArr[3 - dir];
 }
 
-void tGMoveDispatch(int entId, int data) {
-    // // at this point, phys's tilePos is the next position and the regular Position is the current
-    // TaskQueueComponent* tQ = getComponent(entId, COMP_TASK_QUEUE);
-    // int fwdBwdTribool = data;
-    // PhysicsComponent* phys = getComponent(entId, COMP_PHYSICS);
-    // bool isTileOccupiedByPhys = false;
-    // PositionMini nextTP = phys->tilePos;
-
-    // // translate from hitbox-space offsets to world-space offsets
-    // int xTribool, zTribool;
-    // // getXZTribools(nextTP.dir, fwdBwdTribool, &xTribool, &zTribool);
-    // // PositionMini nextTilePos = { nextTP.x + xTribool, nextTP.y, nextTP.z + zTribool };
-    // for (int i = 0; i < numComps(COMP_PHYSICS) && !isTileOccupiedByPhys; i++) {
-    //     PhysicsComponent* otherPhys = &gPhysCompsDense[i];
-    //     if (otherPhys->header.entId == entId || !(otherPhys->header.flags & PHYS_SOLID_FLAG))
-    //         continue;
-    //     PositionMini otherTP = otherPhys->tilePos;
-
-    //     if (!isZeroHitbox(otherPhys->hitbox)) {
-    //         int otherXOffsPos, otherXOffsNeg, otherZOffsPos, otherZOffsNeg;
-    //         getXZOffsets(otherPhys->angle, otherPhys->hitbox,
-    //             &otherXOffsPos, &otherXOffsNeg, &otherZOffsPos, &otherZOffsNeg);
-    //         for (int x = otherTP.x - otherXOffsNeg; x <= otherTP.x + otherXOffsPos && !isTileOccupiedByPhys; x++) {
-    //             for (int z = otherTP.z - otherZOffsNeg; z <= otherTP.z + otherZOffsPos && !isTileOccupiedByPhys; z++) {
-    //                 PositionMini otherTPPlusOffset = { x, otherTP.y, z };
-    //                 if (isEqualPosMini(otherTPPlusOffset, nextTP))
-    //                     isTileOccupiedByPhys = true;
-    //             }
-    //         }
-    //     }
-    //     else
-    //         if (isEqualPosMini(nextTP, otherTP) && (otherPhys->header.flags & PHYS_SOLID_FLAG))
-    //             isTileOccupiedByPhys = true;
-    // }
-
-    // if (isTileOccupiedByPhys) {
-    //     phys->tilePos = getTilePos(entId);
-    //     return;
-    // }
-    // addTaskToQueue(entId, TASK_MOVE, fwdBwdTribool);
-    // executeTask(tQ);
-
-    // int xOffsPos, xOffsNeg, zOffsPos, zOffsNeg;
-    // getXZOffsets(phys->angle, phys->hitbox, &xOffsPos, &xOffsNeg, &zOffsPos, &zOffsNeg);
-    // checkWalkables(phys->weight, getTilePos(entId), nextTP, xOffsPos, xOffsNeg, zOffsPos, zOffsNeg, 0);
-}
-
 void taskMove(int entId, Task* task) {
     moveEnt(entId, task, task->data);
 }
@@ -224,14 +177,4 @@ void turnEnt(int entId, Task* task, int amount) {
     phys->angle += amount;
     if (rot) setInitMatrix(phys, rot);
     applyRotations(entId);
-}
-
-void updatePlayerStuff() {
-    GroupComponent* group = getComponent(gPlayerId, COMP_GROUP);
-    if (group && (group->numMembers > 0)) {
-        PhysicsComponent* keyPhys = getComponent(group->memberIds[0], COMP_PHYSICS);
-        if (keyPhys)
-            gIsKeyNWFacing = keyPhys->angle >= 0xE000 || keyPhys->angle <= 0x1FFF ||
-            (keyPhys->angle >= 0x6000 && keyPhys->angle <= 0x9FFF);
-    }
 }

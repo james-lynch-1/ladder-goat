@@ -84,12 +84,12 @@ void lightenBgPalette(int amount) {
 
 void copyObjAttrsToOAM() { // excluding affine stuff
     memset32(oam_mem, ATTR0_HIDE, 2 * 128);
-    int idx = gDeepestObjEntId[gIsKeyNWFacing];
+    int idx = gDeepestObjEntId;
     int i = 0, j = 0;
     while (idx != INT16_MAX && j < 128) {
         j++;
-        ObjComponent* o = getComponent(idx, COMP_OBJ);
-        idx = o->nextId[gIsKeyNWFacing];
+        ObjComponent* o = getComponentUnsafe(idx, COMP_OBJ);
+        idx = o->nextId;
         if ((o->attr0 & ATTR0_MODE_MASK) == ATTR0_HIDE) {
             continue;
         }
